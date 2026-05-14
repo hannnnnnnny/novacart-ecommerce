@@ -1,20 +1,45 @@
 <template>
   <main class="login-page">
+    <section class="login-brand-panel">
+      <div class="login-mark">
+        <ShieldCheck aria-hidden="true" />
+      </div>
+      <p class="eyebrow">Merchant workspace</p>
+      <h1>Manage NovaCart with a focused admin console.</h1>
+      <p>Review catalog health, keep inventory visible, and move orders through fulfillment.</p>
+    </section>
     <form class="login-panel" @submit.prevent="submitLogin">
-      <p class="eyebrow">Merchant Access</p>
-      <h1>Sign in to NovaCart</h1>
+      <div>
+        <p class="eyebrow">Secure Access</p>
+        <h2>Sign in</h2>
+      </div>
       <ErrorMessage v-if="error" :message="error" />
-      <label>Email<input v-model="form.email" required type="email" placeholder="admin@novacart.local" /></label>
-      <label>Password<input v-model="form.password" required type="password" placeholder="Enter your password" /></label>
+      <label>Email<input v-model.trim="form.email" required type="email" placeholder="admin@novacart.local" /></label>
+      <label>
+        Password
+        <div class="password-field">
+          <input
+            v-model="form.password"
+            required
+            :type="showPassword ? 'text' : 'password'"
+            placeholder="Enter your password"
+          />
+          <button type="button" @click="showPassword = !showPassword">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+      </label>
       <button class="primary-button" type="submit" :disabled="submitting">
         {{ submitting ? 'Signing In...' : 'Sign In' }}
       </button>
+      <p class="login-hint">Local account: admin@novacart.local</p>
     </form>
   </main>
 </template>
 
 <script setup>
 import { reactive, ref } from 'vue'
+import { ShieldCheck } from 'lucide-vue-next'
 import { useRoute, useRouter } from 'vue-router'
 import { loginAdmin } from '../../api/admin'
 import { getApiError } from '../../api/client'
@@ -26,6 +51,7 @@ const router = useRouter()
 const authStore = useAuthStore()
 const submitting = ref(false)
 const error = ref('')
+const showPassword = ref(false)
 const form = reactive({ email: '', password: '' })
 
 async function submitLogin() {
