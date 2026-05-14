@@ -16,11 +16,27 @@ apiClient.interceptors.request.use((config) => {
   return config
 })
 
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      const authStore = useAuthStore()
+      authStore.clearSession()
+    }
+    return Promise.reject(error)
+  }
+)
+
 export function getApiData(response) {
   return response.data?.data ?? response.data
 }
 
 export function getApiError(error, fallbackMessage = 'The request could not be completed.') {
+  const fieldErrors = error.response?.data?.errors
+  if (Array.isArray(fieldErrors) && fieldErrors.length) {
+    return fieldErrors.map((entry) => entry.message).join(' ')
+  }
+
   return error.response?.data?.message || error.message || fallbackMessage
 }
 
