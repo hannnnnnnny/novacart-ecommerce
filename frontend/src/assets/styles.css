@@ -1031,6 +1031,28 @@ textarea {
   background: var(--color-surface);
 }
 
+.product-editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.product-editor-layout .admin-form {
+  margin-top: 0;
+}
+
+.product-publish-panel {
+  position: sticky;
+  top: 1rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.product-publish-panel h2 {
+  margin: 0;
+}
+
 .admin-form.single-column {
   grid-template-columns: 1fr;
   margin-top: 0;
@@ -1155,7 +1177,8 @@ textarea {
   .admin-form,
   .split-admin-layout,
   .checkout-layout,
-  .success-layout {
+  .success-layout,
+  .product-editor-layout {
     grid-template-columns: 1fr;
   }
 
@@ -1189,6 +1212,10 @@ textarea {
   }
 
   .order-summary-card {
+    position: static;
+  }
+
+  .product-publish-panel {
     position: static;
   }
 
