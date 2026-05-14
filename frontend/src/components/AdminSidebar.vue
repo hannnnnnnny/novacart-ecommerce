@@ -1,14 +1,24 @@
 <template>
   <aside class="admin-sidebar">
-    <RouterLink class="admin-brand" to="/admin/dashboard">NovaCart Admin</RouterLink>
-    <nav aria-label="Admin navigation">
+    <RouterLink class="admin-brand" to="/admin/dashboard" aria-label="NovaCart admin dashboard">
+      <span class="brand-mark" aria-hidden="true">N</span>
+      <span>NovaCart Admin</span>
+    </RouterLink>
+
+    <nav class="admin-nav" aria-label="Admin navigation">
       <RouterLink to="/admin/dashboard">Dashboard</RouterLink>
       <RouterLink to="/admin/products">Products</RouterLink>
       <RouterLink to="/admin/categories">Categories</RouterLink>
       <RouterLink to="/admin/orders">Orders</RouterLink>
       <RouterLink to="/admin/inventory">Inventory</RouterLink>
     </nav>
-    <button class="secondary-button" type="button" @click="logout">Sign out</button>
+
+    <div class="admin-session-card">
+      <span>Signed in</span>
+      <strong>{{ authStore.email || 'Administrator' }}</strong>
+    </div>
+
+    <button class="secondary-button admin-signout" type="button" @click="logout">Sign out</button>
   </aside>
 </template>
 

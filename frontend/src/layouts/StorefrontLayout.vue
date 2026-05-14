@@ -1,7 +1,8 @@
 <template>
   <div class="site-shell">
+    <a class="skip-link" href="#storefront-content">Skip to content</a>
     <AppHeader />
-    <main>
+    <main id="storefront-content" tabindex="-1">
       <RouterView />
     </main>
     <AppFooter />

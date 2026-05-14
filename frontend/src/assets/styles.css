@@ -88,8 +88,27 @@ img {
   flex-direction: column;
 }
 
-.app-header,
-.app-footer {
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 100;
+  transform: translateY(-150%);
+  border-radius: var(--radius-sm);
+  padding: 0.7rem 0.9rem;
+  background: var(--color-primary);
+  color: #fffdf7;
+  font-weight: 800;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.app-header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -97,18 +116,46 @@ img {
   padding: 1rem clamp(1rem, 4vw, 4rem);
   background: rgba(255, 254, 249, 0.92);
   border-bottom: 1px solid var(--color-border);
+  backdrop-filter: blur(16px);
 }
 
 .app-footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
   margin-top: auto;
+  padding: 1.25rem clamp(1rem, 4vw, 4rem);
+  background: rgba(255, 254, 249, 0.95);
   border-top: 1px solid var(--color-border);
-  border-bottom: 0;
+  color: var(--color-muted);
+}
+
+.app-footer p {
+  margin: 0.35rem 0 0;
+  max-width: 420px;
 }
 
 .brand,
 .admin-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
   font-weight: 800;
   letter-spacing: 0;
+}
+
+.brand-mark {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: #fffdf7;
+  font-size: 0.9rem;
+  line-height: 1;
+  box-shadow: var(--shadow-sm);
 }
 
 nav {
@@ -120,6 +167,46 @@ nav {
 nav a.router-link-active {
   color: var(--color-primary);
   font-weight: 800;
+}
+
+.store-nav,
+.footer-nav {
+  align-items: center;
+}
+
+.store-nav a,
+.footer-nav a {
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.6rem;
+  color: var(--color-muted);
+  font-weight: 700;
+}
+
+.store-nav a:hover,
+.footer-nav a:hover {
+  color: var(--color-primary);
+  background: rgba(31, 63, 42, 0.07);
+}
+
+.cart-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.cart-count {
+  min-width: 1.6rem;
+  border-radius: 999px;
+  padding: 0.15rem 0.45rem;
+  background: var(--color-primary);
+  color: #fffdf7;
+  text-align: center;
+  font-size: 0.8rem;
+  line-height: 1.2;
+}
+
+.footer-brand {
+  color: var(--color-ink);
 }
 
 .hero-section {
@@ -772,14 +859,59 @@ textarea {
   height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
   padding: 1.25rem;
   background: #132019;
   color: #fffdf7;
 }
 
-.admin-sidebar nav {
+.admin-sidebar .brand-mark {
+  background: #fffdf7;
+  color: #132019;
+}
+
+.admin-nav {
   display: grid;
+  gap: 0.35rem;
+}
+
+.admin-nav a {
+  border-radius: var(--radius-sm);
+  padding: 0.72rem 0.85rem;
+  color: rgba(255, 253, 247, 0.74);
+  font-weight: 750;
+}
+
+.admin-nav a:hover,
+.admin-nav a.router-link-active {
+  background: rgba(255, 253, 247, 0.12);
+  color: #fffdf7;
+}
+
+.admin-session-card {
+  margin-top: auto;
+  border: 1px solid rgba(255, 253, 247, 0.16);
+  border-radius: var(--radius-md);
+  padding: 0.85rem;
+  background: rgba(255, 253, 247, 0.07);
+}
+
+.admin-session-card span {
+  display: block;
+  color: rgba(255, 253, 247, 0.68);
+  font-size: 0.8rem;
+}
+
+.admin-session-card strong {
+  display: block;
+  margin-top: 0.15rem;
+  overflow-wrap: anywhere;
+  font-size: 0.92rem;
+}
+
+.admin-signout {
+  width: 100%;
+  justify-content: center;
 }
 
 .admin-main {
@@ -1223,6 +1355,15 @@ textarea {
     display: grid;
   }
 
+  .app-footer {
+    display: grid;
+  }
+
+  .store-nav,
+  .footer-nav {
+    gap: 0.35rem;
+  }
+
   .page-header {
     display: grid;
   }
@@ -1230,6 +1371,10 @@ textarea {
   .admin-sidebar {
     position: static;
     height: auto;
+  }
+
+  .admin-session-card {
+    margin-top: 0;
   }
 
   .catalog-toolbar {

@@ -1,7 +1,8 @@
 <template>
   <div class="admin-shell">
+    <a class="skip-link" href="#admin-content">Skip to admin content</a>
     <AdminSidebar />
-    <main class="admin-main">
+    <main id="admin-content" class="admin-main" tabindex="-1">
       <RouterView />
     </main>
   </div>
