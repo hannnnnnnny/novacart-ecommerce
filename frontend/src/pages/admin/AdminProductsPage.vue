@@ -1,15 +1,36 @@
 <template>
   <section class="admin-page">
-    <div class="admin-page-header">
-      <h1>Products</h1>
-      <RouterLink class="primary-button" to="/admin/products/new">New Product</RouterLink>
+    <PageHeader
+      eyebrow="Catalog"
+      title="Products"
+      description="Search products, review inventory levels, and manage storefront visibility."
+    >
+      <template #actions>
+        <RouterLink class="primary-button" to="/admin/products/new">New Product</RouterLink>
+      </template>
+    </PageHeader>
+    <div class="catalog-toolbar admin-toolbar">
+      <label class="search-field">
+        Search products
+        <input v-model.trim="searchTerm" type="search" placeholder="Search by product or category" />
+      </label>
+      <label>
+        Status
+        <select v-model="statusFilter">
+          <option value="all">All statuses</option>
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+          <option value="low-stock">Low stock</option>
+          <option value="out-of-stock">Out of stock</option>
+        </select>
+      </label>
     </div>
     <LoadingState v-if="loading" message="Loading products..." />
     <ErrorMessage v-else-if="error" :message="error" />
     <EmptyState
-      v-else-if="!products.length"
+      v-else-if="!filteredProducts.length"
       title="No products yet"
-      message="Create the first product to publish it in the storefront catalog."
+      message="Adjust the search or create a new product for the catalog."
     />
     <div v-else class="admin-table-wrap">
       <table class="admin-table">
@@ -24,18 +45,16 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="product in products" :key="product.id">
+          <tr v-for="product in filteredProducts" :key="product.id">
             <td>
               <strong>{{ product.name }}</strong>
               <span>{{ product.slug }}</span>
             </td>
             <td>{{ product.category?.name }}</td>
             <td>{{ formatCurrency(product.price) }}</td>
-            <td>{{ product.stockQuantity }}</td>
+            <td><StatusBadge :value="stockStatus(product)" :label="stockLabel(product)" /></td>
             <td>
-              <span class="status-pill" :class="{ muted: !product.active }">
-                {{ product.active ? 'Active' : 'Inactive' }}
-              </span>
+              <StatusBadge :value="product.active ? 'active' : 'inactive'" :label="product.active ? 'Active' : 'Inactive'" />
             </td>
             <td>
               <div class="table-actions">
@@ -51,17 +70,35 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { deleteAdminProduct, fetchAdminProducts } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
+import PageHeader from '../../components/PageHeader.vue'
+import StatusBadge from '../../components/StatusBadge.vue'
 import { formatCurrency } from '../../utils/format'
 
 const loading = ref(true)
 const error = ref('')
 const products = ref([])
+const searchTerm = ref('')
+const statusFilter = ref('all')
+const filteredProducts = computed(() => {
+  const query = searchTerm.value.toLowerCase()
+  return products.value.filter((product) => {
+    const matchesQuery = query
+      ? `${product.name} ${product.slug} ${product.category?.name || ''}`.toLowerCase().includes(query)
+      : true
+    const matchesStatus = statusFilter.value === 'all'
+      || (statusFilter.value === 'active' && product.active)
+      || (statusFilter.value === 'inactive' && !product.active)
+      || (statusFilter.value === 'low-stock' && product.stockQuantity > 0 && product.stockQuantity <= 5)
+      || (statusFilter.value === 'out-of-stock' && product.stockQuantity === 0)
+    return matchesQuery && matchesStatus
+  })
+})
 
 onMounted(loadProducts)
 
@@ -87,5 +124,17 @@ async function removeProduct(product) {
   } catch (requestError) {
     error.value = getApiError(requestError, 'Product could not be deleted.')
   }
+}
+
+function stockStatus(product) {
+  if (product.stockQuantity < 1) return 'out of stock'
+  if (product.stockQuantity <= 5) return 'low stock'
+  return 'in stock'
+}
+
+function stockLabel(product) {
+  if (product.stockQuantity < 1) return 'Out of stock'
+  if (product.stockQuantity <= 5) return `${product.stockQuantity} left`
+  return `${product.stockQuantity} in stock`
 }
 </script>

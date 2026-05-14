@@ -320,6 +320,10 @@ nav a.router-link-active {
   margin-bottom: 1.4rem;
 }
 
+.admin-toolbar {
+  margin-top: -0.75rem;
+}
+
 .search-field {
   max-width: 620px;
 }
