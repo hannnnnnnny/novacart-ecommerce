@@ -408,6 +408,11 @@ textarea {
   background: #fffdf8;
 }
 
+.admin-form.single-column {
+  grid-template-columns: 1fr;
+  margin-top: 0;
+}
+
 .wide-field,
 .admin-form .error-message {
   grid-column: 1 / -1;
@@ -423,13 +428,22 @@ textarea {
   width: auto;
 }
 
+.split-admin-layout {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 1.25rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
 @media (max-width: 820px) {
   .app-header,
   .detail-layout,
   .cart-layout,
   .form-grid,
   .admin-shell,
-  .admin-form {
+  .admin-form,
+  .split-admin-layout {
     grid-template-columns: 1fr;
   }
 
