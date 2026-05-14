@@ -114,6 +114,35 @@ nav {
   margin-bottom: 2rem;
 }
 
+.featured-section .section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+  letter-spacing: 0;
+}
+
+.filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin: -0.5rem 0 1.5rem;
+}
+
+.filter-button {
+  border: 1px solid #c8d0c4;
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  background: #fffdf8;
+  color: #314239;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.filter-button.active {
+  background: #243b2a;
+  color: #fffdf7;
+  border-color: #243b2a;
+}
+
 .primary-button,
 .secondary-button,
 .text-button {
