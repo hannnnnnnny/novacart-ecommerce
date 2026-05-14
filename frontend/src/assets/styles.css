@@ -801,6 +801,10 @@ textarea {
   padding: 1rem;
 }
 
+.metric-card {
+  border-left: 4px solid var(--color-accent);
+}
+
 .metrics-grid strong,
 .metric-card strong {
   display: block;
@@ -812,6 +816,34 @@ textarea {
   display: block;
   margin-top: 0.35rem;
   color: var(--color-muted);
+}
+
+.dashboard-layout {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.dashboard-section {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.dashboard-section h2 {
+  margin: 0;
+}
+
+.compact-warning-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  margin-top: 0;
+}
+
+.warning-card h3 {
+  margin: 0;
 }
 
 .login-page {

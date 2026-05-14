@@ -1,32 +1,101 @@
 <template>
   <section class="admin-page">
-    <h1>Dashboard</h1>
+    <PageHeader
+      eyebrow="Operations"
+      title="Dashboard"
+      description="Monitor catalog health, orders, revenue, and inventory warnings from one overview."
+    />
     <LoadingState v-if="loading" message="Loading dashboard..." />
     <ErrorMessage v-else-if="error" :message="error" />
-    <div v-else class="metrics-grid">
-      <article><span>Total Products</span><strong>{{ metrics.totalProducts }}</strong></article>
-      <article><span>Active Products</span><strong>{{ metrics.activeProducts }}</strong></article>
-      <article><span>Total Orders</span><strong>{{ metrics.totalOrders }}</strong></article>
-      <article><span>Revenue</span><strong>{{ formatCurrency(metrics.revenue) }}</strong></article>
+    <div v-else class="dashboard-layout">
+      <div class="metric-grid">
+        <MetricCard label="Total Products" :value="metrics.totalProducts || 0" detail="All catalog records" />
+        <MetricCard label="Active Products" :value="metrics.activeProducts || 0" detail="Visible in storefront" />
+        <MetricCard label="Total Orders" :value="metrics.totalOrders || 0" detail="Orders received" />
+        <MetricCard label="Revenue" :value="formatCurrency(metrics.revenue)" detail="Excluding cancelled orders" />
+      </div>
+
+      <section class="dashboard-section">
+        <div class="admin-page-header">
+          <h2>Recent Orders</h2>
+          <RouterLink class="text-link" to="/admin/orders">View all</RouterLink>
+        </div>
+        <EmptyState v-if="!recentOrders.length" title="No orders yet" message="Orders will appear here after checkout." />
+        <div v-else class="admin-table-wrap">
+          <table class="admin-table compact-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Customer</th>
+                <th>Status</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="order in recentOrders" :key="order.id">
+                <td>#{{ order.id }}</td>
+                <td>{{ order.customerName }}</td>
+                <td><StatusBadge :value="order.status" /></td>
+                <td>{{ formatCurrency(order.totalAmount) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="admin-page-header">
+          <h2>Inventory Watch</h2>
+          <RouterLink class="text-link" to="/admin/inventory">Review inventory</RouterLink>
+        </div>
+        <EmptyState
+          v-if="!warnings.length"
+          title="Inventory is healthy"
+          message="No products are at or below the default warning threshold."
+        />
+        <div v-else class="warning-grid compact-warning-grid">
+          <article v-for="warning in warnings" :key="warning.productId" class="warning-card">
+            <div>
+              <p class="eyebrow">{{ warning.categoryName }}</p>
+              <h3>{{ warning.productName }}</h3>
+            </div>
+            <strong>{{ warning.stockQuantity }} left</strong>
+          </article>
+        </div>
+      </section>
     </div>
   </section>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import { fetchDashboardMetrics } from '../../api/admin'
+import { computed, onMounted, ref } from 'vue'
+import { fetchAdminOrders, fetchDashboardMetrics, fetchInventoryWarnings } from '../../api/admin'
 import { getApiError } from '../../api/client'
+import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
+import MetricCard from '../../components/MetricCard.vue'
+import PageHeader from '../../components/PageHeader.vue'
+import StatusBadge from '../../components/StatusBadge.vue'
 import { formatCurrency } from '../../utils/format'
 
 const loading = ref(true)
 const error = ref('')
 const metrics = ref({})
+const orders = ref([])
+const warnings = ref([])
+const recentOrders = computed(() => orders.value.slice(0, 5))
 
 onMounted(async () => {
   try {
-    metrics.value = await fetchDashboardMetrics()
+    const [metricData, orderData, warningData] = await Promise.all([
+      fetchDashboardMetrics(),
+      fetchAdminOrders(),
+      fetchInventoryWarnings(5)
+    ])
+    metrics.value = metricData
+    orders.value = orderData
+    warnings.value = warningData
   } catch (requestError) {
     error.value = getApiError(requestError, 'Dashboard metrics could not be loaded.')
   } finally {
