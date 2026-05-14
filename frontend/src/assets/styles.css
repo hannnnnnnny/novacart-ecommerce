@@ -125,6 +125,8 @@ nav a.router-link-active {
 .hero-section {
   min-height: 72vh;
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  gap: clamp(2rem, 6vw, 5rem);
   align-items: center;
   padding: clamp(3rem, 8vw, 7rem) clamp(1rem, 6vw, 5rem);
   background:
@@ -135,6 +137,48 @@ nav a.router-link-active {
 
 .hero-copy {
   max-width: 680px;
+}
+
+.hero-copy p:not(.eyebrow) {
+  max-width: 620px;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  color: rgba(255, 253, 247, 0.9);
+}
+
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.5rem;
+}
+
+.hero-secondary {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fffdf7;
+  border: 1px solid rgba(255, 255, 255, 0.32);
+}
+
+.hero-stats {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.hero-stats article {
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--radius-lg);
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+.hero-stats strong {
+  display: block;
+  font-size: 2.3rem;
+  line-height: 1;
+}
+
+.hero-stats span {
+  color: rgba(255, 253, 247, 0.8);
 }
 
 .hero-copy h1,
@@ -157,6 +201,52 @@ nav a.router-link-active {
 
 .hero-section .eyebrow {
   color: #d9f0b6;
+}
+
+.category-section {
+  padding-bottom: 0;
+}
+
+.category-highlight-grid,
+.value-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 1rem;
+}
+
+.category-highlight,
+.value-card {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1.1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.category-highlight:hover,
+.value-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.category-highlight span,
+.value-card h2 {
+  display: block;
+  margin: 0 0 0.45rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+}
+
+.category-highlight small,
+.value-card p {
+  color: var(--color-muted);
+}
+
+.value-card svg {
+  width: 2rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  color: var(--color-accent);
 }
 
 .page-section,
@@ -723,5 +813,11 @@ textarea {
   .admin-sidebar {
     position: static;
     height: auto;
+  }
+}
+
+@media (max-width: 900px) {
+  .hero-section {
+    grid-template-columns: 1fr;
   }
 }
