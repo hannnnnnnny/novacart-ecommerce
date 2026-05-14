@@ -11,6 +11,10 @@ This module contains the Spring Boot REST API for NovaCart Ecommerce.
 - Spring Validation
 - Spring Security
 - Spring Boot Actuator
+- Spring Data JPA
+- MySQL Connector/J
+- H2 for tests
+- JJWT
 
 ## Commands
 
