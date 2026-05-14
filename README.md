@@ -211,6 +211,12 @@ Admin:
 - `/admin/orders/:id`
 - `/admin/inventory`
 
+## Frontend UX Notes
+
+The Vue storefront includes a responsive homepage, searchable product catalog, category filters, price sorting, polished product detail pages, cart quantity controls, checkout validation, and order confirmation views. Shared UI components provide consistent page headers, product cards, loading states, empty states, error messages, quantity controls, metric cards, status badges, and toast feedback.
+
+The admin workspace includes protected routing, session expiry handling, dashboard metrics, searchable product and order tables, inventory warning cards, category management feedback, and responsive navigation with keyboard skip links. The frontend API client centralizes bearer token handling and friendly error messages for validation, authentication, and unavailable backend states.
+
 ## Testing And Builds
 
 Backend:
