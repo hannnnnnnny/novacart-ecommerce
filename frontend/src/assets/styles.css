@@ -312,6 +312,24 @@ nav a.router-link-active {
   border-color: var(--color-primary);
 }
 
+.catalog-toolbar {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px);
+  gap: 1rem;
+  align-items: end;
+  margin-bottom: 1.4rem;
+}
+
+.search-field {
+  max-width: 620px;
+}
+
+.result-count {
+  margin: 0 0 1rem;
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
 .primary-button,
 .secondary-button,
 .text-button {
@@ -405,11 +423,42 @@ nav a.router-link-active {
   padding: 1rem;
 }
 
+.product-card-meta {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.product-card-title:hover {
+  color: var(--color-accent);
+}
+
+.product-card h3 {
+  margin: 0 0 0.55rem;
+  font-size: 1.15rem;
+}
+
+.product-card p:not(.eyebrow) {
+  color: var(--color-muted);
+}
+
 .card-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+}
+
+.card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.compact-button {
+  min-height: 36px;
+  padding: 0.45rem 0.7rem;
 }
 
 .detail-layout,
@@ -813,6 +862,10 @@ textarea {
   .admin-sidebar {
     position: static;
     height: auto;
+  }
+
+  .catalog-toolbar {
+    grid-template-columns: 1fr;
   }
 }
 
