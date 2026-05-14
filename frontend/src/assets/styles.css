@@ -602,6 +602,53 @@ nav a.router-link-active {
   padding: 1.25rem;
 }
 
+.success-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.success-panel {
+  display: grid;
+  gap: 1rem;
+  min-height: 360px;
+  align-content: center;
+}
+
+.success-panel h1 {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.4rem);
+  line-height: 1.05;
+}
+
+.confirmation-number {
+  display: grid;
+  gap: 0.2rem;
+  width: fit-content;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1rem;
+  background: var(--color-accent-soft);
+}
+
+.confirmation-number span {
+  color: var(--color-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.confirmation-number strong {
+  font-size: 1.4rem;
+}
+
+.success-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1000,7 +1047,8 @@ textarea {
   .admin-shell,
   .admin-form,
   .split-admin-layout,
-  .checkout-layout {
+  .checkout-layout,
+  .success-layout {
     grid-template-columns: 1fr;
   }
 
