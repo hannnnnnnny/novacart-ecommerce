@@ -45,7 +45,7 @@ export function getApiError(error, fallbackMessage = DEFAULT_ERROR_MESSAGE) {
     return validationMessages.join(' ')
   }
 
-  return error.response?.data?.message || error.message || fallbackMessage
+  return error.response?.data?.message || fallbackMessage || DEFAULT_ERROR_MESSAGE
 }
 
 function getValidationMessages(errors) {
@@ -72,6 +72,8 @@ function formatFieldError(field, message) {
 
 function humanizeField(field) {
   return String(field)
+    .replace(/\[(\d+)\]/g, (_, index) => ` ${Number(index) + 1}`)
+    .replace(/\./g, ' ')
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     .replace(/[_-]+/g, ' ')
     .replace(/\b\w/g, (letter) => letter.toUpperCase())
