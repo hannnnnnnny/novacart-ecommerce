@@ -42,9 +42,16 @@ Returns active storefront categories ordered by name.
 
 Optional query parameters:
 
+- `search`: searches product name, description, brand, SKU, and category name.
 - `categoryId`: filters active products by category.
+- `minPrice`: filters products at or above this price.
+- `maxPrice`: filters products at or below this price.
+- `availableOnly`: when `true`, returns products with stock greater than zero.
+- `sort`: supports `name`, `newest`, `price-low`, `price-high`, and `stock`.
+- `page`: zero-based page index.
+- `size`: page size, capped at 60.
 
-Returns active storefront products with category context.
+Returns active storefront products with category context and pagination metadata.
 
 ### Get Product
 
@@ -70,6 +77,10 @@ Request body:
   "city": "Auckland",
   "postalCode": "1010",
   "country": "New Zealand",
+  "shippingMethod": "STANDARD",
+  "paymentMethod": "Demo Card Approved",
+  "idempotencyKey": "checkout-unique-key",
+  "simulatePaymentFailure": false,
   "items": [
     {
       "productId": 1,
@@ -86,6 +97,10 @@ Important behavior:
 - Inactive or missing products are rejected.
 - Insufficient stock is rejected.
 - Stock cannot become negative.
+- Repeated submissions with the same `idempotencyKey` return the original order.
+- `Demo Card Declined` or `simulatePaymentFailure: true` returns a safe demo payment failure without deducting stock.
+
+Successful orders include an `orderNumber`, `paymentStatus`, `shippingMethod`, `subtotalAmount`, `shippingAmount`, `taxAmount`, `discountAmount`, and `totalAmount`.
 
 ### Get Order
 
@@ -126,6 +141,12 @@ Returns product, category, order, revenue, low-stock, recent order, and inventor
 
 Returns products with stock at or below the threshold.
 
+### Stock Movements
+
+`GET /api/admin/inventory/movements`
+
+Returns recent inventory events such as checkout stock deductions and cancellation restorations.
+
 ## Admin Categories
 
 - `GET /api/admin/categories`
@@ -160,14 +181,24 @@ Product request body:
 {
   "name": "Bamboo Desk Organizer",
   "slug": "bamboo-desk-organizer",
+  "sku": "NC-BAMBOO-DESK-ORGANIZER",
+  "brand": "Northline Goods",
   "description": "A compact organizer with layered compartments.",
   "price": 39.00,
+  "compareAtPrice": 48.00,
   "stockQuantity": 28,
+  "lowStockThreshold": 6,
   "imageUrl": "https://example.com/product.jpg",
+  "imageGallery": ["https://example.com/product.jpg"],
+  "tags": ["workspace", "bamboo", "organization"],
+  "featured": true,
+  "status": "ACTIVE",
   "active": true,
   "categoryId": 1
 }
 ```
+
+Admin product list endpoints support the same catalog query parameters as public products, plus `status` with `ACTIVE`, `DRAFT`, or `ARCHIVED`.
 
 ## Admin Orders
 

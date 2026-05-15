@@ -13,26 +13,27 @@ NovaCart is a production-style portfolio and demonstration ecommerce system. It 
 ### Storefront Experience
 
 - Responsive storefront homepage with a polished hero section, category highlights, featured products, and trust/value cards.
-- Product catalog with search, category filtering, price sorting, stock badges, loading states, empty states, and friendly error states.
+- Product catalog with server-side search, category filtering, price range filtering, availability filtering, sorting, pagination, stock badges, loading states, empty states, and friendly error states.
 - Product detail pages with large product imagery, category context, clear price hierarchy, quantity selection, stock status, related products, and add-to-cart feedback.
 - Cart page with item summaries, quantity controls, stock-aware limits, remove actions, subtotal calculation, and a clear checkout path.
-- Checkout flow with customer information, shipping address fields, order summary, basic validation, disabled processing state, and backend stock validation.
-- Order success page with confirmation messaging, order number, item summary, total amount, and clear next steps.
+- Checkout flow with customer information, shipping address fields, demo shipping method selection, demo payment approval or decline handling, order summary, basic validation, idempotency protection, and backend stock validation.
+- Order success page with confirmation messaging, order number, payment status, shipping method, item summary, totals breakdown, and clear next steps.
 
 ### Merchant Admin Workspace
 
 - Protected admin login with JWT authentication, persisted sessions, expired-session handling, and BCrypt password support on the backend.
 - Dashboard metrics for total products, active products, total orders, total revenue, low-stock products, and recent order activity.
-- Product management with searchable tables, status filters, inventory indicators, create/edit forms, validation feedback, and delete confirmation.
+- Product management with searchable tables, status filters, inventory indicators, SKU, brand, compare-at price, tags, gallery, featured flag, create/edit forms, validation feedback, and delete confirmation.
 - Category management with create, edit, delete, empty-state, and feedback patterns for catalog organization.
 - Order management with search, status filtering, order detail views, customer information, item summaries, totals, and status updates.
-- Inventory warning screen with configurable low-stock threshold, replenishment indicators, and fast navigation back to product management.
+- Inventory warning screen with product thresholds, replenishment indicators, recent stock movement history, and fast navigation back to product management.
 
 ### Platform Capabilities
 
 - RESTful JSON API with consistent response envelopes and centralized error handling.
 - MySQL persistence through Spring Data JPA and Hibernate.
-- Transactional checkout logic that prevents insufficient-stock purchases and negative inventory.
+- Transactional checkout logic that prevents insufficient-stock purchases, negative inventory, and duplicate order creation from repeated submissions.
+- Stock movement history for checkout deductions and cancellation restorations.
 - Public storefront APIs separated from protected admin APIs.
 - Vue 3 frontend with Vue Router, Pinia state management, Axios API wrappers, and reusable UI components.
 - English-only interface, documentation, API messages, seed data, and comments.

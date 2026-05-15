@@ -11,8 +11,11 @@ The backend module contains the Spring Boot REST API for NovaCart Ecommerce. It 
 - MySQL runtime persistence with H2 test profile support.
 - JWT authentication for protected admin APIs.
 - BCrypt password hashing for admin accounts.
-- Seed data for the default local admin, storefront categories, and sample products.
-- Transactional checkout logic with product row locking to protect stock counts.
+- Seed data for the default local admin, 8 storefront categories, and 30 realistic catalog products.
+- Expanded product metadata including SKU, brand, compare-at price, tags, image gallery, featured flag, product status, and low-stock thresholds.
+- Server-side product search, filtering, sorting, and pagination for public and admin catalog APIs.
+- Transactional checkout logic with product row locking, demo payment status, order numbers, totals breakdown, idempotency keys, and stock protection.
+- Stock movement history for checkout deductions and cancellation restorations.
 - Global exception handling with consistent English JSON error responses.
 - Backend tests for application startup and checkout stock behavior.
 
@@ -34,6 +37,7 @@ Protected admin endpoints:
 
 - `GET /api/admin/dashboard/metrics`
 - `GET /api/admin/inventory/warnings`
+- `GET /api/admin/inventory/movements`
 - `GET /api/admin/categories`
 - `POST /api/admin/categories`
 - `PUT /api/admin/categories/{id}`
