@@ -4,6 +4,10 @@ NovaCart Ecommerce is a full-stack online store system for small merchants. It i
 
 The project is intentionally original in naming, layout, and content. All visible text, seed data, API messages, comments, documentation, and commit messages are written in English.
 
+## Project Status
+
+NovaCart is a production-style portfolio and demonstration ecommerce system. It is designed to show realistic full-stack architecture, merchant workflows, checkout stock protection, admin authentication, and polished UI behavior. It is not a live payment-processing store and should not be used for real customer transactions without additional production hardening, payment integration, observability, legal review, and operational security controls.
+
 ## Product Features
 
 ### Storefront Experience
@@ -43,6 +47,25 @@ The project is intentionally original in naming, layout, and content. All visibl
 - Safer checkout behavior through backend stock checks and frontend quantity controls.
 - Developer-friendly setup with Maven wrapper, Vite scripts, environment examples, tests, and troubleshooting notes.
 - Maintainable UI system with shared components for page headers, product cards, loading states, empty states, error messages, status badges, quantity controls, metrics, and feedback.
+
+## Security Notes
+
+- The default admin account is intended for local development only.
+- `JWT_SECRET` must be replaced with a long, random secret before any deployed environment is exposed.
+- Database credentials, JWT secrets, and deployment-specific values must be supplied through environment variables or a secret manager.
+- No real payment provider is connected. Checkout creates a NovaCart order and deducts inventory, but it does not authorize or capture payment.
+- Public storefront endpoints are intentionally open. Admin endpoints require a valid bearer token.
+- Password hashes are stored with BCrypt and are never returned by API responses.
+
+## Limitations And Future Improvements
+
+- Add a real payment provider integration before supporting paid transactions.
+- Add customer accounts, saved addresses, order history, and account-level authorization if customer self-service is required.
+- Add pagination and server-side search for larger product and order datasets.
+- Add audit logging for admin changes and fulfillment status updates.
+- Add richer inventory controls such as stock adjustments, reserved stock, and supplier notes.
+- Add production observability, structured logs, rate limiting, backups, and monitoring.
+- Add broader frontend automated tests and end-to-end coverage for critical checkout and admin flows.
 
 ## Application Preview
 
