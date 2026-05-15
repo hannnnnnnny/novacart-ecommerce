@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.util.List;
 
@@ -33,9 +34,46 @@ public record CheckoutRequest(
         @Size(max = 80, message = "Country must be 80 characters or fewer.")
         String country,
 
+        @Pattern(
+                regexp = "^(STANDARD|EXPRESS|PICKUP)$",
+                message = "Select a valid shipping method."
+        )
+        String shippingMethod,
+
+        @Size(max = 80, message = "Payment method must be 80 characters or fewer.")
+        String paymentMethod,
+
+        @Size(max = 120, message = "Idempotency key must be 120 characters or fewer.")
+        String idempotencyKey,
+
+        Boolean simulatePaymentFailure,
+
         @Valid
         @NotEmpty(message = "Your cart must include at least one item.")
         @Size(max = 100, message = "Checkout can include no more than 100 line items.")
         List<CheckoutItemRequest> items
 ) {
+    public CheckoutRequest(
+            String customerName,
+            String customerEmail,
+            String shippingAddress,
+            String city,
+            String postalCode,
+            String country,
+            List<CheckoutItemRequest> items
+    ) {
+        this(
+                customerName,
+                customerEmail,
+                shippingAddress,
+                city,
+                postalCode,
+                country,
+                "STANDARD",
+                "Demo Card Approved",
+                null,
+                false,
+                items
+        );
+    }
 }

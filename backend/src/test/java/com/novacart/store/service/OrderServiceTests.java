@@ -8,6 +8,7 @@ import com.novacart.store.dto.CheckoutRequest;
 import com.novacart.store.dto.OrderResponse;
 import com.novacart.store.entity.Category;
 import com.novacart.store.entity.OrderStatus;
+import com.novacart.store.entity.PaymentStatus;
 import com.novacart.store.entity.Product;
 import com.novacart.store.exception.BusinessRuleException;
 import com.novacart.store.repository.CategoryRepository;
@@ -49,7 +50,13 @@ class OrderServiceTests {
         Product updatedProduct = productRepository.findById(product.getId()).orElseThrow();
         assertThat(updatedProduct.getStockQuantity()).isEqualTo(1);
         assertThat(response.items()).hasSize(1);
-        assertThat(response.totalAmount()).isEqualByComparingTo("30.00");
+        assertThat(response.orderNumber()).startsWith("NC-");
+        assertThat(response.status()).isEqualTo(OrderStatus.PAID);
+        assertThat(response.paymentStatus()).isEqualTo(PaymentStatus.PAID);
+        assertThat(response.subtotalAmount()).isEqualByComparingTo("30.00");
+        assertThat(response.shippingAmount()).isEqualByComparingTo("6.00");
+        assertThat(response.taxAmount()).isEqualByComparingTo("2.40");
+        assertThat(response.totalAmount()).isEqualByComparingTo("38.40");
     }
 
     @Test
@@ -72,6 +79,56 @@ class OrderServiceTests {
 
         Product unchangedProduct = productRepository.findById(product.getId()).orElseThrow();
         assertThat(unchangedProduct.getStockQuantity()).isEqualTo(1);
+    }
+
+    @Test
+    void createOrderReturnsExistingOrderForRepeatedIdempotencyKey() {
+        Product product = saveProduct("Test Idempotent Tray", "test-idempotent-tray", 3, "20.00");
+        CheckoutRequest request = new CheckoutRequest(
+                "Morgan Lee",
+                "morgan@example.com",
+                "12 Market Street",
+                "Auckland",
+                "1010",
+                "New Zealand",
+                "STANDARD",
+                "Demo Card Approved",
+                "checkout-idempotency-key-1",
+                false,
+                List.of(new CheckoutItemRequest(product.getId(), 1))
+        );
+
+        OrderResponse firstResponse = orderService.createOrder(request);
+        OrderResponse secondResponse = orderService.createOrder(request);
+
+        Product updatedProduct = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(secondResponse.id()).isEqualTo(firstResponse.id());
+        assertThat(updatedProduct.getStockQuantity()).isEqualTo(2);
+    }
+
+    @Test
+    void createOrderRejectsDemoPaymentFailureWithoutChangingInventory() {
+        Product product = saveProduct("Test Declined Payment Tray", "test-declined-payment-tray", 3, "20.00");
+        CheckoutRequest request = new CheckoutRequest(
+                "Morgan Lee",
+                "morgan@example.com",
+                "12 Market Street",
+                "Auckland",
+                "1010",
+                "New Zealand",
+                "STANDARD",
+                "Demo Card Declined",
+                "checkout-idempotency-key-2",
+                true,
+                List.of(new CheckoutItemRequest(product.getId(), 1))
+        );
+
+        assertThatThrownBy(() -> orderService.createOrder(request))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessage("Demo payment was declined. Select Demo Card Approved and try again.");
+
+        Product unchangedProduct = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(unchangedProduct.getStockQuantity()).isEqualTo(3);
     }
 
     @Test

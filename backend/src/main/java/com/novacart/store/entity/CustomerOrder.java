@@ -26,6 +26,12 @@ public class CustomerOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, length = 32)
+    private String orderNumber;
+
+    @Column(unique = true, length = 120)
+    private String idempotencyKey;
+
     @Column(nullable = false, length = 140)
     private String customerName;
 
@@ -46,7 +52,30 @@ public class CustomerOrder {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
+    private ShippingMethod shippingMethod = ShippingMethod.STANDARD;
+
+    @Column(nullable = false, length = 80)
+    private String paymentMethod = "Demo Card Approved";
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
     private OrderStatus status = OrderStatus.PENDING;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal subtotalAmount = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal shippingAmount = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal taxAmount = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount = BigDecimal.ZERO;
@@ -85,6 +114,22 @@ public class CustomerOrder {
         return id;
     }
 
+    public String getOrderNumber() {
+        return orderNumber;
+    }
+
+    public void setOrderNumber(String orderNumber) {
+        this.orderNumber = orderNumber;
+    }
+
+    public String getIdempotencyKey() {
+        return idempotencyKey;
+    }
+
+    public void setIdempotencyKey(String idempotencyKey) {
+        this.idempotencyKey = idempotencyKey;
+    }
+
     public String getCustomerName() {
         return customerName;
     }
@@ -109,6 +154,30 @@ public class CustomerOrder {
         return country;
     }
 
+    public ShippingMethod getShippingMethod() {
+        return shippingMethod;
+    }
+
+    public void setShippingMethod(ShippingMethod shippingMethod) {
+        this.shippingMethod = shippingMethod;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public PaymentStatus getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(PaymentStatus paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
     public OrderStatus getStatus() {
         return status;
     }
@@ -117,8 +186,35 @@ public class CustomerOrder {
         this.status = status;
     }
 
+    public BigDecimal getSubtotalAmount() {
+        return subtotalAmount;
+    }
+
+    public BigDecimal getShippingAmount() {
+        return shippingAmount;
+    }
+
+    public BigDecimal getTaxAmount() {
+        return taxAmount;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+
     public BigDecimal getTotalAmount() {
         return totalAmount;
+    }
+
+    public void applyTotals(
+            BigDecimal shippingAmount,
+            BigDecimal taxAmount,
+            BigDecimal discountAmount
+    ) {
+        this.shippingAmount = shippingAmount;
+        this.taxAmount = taxAmount;
+        this.discountAmount = discountAmount;
+        this.totalAmount = subtotalAmount.add(shippingAmount).add(taxAmount).subtract(discountAmount);
     }
 
     public List<OrderItem> getItems() {
@@ -136,6 +232,7 @@ public class CustomerOrder {
     public void addItem(OrderItem item) {
         item.setOrder(this);
         items.add(item);
-        totalAmount = totalAmount.add(item.getLineTotal());
+        subtotalAmount = subtotalAmount.add(item.getLineTotal());
+        totalAmount = subtotalAmount;
     }
 }

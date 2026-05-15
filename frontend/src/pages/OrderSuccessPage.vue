@@ -9,9 +9,13 @@
         <p>Your order has been received and is ready for merchant review.</p>
         <div class="confirmation-number">
           <span>Order Number</span>
-          <strong>#{{ order.id }}</strong>
+          <strong>{{ order.orderNumber || `#${order.id}` }}</strong>
         </div>
-        <StatusBadge :value="order.status" />
+        <div class="status-pair">
+          <StatusBadge :value="order.paymentStatus" :label="formatStatus(order.paymentStatus)" />
+          <StatusBadge :value="order.status" :label="formatStatus(order.status)" />
+        </div>
+        <p class="muted">Payment was handled by NovaCart demo checkout. No real card was charged.</p>
         <div class="success-actions">
           <RouterLink class="primary-button" to="/products">Continue Shopping</RouterLink>
           <RouterLink class="secondary-button" to="/">Return Home</RouterLink>
@@ -27,10 +31,22 @@
           </div>
         </div>
         <div class="summary-line">
+          <span>Subtotal</span>
+          <strong>{{ formatCurrency(order.subtotalAmount) }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Shipping</span>
+          <strong>{{ formatCurrency(order.shippingAmount) }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Estimated Tax</span>
+          <strong>{{ formatCurrency(order.taxAmount) }}</strong>
+        </div>
+        <div class="summary-line total-line">
           <span>Total</span>
           <strong>{{ formatCurrency(order.totalAmount) }}</strong>
         </div>
-        <p class="muted">A merchant can update the order status from the admin workspace.</p>
+        <p class="muted">{{ formatStatus(order.shippingMethod) }} selected. A merchant can update the order status from the admin workspace.</p>
       </aside>
     </div>
   </section>
@@ -44,7 +60,7 @@ import { getApiError } from '../api/client'
 import ErrorMessage from '../components/ErrorMessage.vue'
 import LoadingState from '../components/LoadingState.vue'
 import StatusBadge from '../components/StatusBadge.vue'
-import { formatCurrency } from '../utils/format'
+import { formatCurrency, formatStatus } from '../utils/format'
 
 const route = useRoute()
 const loading = ref(true)

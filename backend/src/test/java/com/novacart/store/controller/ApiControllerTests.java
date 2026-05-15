@@ -195,7 +195,12 @@ class ApiControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.items[0].quantity").value(2))
-                .andExpect(jsonPath("$.data.totalAmount").value(44.00));
+                .andExpect(jsonPath("$.data.orderNumber", not(emptyString())))
+                .andExpect(jsonPath("$.data.paymentStatus").value("PAID"))
+                .andExpect(jsonPath("$.data.subtotalAmount").value(44.00))
+                .andExpect(jsonPath("$.data.shippingAmount").value(6.00))
+                .andExpect(jsonPath("$.data.taxAmount").value(3.52))
+                .andExpect(jsonPath("$.data.totalAmount").value(53.52));
 
         Product updatedProduct = productRepository.findById(product.getId()).orElseThrow();
         assertThat(updatedProduct.getStockQuantity()).isEqualTo(3);

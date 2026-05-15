@@ -8,6 +8,7 @@
     <ol class="checkout-progress" aria-label="Checkout progress">
       <li class="active">Cart</li>
       <li class="active">Shipping</li>
+      <li class="active">Payment</li>
       <li>Confirmation</li>
     </ol>
     <EmptyState v-if="!cartStore.items.length" title="Your cart is empty" message="Add products before checkout.">
@@ -56,6 +57,39 @@
             </label>
           </div>
         </section>
+        <section class="form-section">
+          <h2>Delivery Method</h2>
+          <div class="option-grid">
+            <label v-for="option in shippingOptions" :key="option.value" class="choice-card">
+              <input v-model="form.shippingMethod" type="radio" :value="option.value" />
+              <span>
+                <strong>{{ option.label }}</strong>
+                <small>{{ option.description }}</small>
+              </span>
+              <strong>{{ formatCurrency(option.price) }}</strong>
+            </label>
+          </div>
+        </section>
+        <section class="form-section">
+          <h2>Demo Payment</h2>
+          <div class="option-grid">
+            <label class="choice-card">
+              <input v-model="form.paymentMethod" type="radio" value="Demo Card Approved" />
+              <span>
+                <strong>Demo Card Approved</strong>
+                <small>Creates a paid demo order without contacting a real provider.</small>
+              </span>
+            </label>
+            <label class="choice-card">
+              <input v-model="form.paymentMethod" type="radio" value="Demo Card Declined" />
+              <span>
+                <strong>Demo Card Declined</strong>
+                <small>Use this option to preview checkout failure handling.</small>
+              </span>
+            </label>
+          </div>
+          <p class="demo-payment-note">No real card data is collected or processed in NovaCart.</p>
+        </section>
       </div>
       <aside class="summary-panel order-summary-card">
         <h2>Order Summary</h2>
@@ -70,12 +104,24 @@
           <strong>{{ cartStore.itemCount }}</strong>
         </div>
         <div class="summary-line">
-          <span>Total</span>
+          <span>Subtotal</span>
           <strong>{{ formatCurrency(cartStore.subtotal) }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Shipping</span>
+          <strong>{{ formatCurrency(shippingAmount) }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Estimated Tax</span>
+          <strong>{{ formatCurrency(taxAmount) }}</strong>
+        </div>
+        <div class="summary-line total-line">
+          <span>Total</span>
+          <strong>{{ formatCurrency(orderTotal) }}</strong>
         </div>
         <div class="checkout-note">
           <strong>Stock is checked when the order is placed.</strong>
-          <span>No payment provider is connected in this demo checkout.</span>
+          <span>Demo payment can be approved or declined without using real card data.</span>
         </div>
         <button class="primary-button" type="submit" :disabled="submitting">
           {{ submitting ? 'Placing Order...' : 'Place Order' }}
@@ -108,8 +154,30 @@ const form = reactive({
   shippingAddress: '',
   city: '',
   postalCode: '',
-  country: ''
+  country: '',
+  shippingMethod: 'STANDARD',
+  paymentMethod: 'Demo Card Approved'
 })
+const shippingOptions = [
+  {
+    value: 'STANDARD',
+    label: 'Standard Delivery',
+    description: 'Prepared for routine merchant fulfillment.',
+    price: 6
+  },
+  {
+    value: 'EXPRESS',
+    label: 'Express Delivery',
+    description: 'Prioritized handling for urgent orders.',
+    price: 14
+  },
+  {
+    value: 'PICKUP',
+    label: 'Store Pickup',
+    description: 'No shipping fee for demo pickup orders.',
+    price: 0
+  }
+]
 const formIsComplete = computed(() => {
   return Object.values(form).every((value) => String(value).trim().length > 0)
 })
@@ -134,6 +202,12 @@ const formErrors = computed(() => ({
 const formIsValid = computed(() => {
   return formIsComplete.value && emailIsValid.value
 })
+const selectedShippingOption = computed(() => {
+  return shippingOptions.find((option) => option.value === form.shippingMethod) || shippingOptions[0]
+})
+const shippingAmount = computed(() => selectedShippingOption.value.price)
+const taxAmount = computed(() => Number((cartStore.subtotal * 0.08).toFixed(2)))
+const orderTotal = computed(() => cartStore.subtotal + shippingAmount.value + taxAmount.value)
 
 onMounted(() => {
   cartStore.loadCart()
@@ -156,6 +230,8 @@ async function submitOrder() {
   try {
     const order = await createOrder({
       ...form,
+      idempotencyKey: createIdempotencyKey(),
+      simulatePaymentFailure: form.paymentMethod === 'Demo Card Declined',
       items: cartStore.items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity
@@ -168,5 +244,12 @@ async function submitOrder() {
   } finally {
     submitting.value = false
   }
+}
+
+function createIdempotencyKey() {
+  if (window.crypto?.randomUUID) {
+    return window.crypto.randomUUID()
+  }
+  return `checkout-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 </script>

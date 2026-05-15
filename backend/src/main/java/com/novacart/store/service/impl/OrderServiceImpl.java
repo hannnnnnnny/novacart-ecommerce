@@ -7,12 +7,19 @@ import com.novacart.store.dto.OrderResponse;
 import com.novacart.store.entity.CustomerOrder;
 import com.novacart.store.entity.OrderItem;
 import com.novacart.store.entity.OrderStatus;
+import com.novacart.store.entity.PaymentStatus;
 import com.novacart.store.entity.Product;
+import com.novacart.store.entity.ShippingMethod;
 import com.novacart.store.exception.BusinessRuleException;
 import com.novacart.store.exception.ResourceNotFoundException;
 import com.novacart.store.repository.CustomerOrderRepository;
 import com.novacart.store.repository.ProductRepository;
 import com.novacart.store.service.OrderService;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -26,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OrderServiceImpl implements OrderService {
 
     private static final Map<OrderStatus, List<OrderStatus>> ALLOWED_STATUS_TRANSITIONS = buildStatusTransitions();
+    private static final BigDecimal TAX_RATE = new BigDecimal("0.08");
 
     private final CustomerOrderRepository orderRepository;
     private final ProductRepository productRepository;
@@ -37,7 +45,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse createOrder(CheckoutRequest request) {
+        String idempotencyKey = normalizeIdempotencyKey(request.idempotencyKey());
+        if (idempotencyKey != null) {
+            var existingOrder = orderRepository.findByIdempotencyKey(idempotencyKey);
+            if (existingOrder.isPresent()) {
+                return toResponse(existingOrder.get());
+            }
+        }
+
+        validateDemoPayment(request);
         Map<Long, Integer> quantitiesByProduct = aggregateQuantities(request.items());
+        ShippingMethod shippingMethod = resolveShippingMethod(request.shippingMethod());
 
         CustomerOrder order = new CustomerOrder(
                 request.customerName().trim(),
@@ -47,10 +65,15 @@ public class OrderServiceImpl implements OrderService {
                 request.postalCode().trim(),
                 request.country().trim()
         );
+        order.setIdempotencyKey(idempotencyKey);
+        order.setShippingMethod(shippingMethod);
+        order.setPaymentMethod(normalizePaymentMethod(request.paymentMethod()));
+        order.setPaymentStatus(PaymentStatus.PAID);
+        order.setStatus(OrderStatus.PAID);
 
         for (Map.Entry<Long, Integer> entry : quantitiesByProduct.entrySet()) {
             Product product = productRepository.findByIdForUpdate(entry.getKey())
-                    .filter(Product::isActive)
+                    .filter(Product::isStorefrontVisible)
                     .orElseThrow(() -> new ResourceNotFoundException("Product was not found."));
 
             int requestedQuantity = entry.getValue();
@@ -62,7 +85,15 @@ public class OrderServiceImpl implements OrderService {
             order.addItem(new OrderItem(product.getId(), product.getName(), product.getPrice(), requestedQuantity));
         }
 
-        return toResponse(orderRepository.save(order));
+        order.applyTotals(
+                shippingAmount(shippingMethod),
+                taxAmount(order.getSubtotalAmount()),
+                BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
+        );
+
+        CustomerOrder savedOrder = orderRepository.save(order);
+        savedOrder.setOrderNumber(generateOrderNumber(savedOrder.getId()));
+        return toResponse(savedOrder);
     }
 
     @Override
@@ -121,6 +152,55 @@ public class OrderServiceImpl implements OrderService {
         return Character.toUpperCase(label.charAt(0)) + label.substring(1);
     }
 
+    private void validateDemoPayment(CheckoutRequest request) {
+        String paymentMethod = normalizePaymentMethod(request.paymentMethod());
+        if (Boolean.TRUE.equals(request.simulatePaymentFailure()) || "Demo Card Declined".equalsIgnoreCase(paymentMethod)) {
+            throw new BusinessRuleException("Demo payment was declined. Select Demo Card Approved and try again.");
+        }
+    }
+
+    private ShippingMethod resolveShippingMethod(String shippingMethod) {
+        if (shippingMethod == null || shippingMethod.isBlank()) {
+            return ShippingMethod.STANDARD;
+        }
+        try {
+            return ShippingMethod.valueOf(shippingMethod.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessRuleException("Select a valid shipping method.");
+        }
+    }
+
+    private String normalizePaymentMethod(String paymentMethod) {
+        if (paymentMethod == null || paymentMethod.isBlank()) {
+            return "Demo Card Approved";
+        }
+        return paymentMethod.trim();
+    }
+
+    private String normalizeIdempotencyKey(String idempotencyKey) {
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            return null;
+        }
+        return idempotencyKey.trim();
+    }
+
+    private BigDecimal shippingAmount(ShippingMethod shippingMethod) {
+        return switch (shippingMethod) {
+            case STANDARD -> new BigDecimal("6.00");
+            case EXPRESS -> new BigDecimal("14.00");
+            case PICKUP -> BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        };
+    }
+
+    private BigDecimal taxAmount(BigDecimal subtotalAmount) {
+        return subtotalAmount.multiply(TAX_RATE).setScale(2, RoundingMode.HALF_UP);
+    }
+
+    private String generateOrderNumber(Long id) {
+        String datePart = LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.BASIC_ISO_DATE);
+        return "NC-" + datePart + "-" + String.format("%04d", id);
+    }
+
     private Map<Long, Integer> aggregateQuantities(List<CheckoutItemRequest> items) {
         if (items == null || items.isEmpty()) {
             throw new BusinessRuleException("Your cart must include at least one item.");
@@ -159,13 +239,21 @@ public class OrderServiceImpl implements OrderService {
 
         return new OrderResponse(
                 order.getId(),
+                order.getOrderNumber(),
                 order.getCustomerName(),
                 order.getCustomerEmail(),
                 order.getShippingAddress(),
                 order.getCity(),
                 order.getPostalCode(),
                 order.getCountry(),
+                order.getShippingMethod(),
+                order.getPaymentMethod(),
+                order.getPaymentStatus(),
                 order.getStatus(),
+                order.getSubtotalAmount(),
+                order.getShippingAmount(),
+                order.getTaxAmount(),
+                order.getDiscountAmount(),
                 order.getTotalAmount(),
                 items,
                 order.getCreatedAt(),

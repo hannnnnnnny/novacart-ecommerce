@@ -18,6 +18,9 @@ public interface CustomerOrderRepository extends JpaRepository<CustomerOrder, Lo
     @EntityGraph(attributePaths = "items")
     Optional<CustomerOrder> findWithItemsById(Long id);
 
+    @EntityGraph(attributePaths = "items")
+    Optional<CustomerOrder> findByIdempotencyKey(String idempotencyKey);
+
     long countByStatus(OrderStatus status);
 
     @Query("select coalesce(sum(o.totalAmount), 0) from CustomerOrder o where o.status <> :status")
