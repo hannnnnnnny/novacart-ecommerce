@@ -18,6 +18,14 @@ NovaCart is a portfolio ecommerce system. These notes describe safe deployment p
 The repository includes `docker-compose.yml` for local containerized preview:
 
 ```bash
+cp docker.env.example .env
+docker compose up --build
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item docker.env.example .env
 docker compose up --build
 ```
 
@@ -27,7 +35,15 @@ Local container URLs:
 - Backend API: `http://localhost:8080/api`
 - MySQL: `localhost:3306`
 
-The compose file uses local demo credentials only. Do not reuse those values in production.
+The compose file uses local demo credentials only. Edit `.env` before starting Compose if you need different host ports, database credentials, frontend origin, or API URL. The backend container is built with a Maven build image and runs the packaged Spring Boot application on a slim Java runtime image.
+
+Useful validation command:
+
+```bash
+docker compose config
+```
+
+Do not reuse local Docker credentials, JWT secrets, or exposed database ports in production.
 
 ## Backend Hosting
 

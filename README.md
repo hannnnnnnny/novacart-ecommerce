@@ -425,6 +425,14 @@ npm run build
 NovaCart includes Docker configuration for local containerized preview with MySQL, backend, and frontend services:
 
 ```bash
+cp docker.env.example .env
+docker compose up --build
+```
+
+On Windows PowerShell:
+
+```powershell
+Copy-Item docker.env.example .env
 docker compose up --build
 ```
 
@@ -434,7 +442,7 @@ Container preview URLs:
 - Backend API: `http://localhost:8080/api`
 - MySQL: `localhost:3306`
 
-The Docker Compose credentials are local demo values only. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before preparing any deployed environment.
+The Docker Compose credentials are local demo values only. Override ports, credentials, frontend origin, or API URL in the ignored `.env` file when needed. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before preparing any deployed environment.
 
 ## Development Notes
 
