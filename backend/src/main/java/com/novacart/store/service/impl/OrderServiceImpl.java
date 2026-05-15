@@ -10,10 +10,13 @@ import com.novacart.store.entity.OrderStatus;
 import com.novacart.store.entity.PaymentStatus;
 import com.novacart.store.entity.Product;
 import com.novacart.store.entity.ShippingMethod;
+import com.novacart.store.entity.StockMovement;
+import com.novacart.store.entity.StockMovementType;
 import com.novacart.store.exception.BusinessRuleException;
 import com.novacart.store.exception.ResourceNotFoundException;
 import com.novacart.store.repository.CustomerOrderRepository;
 import com.novacart.store.repository.ProductRepository;
+import com.novacart.store.repository.StockMovementRepository;
 import com.novacart.store.service.OrderService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -37,10 +40,16 @@ public class OrderServiceImpl implements OrderService {
 
     private final CustomerOrderRepository orderRepository;
     private final ProductRepository productRepository;
+    private final StockMovementRepository stockMovementRepository;
 
-    public OrderServiceImpl(CustomerOrderRepository orderRepository, ProductRepository productRepository) {
+    public OrderServiceImpl(
+            CustomerOrderRepository orderRepository,
+            ProductRepository productRepository,
+            StockMovementRepository stockMovementRepository
+    ) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
+        this.stockMovementRepository = stockMovementRepository;
     }
 
     @Override
@@ -93,6 +102,7 @@ public class OrderServiceImpl implements OrderService {
 
         CustomerOrder savedOrder = orderRepository.save(order);
         savedOrder.setOrderNumber(generateOrderNumber(savedOrder.getId()));
+        recordOrderPlacedMovements(savedOrder);
         return toResponse(savedOrder);
     }
 
@@ -116,6 +126,9 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse updateStatus(Long id, OrderStatus status) {
         CustomerOrder order = findOrderWithItems(id);
         validateStatusTransition(order.getStatus(), status);
+        if (status == OrderStatus.CANCELLED && order.getStatus() != OrderStatus.CANCELLED) {
+            restoreStockForCancellation(order);
+        }
         order.setStatus(status);
         return toResponse(order);
     }
@@ -199,6 +212,37 @@ public class OrderServiceImpl implements OrderService {
     private String generateOrderNumber(Long id) {
         String datePart = LocalDate.now(ZoneOffset.UTC).format(DateTimeFormatter.BASIC_ISO_DATE);
         return "NC-" + datePart + "-" + String.format("%04d", id);
+    }
+
+    private void recordOrderPlacedMovements(CustomerOrder order) {
+        for (OrderItem item : order.getItems()) {
+            productRepository.findById(item.getProductId()).ifPresent(product -> stockMovementRepository.save(new StockMovement(
+                    product.getId(),
+                    product.getName(),
+                    order.getId(),
+                    StockMovementType.ORDER_PLACED,
+                    -item.getQuantity(),
+                    product.getStockQuantity(),
+                    "Stock deducted for order " + order.getOrderNumber() + "."
+            )));
+        }
+    }
+
+    private void restoreStockForCancellation(CustomerOrder order) {
+        for (OrderItem item : order.getItems()) {
+            Product product = productRepository.findByIdForUpdate(item.getProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product was not found."));
+            product.setStockQuantity(product.getStockQuantity() + item.getQuantity());
+            stockMovementRepository.save(new StockMovement(
+                    product.getId(),
+                    product.getName(),
+                    order.getId(),
+                    StockMovementType.ORDER_CANCELLED,
+                    item.getQuantity(),
+                    product.getStockQuantity(),
+                    "Stock restored after order cancellation."
+            ));
+        }
     }
 
     private Map<Long, Integer> aggregateQuantities(List<CheckoutItemRequest> items) {

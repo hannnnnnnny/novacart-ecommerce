@@ -3,6 +3,7 @@ package com.novacart.store.controller;
 import com.novacart.store.dto.ApiResponse;
 import com.novacart.store.dto.DashboardMetricsResponse;
 import com.novacart.store.dto.InventoryWarningResponse;
+import com.novacart.store.dto.StockMovementResponse;
 import com.novacart.store.service.AdminDashboardService;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -36,5 +37,10 @@ public class AdminDashboardController {
             @RequestParam(defaultValue = "5") int threshold
     ) {
         return ApiResponse.success("Inventory warnings loaded successfully.", adminDashboardService.getInventoryWarnings(threshold));
+    }
+
+    @GetMapping("/inventory/movements")
+    public ApiResponse<List<StockMovementResponse>> getRecentStockMovements() {
+        return ApiResponse.success("Stock movements loaded successfully.", adminDashboardService.getRecentStockMovements());
     }
 }

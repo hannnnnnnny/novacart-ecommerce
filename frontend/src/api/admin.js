@@ -12,6 +12,10 @@ export async function fetchInventoryWarnings(threshold = 5) {
   return getApiData(await apiClient.get('/admin/inventory/warnings', { params: { threshold } }))
 }
 
+export async function fetchInventoryMovements() {
+  return getApiData(await apiClient.get('/admin/inventory/movements'))
+}
+
 export async function fetchAdminProducts() {
   return (await fetchAdminProductPage({ size: 100 })).content
 }

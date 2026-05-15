@@ -1534,6 +1534,16 @@ textarea {
   font-size: 1.4rem;
 }
 
+.inventory-movement-section {
+  display: grid;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.inventory-movement-section h2 {
+  margin: 0;
+}
+
 .inventory-count {
   display: grid;
   justify-items: end;

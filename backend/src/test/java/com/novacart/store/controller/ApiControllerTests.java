@@ -313,6 +313,19 @@ class ApiControllerTests {
                 .andExpect(jsonPath("$.message").value("Order status cannot change from Cancelled to Processing."));
     }
 
+    @Test
+    void adminInventoryMovementsShowCheckoutStockDeduction() throws Exception {
+        Product product = saveProduct("Controller Movement Tray", 4, "19.00", true);
+        createOrder(product);
+
+        mockMvc.perform(get("/api/admin/inventory/movements")
+                        .header("Authorization", "Bearer " + adminToken()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.length()").value(greaterThanOrEqualTo(1)))
+                .andExpect(jsonPath("$.data[0].type").value("ORDER_PLACED"));
+    }
+
     private Product saveProduct(String name, int stockQuantity, String price, boolean active) {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         Category category = categoryRepository.save(new Category(

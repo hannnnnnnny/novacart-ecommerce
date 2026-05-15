@@ -154,7 +154,9 @@ class OrderServiceTests {
 
         OrderResponse cancelledOrder = orderService.updateStatus(order.id(), OrderStatus.CANCELLED);
 
+        Product restoredProduct = productRepository.findById(product.getId()).orElseThrow();
         assertThat(cancelledOrder.status()).isEqualTo(OrderStatus.CANCELLED);
+        assertThat(restoredProduct.getStockQuantity()).isEqualTo(4);
     }
 
     @Test

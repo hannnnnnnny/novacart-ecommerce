@@ -2,12 +2,14 @@ package com.novacart.store.service.impl;
 
 import com.novacart.store.dto.DashboardMetricsResponse;
 import com.novacart.store.dto.InventoryWarningResponse;
+import com.novacart.store.dto.StockMovementResponse;
 import com.novacart.store.entity.OrderStatus;
 import com.novacart.store.entity.Product;
 import com.novacart.store.entity.ProductStatus;
 import com.novacart.store.repository.CategoryRepository;
 import com.novacart.store.repository.CustomerOrderRepository;
 import com.novacart.store.repository.ProductRepository;
+import com.novacart.store.repository.StockMovementRepository;
 import com.novacart.store.service.AdminDashboardService;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -22,15 +24,18 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final CustomerOrderRepository orderRepository;
+    private final StockMovementRepository stockMovementRepository;
 
     public AdminDashboardServiceImpl(
             ProductRepository productRepository,
             CategoryRepository categoryRepository,
-            CustomerOrderRepository orderRepository
+            CustomerOrderRepository orderRepository,
+            StockMovementRepository stockMovementRepository
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.orderRepository = orderRepository;
+        this.stockMovementRepository = stockMovementRepository;
     }
 
     @Override
@@ -51,6 +56,24 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
         return productRepository.findAllByStockQuantityLessThanEqualOrderByStockQuantityAsc(threshold)
                 .stream()
                 .map(this::toWarning)
+                .toList();
+    }
+
+    @Override
+    public List<StockMovementResponse> getRecentStockMovements() {
+        return stockMovementRepository.findTop20ByOrderByCreatedAtDesc()
+                .stream()
+                .map(movement -> new StockMovementResponse(
+                        movement.getId(),
+                        movement.getProductId(),
+                        movement.getProductName(),
+                        movement.getOrderId(),
+                        movement.getType(),
+                        movement.getQuantityChange(),
+                        movement.getStockAfter(),
+                        movement.getReason(),
+                        movement.getCreatedAt()
+                ))
                 .toList();
     }
 
