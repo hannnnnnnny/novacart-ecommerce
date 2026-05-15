@@ -1,6 +1,7 @@
 package com.novacart.store.repository;
 
 import com.novacart.store.entity.Product;
+import com.novacart.store.entity.ProductStatus;
 import java.util.List;
 import java.util.Optional;
 import jakarta.persistence.LockModeType;
@@ -22,10 +23,19 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     List<Product> findAllByActiveTrueAndCategoryIdOrderByNameAsc(Long categoryId);
 
     @EntityGraph(attributePaths = "category")
+    List<Product> findAllByActiveTrueAndStatusOrderByNameAsc(ProductStatus status);
+
+    @EntityGraph(attributePaths = "category")
+    List<Product> findAllByActiveTrueAndStatusAndCategoryIdOrderByNameAsc(ProductStatus status, Long categoryId);
+
+    @EntityGraph(attributePaths = "category")
     List<Product> findAllByStockQuantityLessThanEqualOrderByStockQuantityAsc(int threshold);
 
     @EntityGraph(attributePaths = "category")
     Optional<Product> findByIdAndActiveTrue(Long id);
+
+    @EntityGraph(attributePaths = "category")
+    Optional<Product> findByIdAndActiveTrueAndStatus(Long id, ProductStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("select p from Product p where p.id = :id")
@@ -37,9 +47,15 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     boolean existsBySlugAndIdNot(String slug, Long id);
 
+    boolean existsBySku(String sku);
+
+    boolean existsBySkuAndIdNot(String sku, Long id);
+
     boolean existsByCategoryId(Long categoryId);
 
     long countByActiveTrue();
+
+    long countByActiveTrueAndStatus(ProductStatus status);
 
     long countByStockQuantityLessThanEqual(int threshold);
 }

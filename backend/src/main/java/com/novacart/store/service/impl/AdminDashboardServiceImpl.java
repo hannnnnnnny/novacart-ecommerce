@@ -4,6 +4,7 @@ import com.novacart.store.dto.DashboardMetricsResponse;
 import com.novacart.store.dto.InventoryWarningResponse;
 import com.novacart.store.entity.OrderStatus;
 import com.novacart.store.entity.Product;
+import com.novacart.store.entity.ProductStatus;
 import com.novacart.store.repository.CategoryRepository;
 import com.novacart.store.repository.CustomerOrderRepository;
 import com.novacart.store.repository.ProductRepository;
@@ -36,7 +37,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public DashboardMetricsResponse getMetrics() {
         return new DashboardMetricsResponse(
                 productRepository.count(),
-                productRepository.countByActiveTrue(),
+                productRepository.countByActiveTrueAndStatus(ProductStatus.ACTIVE),
                 categoryRepository.count(),
                 orderRepository.count(),
                 orderRepository.countByStatus(OrderStatus.PENDING),
@@ -59,6 +60,8 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 product.getName(),
                 product.getCategory().getName(),
                 product.getStockQuantity(),
+                product.getLowStockThreshold(),
+                product.getStatus(),
                 product.isActive()
         );
     }

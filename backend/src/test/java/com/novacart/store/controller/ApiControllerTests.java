@@ -1,6 +1,7 @@
 package com.novacart.store.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.emptyString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -90,7 +91,56 @@ class ApiControllerTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data").isArray())
+                .andExpect(jsonPath("$.data.length()").value(greaterThanOrEqualTo(20)))
                 .andExpect(jsonPath("$.data[0].name", not(emptyString())));
+    }
+
+    @Test
+    void adminProductCreationStoresExpandedCatalogFields() throws Exception {
+        String suffix = UUID.randomUUID().toString().substring(0, 8);
+        Category category = categoryRepository.save(new Category(
+                "Expanded Product Category " + suffix,
+                "expanded-product-category-" + suffix,
+                "Category for expanded product API tests.",
+                true
+        ));
+
+        mockMvc.perform(post("/api/admin/products")
+                        .header("Authorization", "Bearer " + adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "Controller Walnut Serving Tray",
+                                  "slug": "controller-walnut-serving-tray-%s",
+                                  "sku": "TEST-WALNUT-TRAY-%s",
+                                  "brand": "Northline Goods",
+                                  "description": "A test tray with realistic product metadata for admin catalog workflows.",
+                                  "price": 44.00,
+                                  "compareAtPrice": 52.00,
+                                  "stockQuantity": 9,
+                                  "lowStockThreshold": 3,
+                                  "imageUrl": "https://example.com/walnut-tray.jpg",
+                                  "imageGallery": [
+                                    "https://example.com/walnut-tray.jpg",
+                                    "https://example.com/walnut-tray-detail.jpg"
+                                  ],
+                                  "tags": ["serving", "wood"],
+                                  "featured": true,
+                                  "status": "ACTIVE",
+                                  "active": true,
+                                  "categoryId": %d
+                                }
+                                """.formatted(suffix, suffix.toUpperCase(), category.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.sku").value("TEST-WALNUT-TRAY-" + suffix.toUpperCase()))
+                .andExpect(jsonPath("$.data.brand").value("Northline Goods"))
+                .andExpect(jsonPath("$.data.compareAtPrice").value(52.00))
+                .andExpect(jsonPath("$.data.lowStockThreshold").value(3))
+                .andExpect(jsonPath("$.data.imageGallery.length()").value(2))
+                .andExpect(jsonPath("$.data.tags[0]").value("serving"))
+                .andExpect(jsonPath("$.data.featured").value(true))
+                .andExpect(jsonPath("$.data.status").value("ACTIVE"));
     }
 
     @Test

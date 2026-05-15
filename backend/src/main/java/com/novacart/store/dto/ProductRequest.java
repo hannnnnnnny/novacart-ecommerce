@@ -1,5 +1,6 @@
 package com.novacart.store.dto;
 
+import com.novacart.store.entity.ProductStatus;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
@@ -8,6 +9,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
+import java.util.List;
 import org.hibernate.validator.constraints.URL;
 
 public record ProductRequest(
@@ -22,6 +24,16 @@ public record ProductRequest(
         )
         String slug,
 
+        @Size(max = 80, message = "Product SKU must be 80 characters or fewer.")
+        @Pattern(
+                regexp = "^[A-Z0-9][A-Z0-9-]*$",
+                message = "Product SKU must use uppercase letters, numbers, and hyphens."
+        )
+        String sku,
+
+        @Size(max = 120, message = "Product brand must be 120 characters or fewer.")
+        String brand,
+
         @NotBlank(message = "Product description is required.")
         @Size(max = 2_000, message = "Product description must be 2,000 characters or fewer.")
         String description,
@@ -31,14 +43,31 @@ public record ProductRequest(
         @Digits(integer = 10, fraction = 2, message = "Product price must use no more than 10 digits and 2 decimals.")
         BigDecimal price,
 
+        @DecimalMin(value = "0.01", message = "Compare-at price must be greater than zero.")
+        @Digits(integer = 10, fraction = 2, message = "Compare-at price must use no more than 10 digits and 2 decimals.")
+        BigDecimal compareAtPrice,
+
         @NotNull(message = "Stock quantity is required.")
         @Min(value = 0, message = "Stock quantity cannot be negative.")
         Integer stockQuantity,
+
+        @Min(value = 0, message = "Low-stock threshold cannot be negative.")
+        Integer lowStockThreshold,
 
         @NotBlank(message = "Product image URL is required.")
         @Size(max = 600, message = "Product image URL must be 600 characters or fewer.")
         @URL(message = "Product image URL must be a valid URL.")
         String imageUrl,
+
+        @Size(max = 6, message = "Product image gallery can include up to 6 images.")
+        List<@URL(message = "Gallery image URL must be a valid URL.") String> imageGallery,
+
+        @Size(max = 12, message = "Product tags can include up to 12 values.")
+        List<@Size(max = 80, message = "Product tag must be 80 characters or fewer.") String> tags,
+
+        Boolean featured,
+
+        ProductStatus status,
 
         Boolean active,
 
