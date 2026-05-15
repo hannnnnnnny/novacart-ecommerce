@@ -420,6 +420,22 @@ npm install
 npm run build
 ```
 
+## Docker Preview
+
+NovaCart includes Docker configuration for local containerized preview with MySQL, backend, and frontend services:
+
+```bash
+docker compose up --build
+```
+
+Container preview URLs:
+
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8080/api`
+- MySQL: `localhost:3306`
+
+The Docker Compose credentials are local demo values only. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) before preparing any deployed environment.
+
 ## Development Notes
 
 - Public storefront APIs are open.

@@ -1,0 +1,98 @@
+# NovaCart Deployment Notes
+
+NovaCart is a portfolio ecommerce system. These notes describe safe deployment preparation without exposing real secrets or implying that the demo checkout is a real payment flow.
+
+## Production Checklist
+
+- Replace the default admin password after the first deployment.
+- Set a long random `JWT_SECRET` through the hosting provider secret manager.
+- Use managed MySQL credentials supplied through environment variables.
+- Set `CORS_ALLOWED_ORIGINS` to the deployed frontend origin.
+- Set `VITE_API_BASE_URL` to the deployed backend API root before building the frontend.
+- Configure HTTPS at the platform, load balancer, or reverse proxy layer.
+- Add monitoring, backup, rate limiting, and log retention before real operational use.
+- Integrate a payment provider before accepting real paid orders.
+
+## Docker Compose
+
+The repository includes `docker-compose.yml` for local containerized preview:
+
+```bash
+docker compose up --build
+```
+
+Local container URLs:
+
+- Frontend: `http://localhost:3000`
+- Backend API: `http://localhost:8080/api`
+- MySQL: `localhost:3306`
+
+The compose file uses local demo credentials only. Do not reuse those values in production.
+
+## Backend Hosting
+
+Render, Railway, Fly.io, and similar platforms can run the backend as a Java service or Docker container.
+
+Required backend variables:
+
+```text
+DB_HOST=
+DB_PORT=
+DB_NAME=
+DB_USERNAME=
+DB_PASSWORD=
+JWT_SECRET=
+JWT_EXPIRATION_MINUTES=120
+CORS_ALLOWED_ORIGINS=https://your-frontend-domain.example
+SERVER_PORT=8080
+```
+
+Build command for a Java service:
+
+```bash
+cd backend && ./mvnw -DskipTests package
+```
+
+Start command:
+
+```bash
+java -jar backend/target/backend-0.0.1-SNAPSHOT.jar
+```
+
+## Frontend Hosting
+
+Vercel, Netlify, Cloudflare Pages, and static hosting platforms can serve the Vite build.
+
+Required frontend variable:
+
+```text
+VITE_API_BASE_URL=https://your-backend-domain.example/api
+```
+
+Build command:
+
+```bash
+cd frontend && npm ci && npm run build
+```
+
+Publish directory:
+
+```text
+frontend/dist
+```
+
+## Database Hosting
+
+Use a managed MySQL-compatible database for deployed environments. Configure network access only for the backend service and avoid exposing MySQL directly to the public internet.
+
+Recommended operational safeguards:
+
+- Automated backups.
+- Point-in-time recovery if available.
+- Restricted database users.
+- Separate databases or schemas for staging and production.
+- Migration strategy before production schema changes.
+
+## Payment Limitation
+
+NovaCart checkout creates an order and deducts stock, but no payment provider is connected. A real deployment that accepts payments should add provider-specific checkout sessions, webhook verification, idempotency keys, payment status reconciliation, and secure customer-facing order access.
