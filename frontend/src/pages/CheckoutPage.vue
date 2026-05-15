@@ -13,23 +13,47 @@
     <EmptyState v-if="!cartStore.items.length" title="Your cart is empty" message="Add products before checkout.">
       <RouterLink class="primary-button" to="/products">Browse Products</RouterLink>
     </EmptyState>
-    <form v-else class="checkout-layout" @submit.prevent="submitOrder">
+    <form v-else class="checkout-layout" novalidate @submit.prevent="submitOrder">
       <div class="checkout-form-panel">
         <ErrorMessage v-if="error" :message="error" />
         <section class="form-section">
           <h2>Customer Information</h2>
           <div class="form-grid">
-            <label>Full Name<input v-model.trim="form.customerName" required placeholder="Morgan Lee" /></label>
-            <label>Email<input v-model.trim="form.customerEmail" required type="email" placeholder="morgan@example.com" /></label>
+            <label :class="{ 'has-field-error': submitted && formErrors.customerName }">
+              Full Name
+              <input v-model.trim="form.customerName" :aria-invalid="Boolean(submitted && formErrors.customerName)" placeholder="Morgan Lee" />
+              <small v-if="submitted && formErrors.customerName" class="field-error">{{ formErrors.customerName }}</small>
+            </label>
+            <label :class="{ 'has-field-error': submitted && formErrors.customerEmail }">
+              Email
+              <input v-model.trim="form.customerEmail" :aria-invalid="Boolean(submitted && formErrors.customerEmail)" type="email" placeholder="morgan@example.com" />
+              <small v-if="submitted && formErrors.customerEmail" class="field-error">{{ formErrors.customerEmail }}</small>
+            </label>
           </div>
         </section>
         <section class="form-section">
           <h2>Shipping Address</h2>
           <div class="form-grid">
-            <label class="wide-field">Address<input v-model.trim="form.shippingAddress" required placeholder="12 Market Street" /></label>
-            <label>City<input v-model.trim="form.city" required placeholder="Auckland" /></label>
-            <label>Postal Code<input v-model.trim="form.postalCode" required placeholder="1010" /></label>
-            <label>Country<input v-model.trim="form.country" required placeholder="New Zealand" /></label>
+            <label class="wide-field" :class="{ 'has-field-error': submitted && formErrors.shippingAddress }">
+              Address
+              <input v-model.trim="form.shippingAddress" :aria-invalid="Boolean(submitted && formErrors.shippingAddress)" placeholder="12 Market Street" />
+              <small v-if="submitted && formErrors.shippingAddress" class="field-error">{{ formErrors.shippingAddress }}</small>
+            </label>
+            <label :class="{ 'has-field-error': submitted && formErrors.city }">
+              City
+              <input v-model.trim="form.city" :aria-invalid="Boolean(submitted && formErrors.city)" placeholder="Auckland" />
+              <small v-if="submitted && formErrors.city" class="field-error">{{ formErrors.city }}</small>
+            </label>
+            <label :class="{ 'has-field-error': submitted && formErrors.postalCode }">
+              Postal Code
+              <input v-model.trim="form.postalCode" :aria-invalid="Boolean(submitted && formErrors.postalCode)" placeholder="1010" />
+              <small v-if="submitted && formErrors.postalCode" class="field-error">{{ formErrors.postalCode }}</small>
+            </label>
+            <label :class="{ 'has-field-error': submitted && formErrors.country }">
+              Country
+              <input v-model.trim="form.country" :aria-invalid="Boolean(submitted && formErrors.country)" placeholder="New Zealand" />
+              <small v-if="submitted && formErrors.country" class="field-error">{{ formErrors.country }}</small>
+            </label>
           </div>
         </section>
       </div>
@@ -49,8 +73,11 @@
           <span>Total</span>
           <strong>{{ formatCurrency(cartStore.subtotal) }}</strong>
         </div>
-        <p class="muted">You can update fulfillment status from the admin workspace after checkout.</p>
-        <button class="primary-button" type="submit" :disabled="submitting || !formIsComplete">
+        <div class="checkout-note">
+          <strong>Stock is checked when the order is placed.</strong>
+          <span>No payment provider is connected in this demo checkout.</span>
+        </div>
+        <button class="primary-button" type="submit" :disabled="submitting">
           {{ submitting ? 'Placing Order...' : 'Place Order' }}
         </button>
         <RouterLink class="text-link" to="/cart">Return to Cart</RouterLink>
@@ -73,6 +100,7 @@ import { formatCurrency } from '../utils/format'
 const router = useRouter()
 const cartStore = useCartStore()
 const submitting = ref(false)
+const submitted = ref(false)
 const error = ref('')
 const form = reactive({
   customerName: '',
@@ -85,15 +113,41 @@ const form = reactive({
 const formIsComplete = computed(() => {
   return Object.values(form).every((value) => String(value).trim().length > 0)
 })
+const emailIsValid = computed(() => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.customerEmail)
+})
+const hasInvalidCartQuantity = computed(() => {
+  return cartStore.items.some((item) => item.quantity > item.stockQuantity)
+})
+const formErrors = computed(() => ({
+  customerName: form.customerName ? '' : 'Full name is required.',
+  customerEmail: !form.customerEmail
+    ? 'Email address is required.'
+    : emailIsValid.value
+      ? ''
+      : 'Enter a valid email address.',
+  shippingAddress: form.shippingAddress ? '' : 'Shipping address is required.',
+  city: form.city ? '' : 'City is required.',
+  postalCode: form.postalCode ? '' : 'Postal code is required.',
+  country: form.country ? '' : 'Country is required.'
+}))
+const formIsValid = computed(() => {
+  return formIsComplete.value && emailIsValid.value
+})
 
 onMounted(() => {
   cartStore.loadCart()
 })
 
 async function submitOrder() {
+  submitted.value = true
   error.value = ''
-  const hasInvalidQuantity = cartStore.items.some((item) => item.quantity > item.stockQuantity)
-  if (hasInvalidQuantity) {
+  if (!formIsValid.value) {
+    error.value = 'Review the highlighted checkout fields before placing the order.'
+    return
+  }
+
+  if (hasInvalidCartQuantity.value) {
     error.value = 'Adjust cart quantities before checkout.'
     return
   }

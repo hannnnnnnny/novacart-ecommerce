@@ -19,6 +19,10 @@
           <option value="stock">Stock availability</option>
         </select>
       </label>
+      <label class="toggle-control">
+        <input v-model="availableOnly" type="checkbox" />
+        Show available only
+      </label>
     </div>
     <div class="filter-row" aria-label="Product categories">
       <button class="filter-button" :class="{ active: selectedCategoryId === null }" type="button" @click="selectCategory(null)">
@@ -38,7 +42,13 @@
     <LoadingState v-if="loading" message="Loading products..." />
     <ErrorMessage v-else-if="error" :message="error" />
     <div v-else-if="filteredProducts.length">
-      <p class="result-count">{{ filteredProducts.length }} products shown</p>
+      <div class="catalog-result-bar">
+        <p class="result-count">
+          {{ filteredProducts.length }} {{ filteredProducts.length === 1 ? 'product' : 'products' }} shown
+          <span v-if="selectedCategoryLabel">in {{ selectedCategoryLabel }}</span>
+        </p>
+        <button v-if="hasActiveFilters" class="text-button" type="button" @click="clearFilters">Clear Filters</button>
+      </div>
       <div class="product-grid">
         <ProductCard
           v-for="product in filteredProducts"
@@ -51,8 +61,10 @@
     <EmptyState
       v-else
       title="No matching products"
-      message="Try clearing the search field or choosing a different category."
-    />
+      message="Try clearing filters, searching for a broader term, or viewing all available products."
+    >
+      <button class="secondary-button" type="button" @click="clearFilters">Clear Filters</button>
+    </EmptyState>
     <ToastMessage :message="toastMessage" />
   </section>
 </template>
@@ -77,6 +89,7 @@ const categories = ref([])
 const selectedCategoryId = ref(null)
 const searchTerm = ref('')
 const sortMode = ref('name')
+const availableOnly = ref(false)
 const toastMessage = ref('')
 let toastTimer
 const filteredProducts = computed(() => {
@@ -87,12 +100,22 @@ const filteredProducts = computed(() => {
       })
     : [...products.value]
 
-  return searchedProducts.sort((left, right) => {
+  const availableProducts = availableOnly.value
+    ? searchedProducts.filter((product) => product.stockQuantity > 0)
+    : searchedProducts
+
+  return availableProducts.sort((left, right) => {
     if (sortMode.value === 'price-low') return Number(left.price) - Number(right.price)
     if (sortMode.value === 'price-high') return Number(right.price) - Number(left.price)
     if (sortMode.value === 'stock') return right.stockQuantity - left.stockQuantity
     return left.name.localeCompare(right.name)
   })
+})
+const selectedCategoryLabel = computed(() => {
+  return categories.value.find((category) => category.id === selectedCategoryId.value)?.name || ''
+})
+const hasActiveFilters = computed(() => {
+  return Boolean(searchTerm.value) || selectedCategoryId.value !== null || sortMode.value !== 'name' || availableOnly.value
 })
 
 onMounted(async () => {
@@ -121,6 +144,18 @@ async function loadProducts() {
 function selectCategory(categoryId) {
   selectedCategoryId.value = categoryId
   loadProducts()
+}
+
+function clearFilters() {
+  const shouldReloadProducts = selectedCategoryId.value !== null
+  selectedCategoryId.value = null
+  searchTerm.value = ''
+  sortMode.value = 'name'
+  availableOnly.value = false
+
+  if (shouldReloadProducts) {
+    loadProducts()
+  }
 }
 
 function showAddedMessage(product) {

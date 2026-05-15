@@ -401,7 +401,7 @@ nav a.router-link-active {
 
 .catalog-toolbar {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px);
+  grid-template-columns: minmax(220px, 1fr) minmax(180px, 240px) auto;
   gap: 1rem;
   align-items: end;
   margin-bottom: 1.4rem;
@@ -415,10 +415,41 @@ nav a.router-link-active {
   max-width: 620px;
 }
 
+.toggle-control {
+  align-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.85rem;
+  background: var(--color-surface);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+.toggle-control input {
+  width: auto;
+  accent-color: var(--color-primary);
+}
+
+.catalog-result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
 .result-count {
-  margin: 0 0 1rem;
+  margin: 0;
   color: var(--color-muted);
   font-weight: 800;
+}
+
+.result-count span {
+  color: var(--color-accent);
 }
 
 .primary-button,
@@ -807,6 +838,25 @@ nav a.router-link-active {
   color: var(--color-muted);
 }
 
+.checkout-note {
+  display: grid;
+  gap: 0.15rem;
+  border: 1px solid rgba(50, 111, 140, 0.18);
+  border-radius: var(--radius-sm);
+  padding: 0.85rem;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font-size: 0.92rem;
+}
+
+.checkout-note span {
+  color: var(--color-muted);
+}
+
+.compact-note {
+  margin: 0;
+}
+
 label {
   display: grid;
   gap: 0.4rem;
@@ -821,6 +871,16 @@ textarea {
   border-radius: 6px;
   padding: 0.75rem;
   background: var(--color-surface);
+}
+
+.has-field-error input {
+  border-color: var(--color-danger);
+  box-shadow: 0 0 0 3px rgba(159, 50, 40, 0.12);
+}
+
+.field-error {
+  color: var(--color-danger);
+  font-weight: 800;
 }
 
 .error-message {
@@ -1379,6 +1439,14 @@ textarea {
 
   .catalog-toolbar {
     grid-template-columns: 1fr;
+  }
+
+  .toggle-control {
+    width: 100%;
+  }
+
+  .catalog-result-bar {
+    display: grid;
   }
 
   .cart-item {

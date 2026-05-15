@@ -23,7 +23,7 @@
             :disabled="product.stockQuantity < 1"
             @click="addProduct"
           >
-            Add
+            {{ product.stockQuantity < 1 ? 'Unavailable' : 'Add' }}
           </button>
         </div>
       </div>
