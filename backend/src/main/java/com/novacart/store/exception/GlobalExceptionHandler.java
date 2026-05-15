@@ -2,15 +2,19 @@ package com.novacart.store.exception;
 
 import com.novacart.store.dto.ErrorResponse;
 import com.novacart.store.dto.FieldValidationError;
+import jakarta.validation.ConstraintViolationException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,6 +43,14 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, exception.getMessage(), request);
     }
 
+    @ExceptionHandler(AuthenticationFailedException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationFailed(
+            AuthenticationFailedException exception,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.UNAUTHORIZED, exception.getMessage(), request);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidation(
             MethodArgumentNotValidException exception,
@@ -55,6 +67,61 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 request.getRequestURI(),
                 errors
+        );
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolation(
+            ConstraintViolationException exception,
+            HttpServletRequest request
+    ) {
+        List<FieldValidationError> errors = exception.getConstraintViolations()
+                .stream()
+                .map(error -> new FieldValidationError(error.getPropertyPath().toString(), error.getMessage()))
+                .toList();
+
+        ErrorResponse response = ErrorResponse.withErrors(
+                "Validation failed. Please review the highlighted fields.",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI(),
+                errors
+        );
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedRequest(
+            HttpMessageNotReadableException exception,
+            HttpServletRequest request
+    ) {
+        return build(HttpStatus.BAD_REQUEST, "Request body is malformed or contains unsupported values.", request);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleTypeMismatch(
+            MethodArgumentTypeMismatchException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = ErrorResponse.withErrors(
+                "Validation failed. Please review the highlighted fields.",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI(),
+                List.of(new FieldValidationError(exception.getName(), "Value has an invalid format."))
+        );
+        return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ErrorResponse> handleMissingParameter(
+            MissingServletRequestParameterException exception,
+            HttpServletRequest request
+    ) {
+        ErrorResponse response = ErrorResponse.withErrors(
+                "Validation failed. Please review the highlighted fields.",
+                HttpStatus.BAD_REQUEST.value(),
+                request.getRequestURI(),
+                List.of(new FieldValidationError(exception.getParameterName(), "Parameter is required."))
         );
         return ResponseEntity.badRequest().body(response);
     }

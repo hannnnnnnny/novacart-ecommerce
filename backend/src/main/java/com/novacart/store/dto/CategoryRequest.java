@@ -1,6 +1,7 @@
 package com.novacart.store.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 public record CategoryRequest(
@@ -9,6 +10,10 @@ public record CategoryRequest(
         String name,
 
         @Size(max = 140, message = "Category slug must be 140 characters or fewer.")
+        @Pattern(
+                regexp = "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                message = "Category slug must use lowercase letters, numbers, and hyphens."
+        )
         String slug,
 
         @Size(max = 500, message = "Category description must be 500 characters or fewer.")

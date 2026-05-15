@@ -35,6 +35,7 @@ public record CheckoutRequest(
 
         @Valid
         @NotEmpty(message = "Your cart must include at least one item.")
+        @Size(max = 100, message = "Checkout can include no more than 100 line items.")
         List<CheckoutItemRequest> items
 ) {
 }

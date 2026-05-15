@@ -5,7 +5,9 @@ import com.novacart.store.dto.CategoryRequest;
 import com.novacart.store.dto.CategoryResponse;
 import com.novacart.store.service.CategoryService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import java.util.List;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/admin/categories")
+@Validated
 public class AdminCategoryController {
 
     private final CategoryService categoryService;
@@ -37,6 +40,7 @@ public class AdminCategoryController {
 
     @PutMapping("/{id}")
     public ApiResponse<CategoryResponse> updateCategory(
+            @Positive(message = "Category ID must be positive.")
             @PathVariable Long id,
             @Valid @RequestBody CategoryRequest request
     ) {
@@ -44,7 +48,10 @@ public class AdminCategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ApiResponse<Void> deleteCategory(@PathVariable Long id) {
+    public ApiResponse<Void> deleteCategory(
+            @Positive(message = "Category ID must be positive.")
+            @PathVariable Long id
+    ) {
         categoryService.deleteCategory(id);
         return ApiResponse.success("Category deleted successfully.");
     }

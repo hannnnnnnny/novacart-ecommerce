@@ -85,8 +85,18 @@ public class OrderServiceImpl implements OrderService {
     }
 
     private Map<Long, Integer> aggregateQuantities(List<CheckoutItemRequest> items) {
+        if (items == null || items.isEmpty()) {
+            throw new BusinessRuleException("Your cart must include at least one item.");
+        }
+
         Map<Long, Integer> quantitiesByProduct = new LinkedHashMap<>();
         for (CheckoutItemRequest item : items) {
+            if (item.productId() == null || item.productId() <= 0) {
+                throw new BusinessRuleException("Product ID must be positive.");
+            }
+            if (item.quantity() < 1) {
+                throw new BusinessRuleException("Quantity must be at least 1.");
+            }
             quantitiesByProduct.merge(item.productId(), item.quantity(), Integer::sum);
         }
         return quantitiesByProduct;

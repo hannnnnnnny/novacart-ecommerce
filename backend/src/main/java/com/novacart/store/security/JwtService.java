@@ -1,5 +1,7 @@
 package com.novacart.store.security;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -39,15 +41,21 @@ public class JwtService {
     }
 
     public String extractSubject(String token) {
+        JwtTokenValidation validation = validateToken(token);
+        return validation.status() == JwtTokenStatus.VALID ? validation.subject() : null;
+    }
+
+    public JwtTokenValidation validateToken(String token) {
         try {
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token)
-                    .getPayload()
-                    .getSubject();
+            Claims claims = parseClaims(token);
+            String subject = claims.getSubject();
+            return subject == null || subject.isBlank()
+                    ? JwtTokenValidation.invalid()
+                    : JwtTokenValidation.valid(subject);
+        } catch (ExpiredJwtException exception) {
+            return JwtTokenValidation.expired();
         } catch (JwtException | IllegalArgumentException exception) {
-            return null;
+            return JwtTokenValidation.invalid();
         }
     }
 
@@ -58,5 +66,13 @@ public class JwtService {
 
     public long getExpirationMinutes() {
         return expirationMinutes;
+    }
+
+    private Claims parseClaims(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 }

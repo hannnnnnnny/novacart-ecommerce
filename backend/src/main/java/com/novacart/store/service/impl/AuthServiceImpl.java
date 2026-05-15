@@ -3,7 +3,7 @@ package com.novacart.store.service.impl;
 import com.novacart.store.dto.LoginRequest;
 import com.novacart.store.dto.LoginResponse;
 import com.novacart.store.entity.AdminUser;
-import com.novacart.store.exception.BusinessRuleException;
+import com.novacart.store.exception.AuthenticationFailedException;
 import com.novacart.store.repository.AdminUserRepository;
 import com.novacart.store.security.JwtService;
 import com.novacart.store.service.AuthService;
@@ -31,10 +31,10 @@ public class AuthServiceImpl implements AuthService {
     public LoginResponse login(LoginRequest request) {
         AdminUser adminUser = adminUserRepository.findByEmailIgnoreCase(request.email().trim())
                 .filter(AdminUser::isActive)
-                .orElseThrow(() -> new BusinessRuleException("Invalid email address or password."));
+                .orElseThrow(() -> new AuthenticationFailedException("Invalid email address or password."));
 
         if (!passwordEncoder.matches(request.password(), adminUser.getPasswordHash())) {
-            throw new BusinessRuleException("Invalid email address or password.");
+            throw new AuthenticationFailedException("Invalid email address or password.");
         }
 
         String token = jwtService.generateToken(adminUser.getEmail(), adminUser.getRole());
