@@ -99,12 +99,24 @@ async function loadOrder() {
 }
 
 async function saveStatus() {
+  if (selectedStatus.value === order.value.status) return
+
+  const confirmed = window.confirm(
+    `Update order #${order.value.id} from ${formatStatus(order.value.status)} to ${formatStatus(selectedStatus.value)}?`
+  )
+  if (!confirmed) {
+    selectedStatus.value = order.value.status
+    return
+  }
+
   savingStatus.value = true
   try {
     order.value = await updateOrderStatus(route.params.id, selectedStatus.value)
+    selectedStatus.value = order.value.status
     showToast('Order status updated.')
   } catch (requestError) {
     error.value = getApiError(requestError, 'Order status could not be updated.')
+    selectedStatus.value = order.value.status
   } finally {
     savingStatus.value = false
   }

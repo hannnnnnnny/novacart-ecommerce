@@ -11,9 +11,26 @@
       <div class="metric-grid">
         <MetricCard label="Total Products" :value="metrics.totalProducts || 0" detail="All catalog records" />
         <MetricCard label="Active Products" :value="metrics.activeProducts || 0" detail="Visible in storefront" />
+        <MetricCard label="Categories" :value="metrics.totalCategories || 0" detail="Catalog groups" />
         <MetricCard label="Total Orders" :value="metrics.totalOrders || 0" detail="Orders received" />
+        <MetricCard label="Pending Orders" :value="metrics.pendingOrders || 0" detail="Need review" />
         <MetricCard label="Revenue" :value="formatCurrency(metrics.revenue)" detail="Excluding cancelled orders" />
       </div>
+
+      <section class="operations-strip" aria-label="Admin shortcuts">
+        <RouterLink to="/admin/products">
+          <strong>Manage Catalog</strong>
+          <span>Create products, adjust stock, and control visibility.</span>
+        </RouterLink>
+        <RouterLink to="/admin/orders">
+          <strong>Review Orders</strong>
+          <span>Move new orders through fulfillment.</span>
+        </RouterLink>
+        <RouterLink to="/admin/inventory">
+          <strong>Check Inventory</strong>
+          <span>Find low-stock products before checkout fails.</span>
+        </RouterLink>
+      </section>
 
       <section class="dashboard-section">
         <div class="admin-page-header">
@@ -33,7 +50,7 @@
             </thead>
             <tbody>
               <tr v-for="order in recentOrders" :key="order.id">
-                <td>#{{ order.id }}</td>
+                <td><RouterLink class="text-link" :to="`/admin/orders/${order.id}`">#{{ order.id }}</RouterLink></td>
                 <td>{{ order.customerName }}</td>
                 <td><StatusBadge :value="order.status" /></td>
                 <td>{{ formatCurrency(order.totalAmount) }}</td>

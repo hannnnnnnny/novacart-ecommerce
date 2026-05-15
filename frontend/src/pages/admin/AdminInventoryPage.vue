@@ -16,6 +16,9 @@
       </label>
       <button class="secondary-button" type="button" @click="loadWarnings">Refresh</button>
     </div>
+    <p class="inventory-guidance">
+      Products at or below this threshold deserve attention before customers run into checkout limits.
+    </p>
     <LoadingState v-if="loading" message="Loading inventory warnings..." />
     <ErrorMessage v-else-if="error" :message="error" />
     <EmptyState
@@ -57,6 +60,13 @@ const error = ref('')
 onMounted(loadWarnings)
 
 async function loadWarnings() {
+  if (!Number.isFinite(threshold.value) || threshold.value < 0) {
+    error.value = 'Inventory threshold cannot be negative.'
+    warnings.value = []
+    return
+  }
+
+  threshold.value = Math.floor(threshold.value)
   loading.value = true
   error.value = ''
   try {

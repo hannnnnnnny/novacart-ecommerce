@@ -19,7 +19,15 @@
         </label>
         <label>
           Slug
-          <input v-model.trim="form.slug" maxlength="140" placeholder="optional-category-slug" />
+          <input
+            v-model.trim="form.slug"
+            :aria-invalid="Boolean(form.slug && !slugIsValid)"
+            maxlength="140"
+            placeholder="optional-category-slug"
+          />
+          <small v-if="form.slug && !slugIsValid" class="field-error">
+            Use lowercase letters, numbers, and hyphens only.
+          </small>
         </label>
         <label>
           Description
@@ -120,6 +128,9 @@ const filteredCategories = computed(() => {
     return `${category.name} ${category.slug} ${category.description || ''}`.toLowerCase().includes(query)
   })
 })
+const slugIsValid = computed(() => {
+  return !form.slug || /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(form.slug)
+})
 
 onMounted(loadCategories)
 
@@ -155,6 +166,15 @@ function resetForm() {
 
 async function submitCategory() {
   formError.value = ''
+  if (!form.name) {
+    formError.value = 'Category name is required.'
+    return
+  }
+  if (!slugIsValid.value) {
+    formError.value = 'Category slug must use lowercase letters, numbers, and hyphens.'
+    return
+  }
+
   submitting.value = true
   const payload = {
     ...form,

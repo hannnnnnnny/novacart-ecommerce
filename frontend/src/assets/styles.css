@@ -1019,6 +1019,31 @@ textarea {
   gap: 1.25rem;
 }
 
+.operations-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.operations-strip a {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.operations-strip a:hover {
+  border-color: rgba(50, 111, 140, 0.35);
+  transform: translateY(-2px);
+}
+
+.operations-strip span {
+  color: var(--color-muted);
+}
+
 .dashboard-section {
   display: grid;
   gap: 1rem;
@@ -1308,7 +1333,13 @@ textarea {
   flex-wrap: wrap;
   align-items: end;
   gap: 0.9rem;
-  margin: -0.75rem 0 1.5rem;
+  margin: -0.75rem 0 0.5rem;
+}
+
+.inventory-guidance {
+  margin: 0 0 1.5rem;
+  max-width: 680px;
+  color: var(--color-muted);
 }
 
 .warning-grid {
@@ -1447,6 +1478,10 @@ textarea {
 
   .catalog-result-bar {
     display: grid;
+  }
+
+  .operations-strip {
+    grid-template-columns: 1fr;
   }
 
   .cart-item {
