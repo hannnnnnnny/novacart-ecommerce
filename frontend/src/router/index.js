@@ -56,12 +56,16 @@ const router = createRouter({
 
 router.beforeEach((to) => {
   const authStore = useAuthStore()
-  if (!authStore.token) {
-    authStore.loadSession()
-  }
+  const sessionStatus = authStore.token ? authStore.validateSession() : authStore.loadSession()
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    return { name: 'admin-login', query: { redirect: to.fullPath } }
+    return {
+      name: 'admin-login',
+      query: {
+        redirect: to.fullPath,
+        ...(sessionStatus === 'expired' ? { session: 'expired' } : {})
+      }
+    }
   }
 })
 
