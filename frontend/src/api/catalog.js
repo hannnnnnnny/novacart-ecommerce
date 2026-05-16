@@ -11,7 +11,7 @@ export async function fetchProductPage(params = {}) {
 
 export async function fetchProducts(paramsOrCategoryId = {}) {
   const params = typeof paramsOrCategoryId === 'number' ? { categoryId: paramsOrCategoryId } : paramsOrCategoryId
-  return (await fetchProductPage({ size: 100, ...params })).content
+  return (await fetchProductPage({ size: 60, ...params })).content
 }
 
 export async function fetchProduct(id) {

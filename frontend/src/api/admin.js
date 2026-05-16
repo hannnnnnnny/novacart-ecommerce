@@ -17,7 +17,7 @@ export async function fetchInventoryMovements() {
 }
 
 export async function fetchAdminProducts() {
-  return (await fetchAdminProductPage({ size: 100 })).content
+  return (await fetchAdminProductPage({ size: 60 })).content
 }
 
 export async function fetchAdminProductPage(params = {}) {
