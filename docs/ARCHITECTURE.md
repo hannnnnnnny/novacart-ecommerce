@@ -65,6 +65,43 @@ flowchart LR
 - `OrderItem`: Product snapshot, unit price, quantity, and line total for each order.
 - `StockMovement`: Inventory event history for checkout deductions, cancellation restorations, manual adjustments, and seed data.
 
+## Fashion Catalog Model
+
+The fashion release extends the catalog around retail merchandising rather than generic ecommerce inventory:
+
+- `Product`: name, slug, description, category, collection, price, compare-at price, computed effective promotion price, SKU, stock quantity, low-stock threshold, status, size options, color options, material, care instructions, primary image, gallery, tags, season, gender target, featured flag, and timestamps.
+- `FashionCollection`: name, slug, description, hero image, display image, active/draft/archive status, featured flag, date window, sort order, and product assignment through product records.
+- `Category`: name, slug, description, display image, sort order, and active flag.
+- `Promotion`: name, description, discount type, discount value, date window, active flag, target type, target values, and timestamps.
+- `CustomerProfile`: guest customer record keyed by checkout email with contact, address summary, country, region, city, creation date, and last order date.
+- `SupportTicket` and `RefundRequest`: customer care records linked to order number/email and managed from protected admin screens.
+
+All sample data is original to this repository. Local storefront imagery uses generated SVG assets under `frontend/public/catalog`.
+
+## Promotion Flow
+
+1. Admin creates a promotion for selected products, a category, a collection, a season, or one or more tags.
+2. The backend validates discount type, positive discount value, fixed discount price floor, and date range.
+3. Public catalog responses quote each product through the promotion service.
+4. Product cards, detail pages, cart, and checkout display the effective price, original price, and discount badge.
+5. Checkout recalculates product prices server-side so local cart snapshots cannot force a stale or invalid total.
+
+## Refund And Support Flow
+
+1. A customer submits a support ticket or refund request from storefront customer care pages.
+2. Refund requests verify order number, email, payment/refund status, and the refund window.
+3. Admin users can move support tickets through `OPEN`, `IN_REVIEW`, `WAITING_FOR_CUSTOMER`, `RESOLVED`, and `CLOSED`.
+4. Admin users can move refunds through `REQUESTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, and `REFUNDED`.
+5. Approved/refunded transitions update the order refund status and payment status consistently.
+
+## Analytics Flow
+
+1. Checkout upserts a guest `CustomerProfile` by email and links the order to that profile.
+2. Admin analytics aggregates non-cancelled orders for daily, weekly, monthly, yearly, and total revenue.
+3. Region and country metrics come from checkout shipping fields.
+4. Customer preference metrics are derived from purchased categories, selected colors, and selected sizes.
+5. Best-seller metrics aggregate order items by product snapshot.
+
 ## API Response Shape
 
 Successful responses use:

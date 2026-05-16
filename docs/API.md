@@ -59,6 +59,113 @@ Returns active storefront products with category context and pagination metadata
 
 Returns one active product. Inactive or missing products return `404`.
 
+## Fashion Commerce API Addendum
+
+The current fashion release expands the original API with richer catalog, care, promotion, refund, support, customer, and analytics resources.
+
+### Public Catalog Filters
+
+`GET /api/public/products` supports:
+
+- `search`
+- `categoryId`
+- `collectionId`
+- `sizeFilter`
+- `color`
+- `material`
+- `brand`
+- `season`
+- `saleOnly`
+- `minPrice`
+- `maxPrice`
+- `availableOnly`
+- `sort=name|newest|price-low|price-high|best-selling|discount`
+- `page`
+- `size`
+
+Product responses include effective discounted price, compare-at price, discount amount, discount percent, fictional label, SKU, stock status fields, sizes, colors, material, care instructions, image gallery, tags, season, gender target, category, and collection.
+
+### Public Collections
+
+- `GET /api/public/collections`
+- `GET /api/public/collections/featured`
+
+Collection responses include slug, description, hero image, display image, status, featured flag, date window, sort order, and assigned product count.
+
+### Public Checkout
+
+`POST /api/public/orders`
+
+```json
+{
+  "customerName": "Morgan Lee",
+  "customerEmail": "morgan@example.com",
+  "customerPhone": "+64 20 0000 0000",
+  "shippingAddress": "12 Market Street",
+  "city": "Auckland",
+  "region": "Auckland",
+  "postalCode": "1010",
+  "country": "New Zealand",
+  "shippingMethod": "STANDARD",
+  "paymentMethod": "Demo Card Approved",
+  "refundPolicyAcknowledged": true,
+  "simulatePaymentFailure": false,
+  "items": [
+    {
+      "productId": 1,
+      "selectedSize": "M",
+      "selectedColor": "Ivory",
+      "quantity": 1
+    }
+  ]
+}
+```
+
+Payment status values are `UNPAID`, `PAID`, `FAILED`, and `REFUNDED`. The checkout is demo-safe only and does not collect or transmit card data.
+
+### Public Customer Care
+
+- `GET /api/public/orders/lookup?orderNumber=NC-20260516-0001&email=morgan@example.com`
+- `POST /api/public/support-tickets`
+- `POST /api/public/refunds`
+
+Support issue types are `REFUND_REQUEST`, `EXCHANGE_REQUEST`, `SHIPPING_ISSUE`, `PRODUCT_ISSUE`, `PAYMENT_ISSUE`, and `OTHER`.
+
+Refund statuses are `REQUESTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, and `REFUNDED`.
+
+### Admin Fashion Operations
+
+Admin endpoints require `Authorization: Bearer <token>`.
+
+- `GET /api/admin/products`
+- `GET /api/admin/products/{id}`
+- `POST /api/admin/products`
+- `PUT /api/admin/products/{id}`
+- `DELETE /api/admin/products/{id}`
+- `GET /api/admin/categories`
+- `POST /api/admin/categories`
+- `PUT /api/admin/categories/{id}`
+- `DELETE /api/admin/categories/{id}`
+- `GET /api/admin/collections`
+- `POST /api/admin/collections`
+- `PUT /api/admin/collections/{id}`
+- `DELETE /api/admin/collections/{id}`
+- `GET /api/admin/promotions`
+- `POST /api/admin/promotions`
+- `PUT /api/admin/promotions/{id}`
+- `DELETE /api/admin/promotions/{id}`
+- `GET /api/admin/orders`
+- `GET /api/admin/orders/{id}`
+- `PATCH /api/admin/orders/{id}/status`
+- `GET /api/admin/refunds`
+- `PATCH /api/admin/refunds/{id}`
+- `GET /api/admin/support-tickets`
+- `PATCH /api/admin/support-tickets/{id}`
+- `GET /api/admin/customers`
+- `GET /api/admin/analytics`
+
+Promotion targets support selected product IDs, category IDs/slugs/names, collection IDs/slugs/names, season values, and tag values. Fixed-amount promotions are rejected when they would make any targeted product price zero or negative, and all promotion date ranges are validated.
+
 ## Public Orders
 
 ### Create Order

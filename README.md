@@ -4,6 +4,17 @@ NovaCart Fashion Commerce Platform is a full-stack online store system for fashi
 
 The project is intentionally original in naming, layout, and content. All visible text, seed data, API messages, comments, documentation, and commit messages are written in English.
 
+## Current Release Highlights
+
+- Fashion/lifestyle catalog direction with original seed data for Women, Men, Bags, Jewelry, Shoes, Sportswear, Accessories, New Arrivals, Sale, and Seasonal Collection.
+- Rich product records with fictional private labels, slugs, SKU, compare-at pricing, stock thresholds, sizes, colors, material, care instructions, gallery images, tags, season, gender target, status, featured flag, category, and collection.
+- Seasonal collection model seeded with Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale.
+- Promotion engine for percentage or fixed-amount discounts targeted to selected products, category, collection, season, or tags. Storefront prices, cart totals, and checkout totals use effective discounted prices.
+- Customer storefront support for product browsing, filters, detail variants, cart, demo checkout, payment decline/approval states, order confirmation, support tickets, and refund requests.
+- Merchant workspace for dashboard analytics, product/category/collection/promotion management, order fulfillment, refund queue, support queue, guest customer records, and inventory warnings.
+- Guest customer records are created from checkout email and used for repeat customer and preference analytics.
+- Demo payment only. No real payment provider or card collection is connected.
+
 ## Project Status
 
 NovaCart is a production-style fashion commerce system for clothing, bags, jewelry, accessories, shoes, sportswear, sports equipment, seasonal collections, sale edits, and lifestyle fashion products. It is not a live payment-processing store and should not be used for real customer transactions without additional production hardening, payment integration, observability, legal review, and operational security controls.
@@ -18,14 +29,20 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 - Cart page with item summaries, quantity controls, stock-aware limits, remove actions, subtotal calculation, and a clear checkout path.
 - Checkout flow with customer information, shipping address fields, demo shipping method selection, demo payment approval or decline handling, order summary, basic validation, idempotency protection, and backend stock validation.
 - Order success page with confirmation messaging, order number, payment status, shipping method, item summary, totals breakdown, and clear next steps.
+- Customer service page for refund, exchange, shipping, product, payment, and other support tickets.
+- Refund request page that validates order number and email, stores the request, and lets admin users move requests through review.
 
 ### Merchant Admin Workspace
 
 - Protected admin login with JWT authentication, persisted sessions, expired-session handling, and BCrypt password support on the backend.
 - Dashboard metrics for total products, active products, total orders, total revenue, low-stock products, and recent order activity.
 - Product management with searchable fashion tables, status filters, inventory indicators, SKU, private label, compare-at price, tags, gallery, featured flag, create/edit forms, validation feedback, and delete confirmation.
+- Collection management for seasonal edits, campaign imagery, featured status, active/draft/archive status, dates, and sort order.
+- Promotion management for bulk markdowns across selected products, categories, collections, seasons, or tags.
 - Category management for Women, Men, Bags, Jewelry, Shoes, Sportswear, Accessories, New Arrivals, Sale, and Seasonal Collection.
 - Order management with search, status filtering, order detail views, customer information, fashion item summaries, totals, and status updates.
+- Refund and support ticket management with status updates for customer care workflows.
+- Customer records and analytics for guest checkout profiles, top regions, best sellers, sales trends, and customer preferences.
 - Inventory warning screen with product thresholds, replenishment indicators, recent stock movement history, and fast navigation back to product management.
 
 ### Platform Capabilities
