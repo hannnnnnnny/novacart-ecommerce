@@ -14,28 +14,28 @@ import org.springframework.data.repository.query.Param;
 
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     List<Product> findAllByOrderByNameAsc();
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     List<Product> findAllByActiveTrueOrderByNameAsc();
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     List<Product> findAllByActiveTrueAndCategoryIdOrderByNameAsc(Long categoryId);
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     List<Product> findAllByActiveTrueAndStatusOrderByNameAsc(ProductStatus status);
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     List<Product> findAllByActiveTrueAndStatusAndCategoryIdOrderByNameAsc(ProductStatus status, Long categoryId);
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     List<Product> findAllByStockQuantityLessThanEqualOrderByStockQuantityAsc(int threshold);
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     Optional<Product> findByIdAndActiveTrue(Long id);
 
-    @EntityGraph(attributePaths = "category")
+    @EntityGraph(attributePaths = {"category", "collection"})
     Optional<Product> findByIdAndActiveTrueAndStatus(Long id, ProductStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
@@ -54,9 +54,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
 
     boolean existsByCategoryId(Long categoryId);
 
+    boolean existsByCollectionId(Long collectionId);
+
     long countByActiveTrue();
 
     long countByActiveTrueAndStatus(ProductStatus status);
 
     long countByStockQuantityLessThanEqual(int threshold);
+
+    long countByCollectionId(Long collectionId);
 }

@@ -68,6 +68,29 @@ public class Product {
     @Column(name = "tag", length = 80)
     private List<String> tags = new ArrayList<>();
 
+    @ElementCollection
+    @CollectionTable(name = "product_sizes", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "size_value", length = 40)
+    private List<String> sizes = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "product_colors", joinColumns = @JoinColumn(name = "product_id"))
+    @Column(name = "color_value", length = 60)
+    private List<String> colors = new ArrayList<>();
+
+    @Column(length = 120)
+    private String material;
+
+    @Column(length = 800)
+    private String careInstructions;
+
+    @Column(length = 80)
+    private String season;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private GenderTarget genderTarget = GenderTarget.UNISEX;
+
     @Column(nullable = false)
     private boolean featured;
 
@@ -81,6 +104,10 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "collection_id")
+    private FashionCollection collection;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -116,10 +143,17 @@ public class Product {
                 imageUrl,
                 List.of(imageUrl),
                 List.of(),
+                List.of(),
+                List.of(),
+                null,
+                null,
+                null,
+                GenderTarget.UNISEX,
                 false,
                 active ? ProductStatus.ACTIVE : ProductStatus.DRAFT,
                 active,
-                category
+                category,
+                null
         );
     }
 
@@ -136,10 +170,17 @@ public class Product {
             String imageUrl,
             List<String> imageGallery,
             List<String> tags,
+            List<String> sizes,
+            List<String> colors,
+            String material,
+            String careInstructions,
+            String season,
+            GenderTarget genderTarget,
             boolean featured,
             ProductStatus status,
             boolean active,
-            Category category
+            Category category,
+            FashionCollection collection
     ) {
         this.name = name;
         this.slug = slug;
@@ -153,10 +194,17 @@ public class Product {
         this.imageUrl = imageUrl;
         setImageGallery(imageGallery);
         setTags(tags);
+        setSizes(sizes);
+        setColors(colors);
+        this.material = material;
+        this.careInstructions = careInstructions;
+        this.season = season;
+        this.genderTarget = genderTarget == null ? GenderTarget.UNISEX : genderTarget;
         this.featured = featured;
         this.status = status == null ? ProductStatus.ACTIVE : status;
         this.active = active;
         this.category = category;
+        this.collection = collection;
     }
 
     public Long getId() {
@@ -262,6 +310,54 @@ public class Product {
         this.tags = tags == null ? new ArrayList<>() : new ArrayList<>(tags);
     }
 
+    public List<String> getSizes() {
+        return sizes;
+    }
+
+    public void setSizes(List<String> sizes) {
+        this.sizes = sizes == null ? new ArrayList<>() : new ArrayList<>(sizes);
+    }
+
+    public List<String> getColors() {
+        return colors;
+    }
+
+    public void setColors(List<String> colors) {
+        this.colors = colors == null ? new ArrayList<>() : new ArrayList<>(colors);
+    }
+
+    public String getMaterial() {
+        return material;
+    }
+
+    public void setMaterial(String material) {
+        this.material = material;
+    }
+
+    public String getCareInstructions() {
+        return careInstructions;
+    }
+
+    public void setCareInstructions(String careInstructions) {
+        this.careInstructions = careInstructions;
+    }
+
+    public String getSeason() {
+        return season;
+    }
+
+    public void setSeason(String season) {
+        this.season = season;
+    }
+
+    public GenderTarget getGenderTarget() {
+        return genderTarget;
+    }
+
+    public void setGenderTarget(GenderTarget genderTarget) {
+        this.genderTarget = genderTarget;
+    }
+
     public boolean isFeatured() {
         return featured;
     }
@@ -292,6 +388,14 @@ public class Product {
 
     public void setCategory(Category category) {
         this.category = category;
+    }
+
+    public FashionCollection getCollection() {
+        return collection;
+    }
+
+    public void setCollection(FashionCollection collection) {
+        this.collection = collection;
     }
 
     public boolean isStorefrontVisible() {

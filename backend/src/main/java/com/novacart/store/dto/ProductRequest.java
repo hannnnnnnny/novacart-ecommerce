@@ -1,6 +1,7 @@
 package com.novacart.store.dto;
 
 import com.novacart.store.entity.ProductStatus;
+import com.novacart.store.entity.GenderTarget;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Min;
@@ -70,6 +71,23 @@ public record ProductRequest(
         @Size(max = 12, message = "Product tags can include up to 12 values.")
         List<@Size(max = 80, message = "Product tag must be 80 characters or fewer.") String> tags,
 
+        @Size(max = 20, message = "Product sizes can include up to 20 values.")
+        List<@Size(max = 40, message = "Product size must be 40 characters or fewer.") String> sizes,
+
+        @Size(max = 20, message = "Product colors can include up to 20 values.")
+        List<@Size(max = 60, message = "Product color must be 60 characters or fewer.") String> colors,
+
+        @Size(max = 120, message = "Product material must be 120 characters or fewer.")
+        String material,
+
+        @Size(max = 800, message = "Care instructions must be 800 characters or fewer.")
+        String careInstructions,
+
+        @Size(max = 80, message = "Season must be 80 characters or fewer.")
+        String season,
+
+        GenderTarget genderTarget,
+
         Boolean featured,
 
         ProductStatus status,
@@ -77,6 +95,8 @@ public record ProductRequest(
         Boolean active,
 
         @NotNull(message = "Product category is required.")
-        Long categoryId
+        Long categoryId,
+
+        Long collectionId
 ) {
 }

@@ -18,6 +18,9 @@ public record CheckoutRequest(
         @Size(max = 180, message = "Email address must be 180 characters or fewer.")
         String customerEmail,
 
+        @Size(max = 40, message = "Phone number must be 40 characters or fewer.")
+        String customerPhone,
+
         @NotBlank(message = "Shipping address is required.")
         @Size(max = 220, message = "Shipping address must be 220 characters or fewer.")
         String shippingAddress,
@@ -25,6 +28,9 @@ public record CheckoutRequest(
         @NotBlank(message = "City is required.")
         @Size(max = 120, message = "City must be 120 characters or fewer.")
         String city,
+
+        @Size(max = 120, message = "Region must be 120 characters or fewer.")
+        String region,
 
         @NotBlank(message = "Postal code is required.")
         @Size(max = 40, message = "Postal code must be 40 characters or fewer.")
@@ -46,6 +52,8 @@ public record CheckoutRequest(
         @Size(max = 120, message = "Idempotency key must be 120 characters or fewer.")
         String idempotencyKey,
 
+        Boolean refundPolicyAcknowledged,
+
         Boolean simulatePaymentFailure,
 
         @Valid
@@ -65,14 +73,48 @@ public record CheckoutRequest(
         this(
                 customerName,
                 customerEmail,
+                null,
                 shippingAddress,
                 city,
+                null,
                 postalCode,
                 country,
                 "STANDARD",
                 "Demo Card Approved",
                 null,
+                true,
                 false,
+                items
+        );
+    }
+
+    public CheckoutRequest(
+            String customerName,
+            String customerEmail,
+            String shippingAddress,
+            String city,
+            String postalCode,
+            String country,
+            String shippingMethod,
+            String paymentMethod,
+            String idempotencyKey,
+            Boolean simulatePaymentFailure,
+            List<CheckoutItemRequest> items
+    ) {
+        this(
+                customerName,
+                customerEmail,
+                null,
+                shippingAddress,
+                city,
+                null,
+                postalCode,
+                country,
+                shippingMethod,
+                paymentMethod,
+                idempotencyKey,
+                true,
+                simulatePaymentFailure,
                 items
         );
     }

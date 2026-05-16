@@ -1,6 +1,7 @@
 package com.novacart.store.dto;
 
 import com.novacart.store.entity.ProductStatus;
+import com.novacart.store.entity.GenderTarget;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -18,9 +19,19 @@ public record ProductResponse(
         String imageUrl,
         List<String> imageGallery,
         List<String> tags,
+        List<String> sizes,
+        List<String> colors,
+        String material,
+        String careInstructions,
+        String season,
+        GenderTarget genderTarget,
+        BigDecimal effectivePrice,
+        BigDecimal discountAmount,
+        Integer discountPercent,
         boolean featured,
         ProductStatus status,
         boolean active,
-        CategoryResponse category
+        CategoryResponse category,
+        CollectionResponse collection
 ) {
 }

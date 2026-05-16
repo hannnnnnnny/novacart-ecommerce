@@ -4,6 +4,7 @@ import com.novacart.store.dto.CheckoutItemRequest;
 import com.novacart.store.dto.CheckoutRequest;
 import com.novacart.store.dto.OrderItemResponse;
 import com.novacart.store.dto.OrderResponse;
+import com.novacart.store.entity.CustomerProfile;
 import com.novacart.store.entity.CustomerOrder;
 import com.novacart.store.entity.OrderItem;
 import com.novacart.store.entity.OrderStatus;
@@ -15,11 +16,14 @@ import com.novacart.store.entity.StockMovementType;
 import com.novacart.store.exception.BusinessRuleException;
 import com.novacart.store.exception.ResourceNotFoundException;
 import com.novacart.store.repository.CustomerOrderRepository;
+import com.novacart.store.repository.CustomerProfileRepository;
 import com.novacart.store.repository.ProductRepository;
 import com.novacart.store.repository.StockMovementRepository;
 import com.novacart.store.service.OrderService;
+import com.novacart.store.service.PromotionService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -39,17 +43,23 @@ public class OrderServiceImpl implements OrderService {
     private static final BigDecimal TAX_RATE = new BigDecimal("0.08");
 
     private final CustomerOrderRepository orderRepository;
+    private final CustomerProfileRepository customerProfileRepository;
     private final ProductRepository productRepository;
     private final StockMovementRepository stockMovementRepository;
+    private final PromotionService promotionService;
 
     public OrderServiceImpl(
             CustomerOrderRepository orderRepository,
+            CustomerProfileRepository customerProfileRepository,
             ProductRepository productRepository,
-            StockMovementRepository stockMovementRepository
+            StockMovementRepository stockMovementRepository,
+            PromotionService promotionService
     ) {
         this.orderRepository = orderRepository;
+        this.customerProfileRepository = customerProfileRepository;
         this.productRepository = productRepository;
         this.stockMovementRepository = stockMovementRepository;
+        this.promotionService = promotionService;
     }
 
     @Override
@@ -63,8 +73,10 @@ public class OrderServiceImpl implements OrderService {
         }
 
         validateDemoPayment(request);
+        validateRefundAcknowledgement(request);
         Map<Long, Integer> quantitiesByProduct = aggregateQuantities(request.items());
         ShippingMethod shippingMethod = resolveShippingMethod(request.shippingMethod());
+        CustomerProfile customerProfile = upsertCustomerProfile(request);
 
         CustomerOrder order = new CustomerOrder(
                 request.customerName().trim(),
@@ -75,11 +87,15 @@ public class OrderServiceImpl implements OrderService {
                 request.country().trim()
         );
         order.setIdempotencyKey(idempotencyKey);
+        order.setCustomerPhone(clean(request.customerPhone()));
+        order.setRegion(clean(request.region()));
+        order.setCustomerProfile(customerProfile);
         order.setShippingMethod(shippingMethod);
         order.setPaymentMethod(normalizePaymentMethod(request.paymentMethod()));
         order.setPaymentStatus(PaymentStatus.PAID);
         order.setStatus(OrderStatus.PAID);
 
+        Map<Long, Product> productsById = new LinkedHashMap<>();
         for (Map.Entry<Long, Integer> entry : quantitiesByProduct.entrySet()) {
             Product product = productRepository.findByIdForUpdate(entry.getKey())
                     .filter(Product::isStorefrontVisible)
@@ -91,13 +107,32 @@ public class OrderServiceImpl implements OrderService {
             }
 
             product.setStockQuantity(product.getStockQuantity() - requestedQuantity);
-            order.addItem(new OrderItem(product.getId(), product.getName(), product.getPrice(), requestedQuantity));
+            productsById.put(product.getId(), product);
+        }
+
+        BigDecimal orderDiscountAmount = BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        for (CheckoutItemRequest item : request.items()) {
+            Product product = productsById.get(item.productId());
+            validateSelectedOptions(product, item);
+            PromotionService.DiscountQuote quote = promotionService.quote(product);
+            BigDecimal lineDiscount = quote.discountAmount().multiply(BigDecimal.valueOf(item.quantity()));
+            orderDiscountAmount = orderDiscountAmount.add(lineDiscount).setScale(2, RoundingMode.HALF_UP);
+            order.addItem(new OrderItem(
+                    product.getId(),
+                    product.getName(),
+                    clean(item.selectedSize()),
+                    clean(item.selectedColor()),
+                    quote.effectivePrice(),
+                    product.getPrice(),
+                    quote.discountAmount(),
+                    item.quantity()
+            ));
         }
 
         order.applyTotals(
                 shippingAmount(shippingMethod),
                 taxAmount(order.getSubtotalAmount()),
-                BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP)
+                orderDiscountAmount
         );
 
         CustomerOrder savedOrder = orderRepository.save(order);
@@ -110,6 +145,17 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderResponse findOrder(Long id) {
         CustomerOrder order = findOrderWithItems(id);
+        return toResponse(order);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderResponse findOrderByNumber(String orderNumber, String email) {
+        if (orderNumber == null || orderNumber.isBlank() || email == null || email.isBlank()) {
+            throw new BusinessRuleException("Order number and email are required.");
+        }
+        CustomerOrder order = orderRepository.findByOrderNumberAndCustomerEmailIgnoreCase(orderNumber.trim(), email.trim())
+                .orElseThrow(() -> new ResourceNotFoundException("Order was not found for that email address."));
         return toResponse(order);
     }
 
@@ -172,6 +218,45 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    private void validateRefundAcknowledgement(CheckoutRequest request) {
+        if (Boolean.FALSE.equals(request.refundPolicyAcknowledged())) {
+            throw new BusinessRuleException("Acknowledge the refund policy before placing the order.");
+        }
+    }
+
+    private CustomerProfile upsertCustomerProfile(CheckoutRequest request) {
+        String email = request.customerEmail().trim();
+        CustomerProfile profile = customerProfileRepository.findByEmailIgnoreCase(email)
+                .orElseGet(() -> new CustomerProfile(request.customerName().trim(), email));
+        profile.setName(request.customerName().trim());
+        profile.setPhone(clean(request.customerPhone()));
+        profile.setAddressSummary(request.shippingAddress().trim() + ", " + request.city().trim());
+        profile.setCountry(request.country().trim());
+        profile.setRegion(clean(request.region()));
+        profile.setCity(request.city().trim());
+        profile.setLastOrderAt(Instant.now());
+        return customerProfileRepository.save(profile);
+    }
+
+    private void validateSelectedOptions(Product product, CheckoutItemRequest item) {
+        if (!product.getSizes().isEmpty() && !containsIgnoreCase(product.getSizes(), item.selectedSize())) {
+            throw new BusinessRuleException("Select an available size for " + product.getName() + ".");
+        }
+        if (!product.getColors().isEmpty() && !containsIgnoreCase(product.getColors(), item.selectedColor())) {
+            throw new BusinessRuleException("Select an available color for " + product.getName() + ".");
+        }
+    }
+
+    private boolean containsIgnoreCase(List<String> values, String selectedValue) {
+        if (selectedValue == null || selectedValue.isBlank()) {
+            return false;
+        }
+        String normalized = selectedValue.trim().toLowerCase(Locale.ROOT);
+        return values.stream()
+                .map(value -> value.trim().toLowerCase(Locale.ROOT))
+                .anyMatch(normalized::equals);
+    }
+
     private ShippingMethod resolveShippingMethod(String shippingMethod) {
         if (shippingMethod == null || shippingMethod.isBlank()) {
             return ShippingMethod.STANDARD;
@@ -195,6 +280,10 @@ public class OrderServiceImpl implements OrderService {
             return null;
         }
         return idempotencyKey.trim();
+    }
+
+    private String clean(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
     }
 
     private BigDecimal shippingAmount(ShippingMethod shippingMethod) {
@@ -275,7 +364,11 @@ public class OrderServiceImpl implements OrderService {
                         item.getId(),
                         item.getProductId(),
                         item.getProductName(),
+                        item.getSelectedSize(),
+                        item.getSelectedColor(),
                         item.getUnitPrice(),
+                        item.getOriginalUnitPrice(),
+                        item.getDiscountAmount(),
                         item.getQuantity(),
                         item.getLineTotal()
                 ))
@@ -286,13 +379,16 @@ public class OrderServiceImpl implements OrderService {
                 order.getOrderNumber(),
                 order.getCustomerName(),
                 order.getCustomerEmail(),
+                order.getCustomerPhone(),
                 order.getShippingAddress(),
                 order.getCity(),
+                order.getRegion(),
                 order.getPostalCode(),
                 order.getCountry(),
                 order.getShippingMethod(),
                 order.getPaymentMethod(),
                 order.getPaymentStatus(),
+                order.getRefundStatus(),
                 order.getStatus(),
                 order.getSubtotalAmount(),
                 order.getShippingAmount(),

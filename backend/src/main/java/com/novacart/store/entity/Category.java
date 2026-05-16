@@ -27,6 +27,12 @@ public class Category {
     @Column(length = 500)
     private String description;
 
+    @Column(length = 600)
+    private String imageUrl;
+
+    @Column(nullable = false)
+    private int sortOrder;
+
     @Column(nullable = false)
     private boolean active = true;
 
@@ -42,9 +48,15 @@ public class Category {
     }
 
     public Category(String name, String slug, String description, boolean active) {
+        this(name, slug, description, null, 0, active);
+    }
+
+    public Category(String name, String slug, String description, String imageUrl, int sortOrder, boolean active) {
         this.name = name;
         this.slug = slug;
         this.description = description;
+        this.imageUrl = imageUrl;
+        this.sortOrder = sortOrder;
         this.active = active;
     }
 
@@ -74,6 +86,22 @@ public class Category {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
     }
 
     public boolean isActive() {

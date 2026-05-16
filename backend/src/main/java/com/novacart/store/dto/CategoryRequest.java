@@ -19,6 +19,15 @@ public record CategoryRequest(
         @Size(max = 500, message = "Category description must be 500 characters or fewer.")
         String description,
 
+        @Size(max = 600, message = "Category image URL must be 600 characters or fewer.")
+        @Pattern(
+                regexp = "^(https?://|/).+",
+                message = "Category image URL must be an absolute HTTP URL or a local public asset path."
+        )
+        String imageUrl,
+
+        Integer sortOrder,
+
         Boolean active
 ) {
 }

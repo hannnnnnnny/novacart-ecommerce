@@ -11,6 +11,8 @@ public interface OrderService {
 
     OrderResponse findOrder(Long id);
 
+    OrderResponse findOrderByNumber(String orderNumber, String email);
+
     List<OrderResponse> findAdminOrders();
 
     OrderResponse updateStatus(Long id, OrderStatus status);

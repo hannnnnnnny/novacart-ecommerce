@@ -29,8 +29,20 @@ public class OrderItem {
     @Column(nullable = false, length = 180)
     private String productName;
 
+    @Column(length = 40)
+    private String selectedSize;
+
+    @Column(length = 60)
+    private String selectedColor;
+
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal originalUnitPrice = BigDecimal.ZERO;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal discountAmount = BigDecimal.ZERO;
 
     @Column(nullable = false)
     private int quantity;
@@ -42,9 +54,26 @@ public class OrderItem {
     }
 
     public OrderItem(Long productId, String productName, BigDecimal unitPrice, int quantity) {
+        this(productId, productName, null, null, unitPrice, unitPrice, BigDecimal.ZERO, quantity);
+    }
+
+    public OrderItem(
+            Long productId,
+            String productName,
+            String selectedSize,
+            String selectedColor,
+            BigDecimal unitPrice,
+            BigDecimal originalUnitPrice,
+            BigDecimal discountAmount,
+            int quantity
+    ) {
         this.productId = productId;
         this.productName = productName;
+        this.selectedSize = selectedSize;
+        this.selectedColor = selectedColor;
         this.unitPrice = unitPrice;
+        this.originalUnitPrice = originalUnitPrice == null ? unitPrice : originalUnitPrice;
+        this.discountAmount = discountAmount == null ? BigDecimal.ZERO : discountAmount;
         this.quantity = quantity;
         this.lineTotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
     }
@@ -69,8 +98,24 @@ public class OrderItem {
         return productName;
     }
 
+    public String getSelectedSize() {
+        return selectedSize;
+    }
+
+    public String getSelectedColor() {
+        return selectedColor;
+    }
+
     public BigDecimal getUnitPrice() {
         return unitPrice;
+    }
+
+    public BigDecimal getOriginalUnitPrice() {
+        return originalUnitPrice;
+    }
+
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
     }
 
     public int getQuantity() {

@@ -40,6 +40,14 @@ public class AdminProductController {
             @RequestParam(required = false) String search,
             @Positive(message = "Category ID must be positive.")
             @RequestParam(required = false) Long categoryId,
+            @Positive(message = "Collection ID must be positive.")
+            @RequestParam(required = false) Long collectionId,
+            @RequestParam(required = false) String sizeFilter,
+            @RequestParam(required = false) String color,
+            @RequestParam(required = false) String material,
+            @RequestParam(required = false) String brand,
+            @RequestParam(required = false) String season,
+            @RequestParam(required = false) Boolean saleOnly,
             @RequestParam(required = false) ProductStatus status,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
@@ -54,6 +62,13 @@ public class AdminProductController {
         ProductSearchRequest request = new ProductSearchRequest(
                 search,
                 categoryId,
+                collectionId,
+                sizeFilter,
+                color,
+                material,
+                brand,
+                season,
+                saleOnly,
                 status,
                 minPrice,
                 maxPrice,

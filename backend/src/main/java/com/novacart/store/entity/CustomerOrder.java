@@ -9,6 +9,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -38,11 +41,17 @@ public class CustomerOrder {
     @Column(nullable = false, length = 180)
     private String customerEmail;
 
+    @Column(length = 40)
+    private String customerPhone;
+
     @Column(nullable = false, length = 220)
     private String shippingAddress;
 
     @Column(nullable = false, length = 120)
     private String city;
+
+    @Column(length = 120)
+    private String region;
 
     @Column(nullable = false, length = 40)
     private String postalCode;
@@ -60,6 +69,10 @@ public class CustomerOrder {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 30)
+    private RefundStatus refundStatus = RefundStatus.NONE;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -82,6 +95,10 @@ public class CustomerOrder {
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private final List<OrderItem> items = new ArrayList<>();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_profile_id")
+    private CustomerProfile customerProfile;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
@@ -138,12 +155,28 @@ public class CustomerOrder {
         return customerEmail;
     }
 
+    public String getCustomerPhone() {
+        return customerPhone;
+    }
+
+    public void setCustomerPhone(String customerPhone) {
+        this.customerPhone = customerPhone;
+    }
+
     public String getShippingAddress() {
         return shippingAddress;
     }
 
     public String getCity() {
         return city;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public String getPostalCode() {
@@ -176,6 +209,14 @@ public class CustomerOrder {
 
     public void setPaymentStatus(PaymentStatus paymentStatus) {
         this.paymentStatus = paymentStatus;
+    }
+
+    public RefundStatus getRefundStatus() {
+        return refundStatus;
+    }
+
+    public void setRefundStatus(RefundStatus refundStatus) {
+        this.refundStatus = refundStatus;
     }
 
     public OrderStatus getStatus() {
@@ -214,7 +255,7 @@ public class CustomerOrder {
         this.shippingAmount = shippingAmount;
         this.taxAmount = taxAmount;
         this.discountAmount = discountAmount;
-        this.totalAmount = subtotalAmount.add(shippingAmount).add(taxAmount).subtract(discountAmount);
+        this.totalAmount = subtotalAmount.add(shippingAmount).add(taxAmount);
     }
 
     public List<OrderItem> getItems() {
@@ -227,6 +268,14 @@ public class CustomerOrder {
 
     public Instant getUpdatedAt() {
         return updatedAt;
+    }
+
+    public CustomerProfile getCustomerProfile() {
+        return customerProfile;
+    }
+
+    public void setCustomerProfile(CustomerProfile customerProfile) {
+        this.customerProfile = customerProfile;
     }
 
     public void addItem(OrderItem item) {

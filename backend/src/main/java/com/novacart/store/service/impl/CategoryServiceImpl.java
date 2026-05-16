@@ -36,7 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<CategoryResponse> findPublicCategories() {
-        return categoryRepository.findAllByActiveTrueOrderByNameAsc()
+        return categoryRepository.findAllByActiveTrueOrderBySortOrderAscNameAsc()
                 .stream()
                 .map(this::toResponse)
                 .toList();
@@ -47,7 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryResponse> findAdminCategories() {
         return categoryRepository.findAll()
                 .stream()
-                .sorted(Comparator.comparing(Category::getName, String.CASE_INSENSITIVE_ORDER))
+                .sorted(Comparator.comparingInt(Category::getSortOrder).thenComparing(Category::getName, String.CASE_INSENSITIVE_ORDER))
                 .map(this::toResponse)
                 .toList();
     }
@@ -63,6 +63,8 @@ public class CategoryServiceImpl implements CategoryService {
                 request.name().trim(),
                 slug,
                 clean(request.description()),
+                clean(request.imageUrl()),
+                request.sortOrder() == null ? 0 : request.sortOrder(),
                 request.active() == null || request.active()
         );
         return toResponse(categoryRepository.save(category));
@@ -79,6 +81,8 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(request.name().trim());
         category.setSlug(slug);
         category.setDescription(clean(request.description()));
+        category.setImageUrl(clean(request.imageUrl()));
+        category.setSortOrder(request.sortOrder() == null ? category.getSortOrder() : request.sortOrder());
         category.setActive(request.active() == null || request.active());
         return toResponse(category);
     }
@@ -103,6 +107,8 @@ public class CategoryServiceImpl implements CategoryService {
                 category.getName(),
                 category.getSlug(),
                 category.getDescription(),
+                category.getImageUrl(),
+                category.getSortOrder(),
                 category.isActive()
         );
     }

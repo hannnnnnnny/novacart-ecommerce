@@ -2,12 +2,21 @@ package com.novacart.store.config;
 
 import com.novacart.store.entity.AdminUser;
 import com.novacart.store.entity.Category;
+import com.novacart.store.entity.CollectionStatus;
+import com.novacart.store.entity.FashionCollection;
+import com.novacart.store.entity.GenderTarget;
 import com.novacart.store.entity.Product;
 import com.novacart.store.entity.ProductStatus;
+import com.novacart.store.entity.Promotion;
+import com.novacart.store.entity.PromotionDiscountType;
+import com.novacart.store.entity.PromotionTargetType;
 import com.novacart.store.repository.AdminUserRepository;
 import com.novacart.store.repository.CategoryRepository;
+import com.novacart.store.repository.FashionCollectionRepository;
 import com.novacart.store.repository.ProductRepository;
+import com.novacart.store.repository.PromotionRepository;
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.springframework.boot.CommandLineRunner;
@@ -26,6 +35,8 @@ public class DataInitializer {
             AdminUserRepository adminUserRepository,
             CategoryRepository categoryRepository,
             ProductRepository productRepository,
+            FashionCollectionRepository collectionRepository,
+            PromotionRepository promotionRepository,
             PasswordEncoder passwordEncoder
     ) {
         return args -> {
@@ -40,7 +51,9 @@ public class DataInitializer {
             }
 
             Map<String, Category> categories = seedCategories(categoryRepository);
-            seedProducts(productRepository, categories);
+            Map<String, FashionCollection> collections = seedCollections(collectionRepository);
+            seedProducts(productRepository, categories, collections);
+            seedPromotions(promotionRepository);
         };
     }
 
@@ -109,7 +122,55 @@ public class DataInitializer {
         );
     }
 
-    private void seedProducts(ProductRepository productRepository, Map<String, Category> categories) {
+    private Map<String, FashionCollection> seedCollections(FashionCollectionRepository collectionRepository) {
+        return Map.of(
+                "spring-edit", seedCollection(collectionRepository, "Spring Edit", "spring-edit", "Light layers, fresh color, and polished pieces for the first warm days.", "/catalog/seasonal.svg", "/catalog/women.svg", true, 10),
+                "summer-essentials", seedCollection(collectionRepository, "Summer Essentials", "summer-essentials", "Airy linen, easy sandals, and resort-minded accessories for heat and travel.", "/catalog/seasonal.svg", "/catalog/accessories.svg", true, 20),
+                "workwear-capsule", seedCollection(collectionRepository, "Workwear Capsule", "workwear-capsule", "Quiet tailoring, crisp shirting, structured bags, and shoes built for repeat wear.", "/catalog/men.svg", "/catalog/bags.svg", true, 30),
+                "evening-details", seedCollection(collectionRepository, "Evening Details", "evening-details", "Satin, sculptural jewelry, small bags, and soft shine for after-dark plans.", "/catalog/jewelry.svg", "/catalog/bags.svg", true, 40),
+                "active-weekend", seedCollection(collectionRepository, "Active Weekend", "active-weekend", "Performance layers, trainers, equipment, and outdoor-ready lifestyle pieces.", "/catalog/sportswear.svg", "/catalog/shoes.svg", true, 50),
+                "end-of-season-sale", seedCollection(collectionRepository, "End of Season Sale", "end-of-season-sale", "Selected last-season favorites with limited markdowns while sizes remain.", "/catalog/sale.svg", "/catalog/sale.svg", true, 60)
+        );
+    }
+
+    private FashionCollection seedCollection(
+            FashionCollectionRepository collectionRepository,
+            String name,
+            String slug,
+            String description,
+            String heroImageUrl,
+            String displayImageUrl,
+            boolean featured,
+            int sortOrder
+    ) {
+        return collectionRepository.findBySlug(slug)
+                .map(collection -> {
+                    collection.setName(name);
+                    collection.setDescription(description);
+                    collection.setHeroImageUrl(heroImageUrl);
+                    collection.setDisplayImageUrl(displayImageUrl);
+                    collection.setStatus(CollectionStatus.ACTIVE);
+                    collection.setFeatured(featured);
+                    collection.setStartDate(LocalDate.of(2026, 1, 1));
+                    collection.setEndDate(LocalDate.of(2026, 12, 31));
+                    collection.setSortOrder(sortOrder);
+                    return collection;
+                })
+                .orElseGet(() -> collectionRepository.save(new FashionCollection(
+                        name,
+                        slug,
+                        description,
+                        heroImageUrl,
+                        displayImageUrl,
+                        CollectionStatus.ACTIVE,
+                        featured,
+                        LocalDate.of(2026, 1, 1),
+                        LocalDate.of(2026, 12, 31),
+                        sortOrder
+                )));
+    }
+
+    private void seedProducts(ProductRepository productRepository, Map<String, Category> categories, Map<String, FashionCollection> collections) {
         List<SeedProduct> products = List.of(
                 new SeedProduct("silk-wrap-blouse", "Silk Wrap Blouse", "women", "Aster Row", "A fluid wrap blouse with a soft tie waist and subtle sheen for dinner, work, and weekends.", "118.00", "148.00", 24, 5, "/catalog/women.svg", true, ProductStatus.ACTIVE, List.of("spring-edit", "silk", "workwear")),
                 new SeedProduct("linen-wide-leg-trouser", "Linen Wide-Leg Trouser", "women", "Linden Vale", "Airy linen trousers with a pressed front crease and comfortable high-rise waist.", "132.00", null, 31, 6, "/catalog/women.svg", true, ProductStatus.ACTIVE, List.of("linen", "summer", "capsule")),
@@ -173,7 +234,7 @@ public class DataInitializer {
                 new SeedProduct("holiday-sequin-top", "Holiday Sequin Top", "seasonal-collection", "Aster Row", "A draft campaign top with small tonal sequins and a soft jersey backing for holiday styling.", "108.00", null, 0, 5, "/catalog/seasonal.svg", false, ProductStatus.DRAFT, List.of("evening-details", "holiday", "draft"))
         );
 
-        products.forEach(product -> seedProduct(productRepository, product, categories.get(product.categorySlug())));
+        products.forEach(product -> seedProduct(productRepository, product, categories.get(product.categorySlug()), collections));
     }
 
     private Category seedCategory(
@@ -183,12 +244,33 @@ public class DataInitializer {
             String description
     ) {
         return categoryRepository.findBySlug(slug)
-                .orElseGet(() -> categoryRepository.save(new Category(name, slug, description, true)));
+                .map(category -> {
+                    category.setName(name);
+                    category.setDescription(description);
+                    category.setImageUrl(categoryImage(slug));
+                    category.setSortOrder(sortOrderForCategory(slug));
+                    category.setActive(true);
+                    return category;
+                })
+                .orElseGet(() -> categoryRepository.save(new Category(
+                        name,
+                        slug,
+                        description,
+                        categoryImage(slug),
+                        sortOrderForCategory(slug),
+                        true
+                )));
     }
 
-    private void seedProduct(ProductRepository productRepository, SeedProduct seed, Category category) {
+    private void seedProduct(
+            ProductRepository productRepository,
+            SeedProduct seed,
+            Category category,
+            Map<String, FashionCollection> collections
+    ) {
+        FashionCollection collection = collectionFor(seed, collections);
         productRepository.findBySlug(seed.slug()).ifPresentOrElse(
-                product -> applySeedProduct(product, seed, category),
+                product -> applySeedProduct(product, seed, category, collection),
                 () -> productRepository.save(new Product(
                         seed.name(),
                         seed.slug(),
@@ -202,15 +284,22 @@ public class DataInitializer {
                         seed.imageUrl(),
                         List.of(seed.imageUrl()),
                         seed.tags(),
+                        sizesFor(seed),
+                        colorsFor(seed),
+                        materialFor(seed),
+                        careInstructionsFor(seed),
+                        seasonFor(seed),
+                        genderTargetFor(seed),
                         seed.featured(),
                         seed.status(),
                         seed.status() == ProductStatus.ACTIVE,
-                        category
+                        category,
+                        collection
                 ))
         );
     }
 
-    private void applySeedProduct(Product product, SeedProduct seed, Category category) {
+    private void applySeedProduct(Product product, SeedProduct seed, Category category, FashionCollection collection) {
         product.setName(seed.name());
         product.setSku(sku(seed.slug()));
         product.setBrand(seed.brand());
@@ -221,10 +310,175 @@ public class DataInitializer {
         product.setImageUrl(seed.imageUrl());
         product.setImageGallery(List.of(seed.imageUrl()));
         product.setTags(seed.tags());
+        product.setSizes(sizesFor(seed));
+        product.setColors(colorsFor(seed));
+        product.setMaterial(materialFor(seed));
+        product.setCareInstructions(careInstructionsFor(seed));
+        product.setSeason(seasonFor(seed));
+        product.setGenderTarget(genderTargetFor(seed));
         product.setFeatured(seed.featured());
         product.setStatus(seed.status());
         product.setActive(seed.status() == ProductStatus.ACTIVE);
         product.setCategory(category);
+        product.setCollection(collection);
+    }
+
+    private int sortOrderForCategory(String slug) {
+        return switch (slug) {
+            case "women" -> 10;
+            case "men" -> 20;
+            case "bags" -> 30;
+            case "jewelry" -> 40;
+            case "shoes" -> 50;
+            case "sportswear" -> 60;
+            case "accessories" -> 70;
+            case "new-arrivals" -> 80;
+            case "sale" -> 90;
+            case "seasonal-collection" -> 100;
+            default -> 999;
+        };
+    }
+
+    private String categoryImage(String slug) {
+        return "/catalog/" + switch (slug) {
+            case "seasonal-collection" -> "seasonal";
+            default -> slug;
+        } + ".svg";
+    }
+
+    private FashionCollection collectionFor(SeedProduct seed, Map<String, FashionCollection> collections) {
+        if (seed.tags().contains("spring-edit")) {
+            return collections.get("spring-edit");
+        }
+        if (seed.tags().contains("summer-essentials") || seed.tags().contains("summer") || seed.tags().contains("resort")) {
+            return collections.get("summer-essentials");
+        }
+        if (seed.tags().contains("workwear") || seed.tags().contains("capsule") || seed.tags().contains("commute")) {
+            return collections.get("workwear-capsule");
+        }
+        if (seed.tags().contains("evening") || seed.tags().contains("occasion") || seed.tags().contains("holiday")) {
+            return collections.get("evening-details");
+        }
+        if (seed.tags().contains("active-weekend") || seed.tags().contains("sportswear") || seed.tags().contains("training") || seed.tags().contains("equipment")) {
+            return collections.get("active-weekend");
+        }
+        if (seed.tags().contains("sale") || seed.tags().contains("last-season")) {
+            return collections.get("end-of-season-sale");
+        }
+        return collections.get("spring-edit");
+    }
+
+    private List<String> sizesFor(SeedProduct seed) {
+        if ("shoes".equals(seed.categorySlug()) || seed.tags().contains("sneaker") || seed.tags().contains("trainer") || seed.tags().contains("shoe")) {
+            return List.of("5", "6", "7", "8", "9", "10", "11");
+        }
+        if ("jewelry".equals(seed.categorySlug()) || "bags".equals(seed.categorySlug()) || seed.tags().contains("equipment") || seed.tags().contains("scarf") || seed.tags().contains("sunglasses") || seed.tags().contains("case")) {
+            return List.of("One Size");
+        }
+        return List.of("XS", "S", "M", "L", "XL");
+    }
+
+    private List<String> colorsFor(SeedProduct seed) {
+        if (seed.tags().contains("gold-tone")) {
+            return List.of("Gold", "Warm Brass");
+        }
+        if (seed.tags().contains("silver-tone")) {
+            return List.of("Silver", "Graphite");
+        }
+        if (seed.tags().contains("summer") || seed.tags().contains("resort")) {
+            return List.of("Ivory", "Sand", "Sky");
+        }
+        if (seed.tags().contains("evening")) {
+            return List.of("Black", "Pearl", "Wine");
+        }
+        if (seed.tags().contains("sportswear") || seed.tags().contains("training") || seed.tags().contains("equipment")) {
+            return List.of("Black", "Slate", "Pine");
+        }
+        return List.of("Black", "Ivory", "Taupe");
+    }
+
+    private String materialFor(SeedProduct seed) {
+        if (seed.tags().contains("silk") || seed.name().toLowerCase().contains("silk")) {
+            return "Silk blend";
+        }
+        if (seed.tags().contains("linen")) {
+            return "Linen";
+        }
+        if (seed.tags().contains("leather") || seed.name().toLowerCase().contains("loafer") || seed.name().toLowerCase().contains("belt")) {
+            return "Leather";
+        }
+        if (seed.tags().contains("satin")) {
+            return "Satin";
+        }
+        if (seed.tags().contains("denim")) {
+            return "Cotton denim";
+        }
+        if (seed.tags().contains("equipment") || seed.tags().contains("sportswear") || seed.tags().contains("training")) {
+            return "Performance blend";
+        }
+        if (seed.tags().contains("wool") || seed.name().toLowerCase().contains("wool")) {
+            return "Wool blend";
+        }
+        return "Cotton blend";
+    }
+
+    private String careInstructionsFor(SeedProduct seed) {
+        if (seed.tags().contains("jewelry") || "jewelry".equals(seed.categorySlug())) {
+            return "Store dry and polish gently with a soft cloth.";
+        }
+        if (seed.tags().contains("leather") || "bags".equals(seed.categorySlug()) || "shoes".equals(seed.categorySlug())) {
+            return "Wipe clean with a soft damp cloth and store away from direct heat.";
+        }
+        if (seed.tags().contains("silk") || seed.tags().contains("satin") || seed.tags().contains("wool")) {
+            return "Dry clean recommended to preserve shape and finish.";
+        }
+        return "Machine wash cold with like colors and lay flat or hang to dry.";
+    }
+
+    private String seasonFor(SeedProduct seed) {
+        if (seed.tags().contains("last-season") || seed.tags().contains("sale")) {
+            return "Last Season";
+        }
+        if (seed.tags().contains("summer") || seed.tags().contains("summer-essentials") || seed.tags().contains("resort")) {
+            return "Summer 2026";
+        }
+        if (seed.tags().contains("fall") || seed.tags().contains("winter") || seed.tags().contains("holiday")) {
+            return "Fall Winter 2026";
+        }
+        if (seed.tags().contains("active-weekend")) {
+            return "Active Weekend";
+        }
+        if (seed.tags().contains("evening-details") || seed.tags().contains("evening")) {
+            return "Evening Edit";
+        }
+        return "Spring 2026";
+    }
+
+    private GenderTarget genderTargetFor(SeedProduct seed) {
+        if ("women".equals(seed.categorySlug())) {
+            return GenderTarget.WOMEN;
+        }
+        if ("men".equals(seed.categorySlug())) {
+            return GenderTarget.MEN;
+        }
+        return GenderTarget.UNISEX;
+    }
+
+    private void seedPromotions(PromotionRepository promotionRepository) {
+        if (promotionRepository.findAll().stream().anyMatch(promotion -> "End of Season Fashion Markdown".equals(promotion.getName()))) {
+            return;
+        }
+        promotionRepository.save(new Promotion(
+                "End of Season Fashion Markdown",
+                "A controlled markdown for selected last-season fashion pieces.",
+                PromotionDiscountType.PERCENTAGE,
+                new BigDecimal("15.00"),
+                LocalDate.now().minusDays(7),
+                LocalDate.now().plusDays(45),
+                true,
+                PromotionTargetType.TAGS,
+                List.of("sale", "last-season")
+        ));
     }
 
     private String sku(String slug) {

@@ -1,19 +1,24 @@
 package com.novacart.store.service.impl;
 
 import com.novacart.store.dto.CategoryResponse;
+import com.novacart.store.dto.CollectionResponse;
 import com.novacart.store.dto.PageResponse;
 import com.novacart.store.dto.ProductRequest;
 import com.novacart.store.dto.ProductResponse;
 import com.novacart.store.dto.ProductSearchRequest;
 import com.novacart.store.entity.Category;
+import com.novacart.store.entity.FashionCollection;
+import com.novacart.store.entity.GenderTarget;
 import com.novacart.store.entity.Product;
 import com.novacart.store.entity.ProductStatus;
 import com.novacart.store.exception.BusinessRuleException;
 import com.novacart.store.exception.DuplicateResourceException;
 import com.novacart.store.exception.ResourceNotFoundException;
 import com.novacart.store.repository.CategoryRepository;
+import com.novacart.store.repository.FashionCollectionRepository;
 import com.novacart.store.repository.ProductRepository;
 import com.novacart.store.service.ProductService;
+import com.novacart.store.service.PromotionService;
 import com.novacart.store.service.SlugService;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -36,15 +41,21 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final FashionCollectionRepository collectionRepository;
+    private final PromotionService promotionService;
     private final SlugService slugService;
 
     public ProductServiceImpl(
             ProductRepository productRepository,
             CategoryRepository categoryRepository,
+            FashionCollectionRepository collectionRepository,
+            PromotionService promotionService,
             SlugService slugService
     ) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.collectionRepository = collectionRepository;
+        this.promotionService = promotionService;
         this.slugService = slugService;
     }
 
@@ -57,10 +68,17 @@ public class ProductServiceImpl implements ProductService {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 false,
                 "name",
                 0,
-                100
+                60
         )).content();
     }
 
@@ -87,10 +105,17 @@ public class ProductServiceImpl implements ProductService {
                 null,
                 null,
                 null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
                 false,
                 "name",
                 0,
-                100
+                60
         )).content();
     }
 
@@ -122,6 +147,7 @@ public class ProductServiceImpl implements ProductService {
         validateCompareAtPrice(request.price(), request.compareAtPrice());
 
         Category category = findCategory(request.categoryId());
+        FashionCollection collection = findCollection(request.collectionId());
         ProductStatus status = request.status() == null ? ProductStatus.ACTIVE : request.status();
         boolean active = request.active() == null ? status == ProductStatus.ACTIVE : request.active();
         Product product = new Product(
@@ -137,10 +163,17 @@ public class ProductServiceImpl implements ProductService {
                 request.imageUrl().trim(),
                 normalizeImageGallery(request.imageUrl(), request.imageGallery()),
                 normalizeList(request.tags()),
+                normalizeList(request.sizes()),
+                normalizeList(request.colors()),
+                clean(request.material()),
+                clean(request.careInstructions()),
+                clean(request.season()),
+                request.genderTarget(),
                 Boolean.TRUE.equals(request.featured()),
                 status,
                 active,
-                category
+                category,
+                collection
         );
         return toResponse(productRepository.save(product));
     }
@@ -176,10 +209,17 @@ public class ProductServiceImpl implements ProductService {
         product.setImageUrl(request.imageUrl().trim());
         product.setImageGallery(normalizeImageGallery(request.imageUrl(), request.imageGallery()));
         product.setTags(normalizeList(request.tags()));
+        product.setSizes(normalizeList(request.sizes()));
+        product.setColors(normalizeList(request.colors()));
+        product.setMaterial(clean(request.material()));
+        product.setCareInstructions(clean(request.careInstructions()));
+        product.setSeason(clean(request.season()));
+        product.setGenderTarget(request.genderTarget() == null ? GenderTarget.UNISEX : request.genderTarget());
         product.setFeatured(Boolean.TRUE.equals(request.featured()));
         product.setStatus(status);
         product.setActive(request.active() == null ? status == ProductStatus.ACTIVE : request.active());
         product.setCategory(findCategory(request.categoryId()));
+        product.setCollection(findCollection(request.collectionId()));
         return toResponse(product);
     }
 
@@ -193,6 +233,14 @@ public class ProductServiceImpl implements ProductService {
     private Category findCategory(Long id) {
         return categoryRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Category was not found."));
+    }
+
+    private FashionCollection findCollection(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return collectionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Collection was not found."));
     }
 
     private PageResponse<ProductResponse> searchProducts(ProductSearchRequest request, boolean publicOnly) {
@@ -210,7 +258,9 @@ public class ProductServiceImpl implements ProductService {
     private Specification<Product> productSpecification(ProductSearchRequest request, boolean publicOnly) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
+            query.distinct(true);
             var categoryJoin = root.join("category", JoinType.LEFT);
+            var collectionJoin = root.join("collection", JoinType.LEFT);
 
             if (publicOnly) {
                 predicates.add(criteriaBuilder.isTrue(root.get("active")));
@@ -221,6 +271,44 @@ public class ProductServiceImpl implements ProductService {
 
             if (request.categoryId() != null) {
                 predicates.add(criteriaBuilder.equal(categoryJoin.get("id"), request.categoryId()));
+            }
+
+            if (request.collectionId() != null) {
+                predicates.add(criteriaBuilder.equal(collectionJoin.get("id"), request.collectionId()));
+            }
+
+            if (!isBlank(request.sizeFilter())) {
+                var sizeJoin = root.join("sizes", JoinType.LEFT);
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(sizeJoin.as(String.class)), normalize(request.sizeFilter())));
+            }
+
+            if (!isBlank(request.color())) {
+                var colorJoin = root.join("colors", JoinType.LEFT);
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(colorJoin.as(String.class)), normalize(request.color())));
+            }
+
+            if (!isBlank(request.material())) {
+                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("material")), "%" + normalize(request.material()) + "%"));
+            }
+
+            if (!isBlank(request.brand())) {
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("brand")), normalize(request.brand())));
+            }
+
+            if (!isBlank(request.season())) {
+                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("season")), normalize(request.season())));
+            }
+
+            if (Boolean.TRUE.equals(request.saleOnly())) {
+                var saleTagJoin = root.join("tags", JoinType.LEFT);
+                predicates.add(criteriaBuilder.or(
+                        criteriaBuilder.and(
+                                criteriaBuilder.isNotNull(root.get("compareAtPrice")),
+                                criteriaBuilder.greaterThan(root.get("compareAtPrice"), root.get("price"))
+                        ),
+                        criteriaBuilder.equal(criteriaBuilder.lower(saleTagJoin.as(String.class)), "sale"),
+                        criteriaBuilder.equal(criteriaBuilder.lower(saleTagJoin.as(String.class)), "last-season")
+                ));
             }
 
             if (request.minPrice() != null) {
@@ -235,7 +323,7 @@ public class ProductServiceImpl implements ProductService {
                 predicates.add(criteriaBuilder.greaterThan(root.get("stockQuantity"), 0));
             }
 
-            String searchTerm = request.search() == null ? "" : request.search().trim().toLowerCase(Locale.ROOT);
+            String searchTerm = normalize(request.search());
             if (!searchTerm.isBlank()) {
                 String pattern = "%" + searchTerm + "%";
                 predicates.add(criteriaBuilder.or(
@@ -243,7 +331,8 @@ public class ProductServiceImpl implements ProductService {
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("brand")), pattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("sku")), pattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(categoryJoin.get("name")), pattern)
+                        criteriaBuilder.like(criteriaBuilder.lower(categoryJoin.get("name")), pattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(collectionJoin.get("name")), pattern)
                 ));
             }
 
@@ -257,6 +346,8 @@ public class ProductServiceImpl implements ProductService {
             case "price-high", "price-desc" -> Sort.by("price").descending().and(Sort.by("name").ascending());
             case "stock" -> Sort.by("stockQuantity").descending().and(Sort.by("name").ascending());
             case "newest" -> Sort.by("createdAt").descending();
+            case "best-selling" -> Sort.by("featured").descending().and(Sort.by("createdAt").descending());
+            case "discount" -> Sort.by("compareAtPrice").descending().and(Sort.by("price").ascending());
             default -> Sort.by("name").ascending();
         };
     }
@@ -279,6 +370,18 @@ public class ProductServiceImpl implements ProductService {
             return fallback;
         }
         return value.trim();
+    }
+
+    private String clean(String value) {
+        return value == null || value.isBlank() ? null : value.trim();
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
+    }
+
+    private String normalize(String value) {
+        return value == null ? "" : value.trim().toLowerCase(Locale.ROOT);
     }
 
     private List<String> normalizeImageGallery(String primaryImageUrl, List<String> imageGallery) {
@@ -318,8 +421,28 @@ public class ProductServiceImpl implements ProductService {
                 category.getName(),
                 category.getSlug(),
                 category.getDescription(),
+                category.getImageUrl(),
+                category.getSortOrder(),
                 category.isActive()
         );
+        FashionCollection collection = product.getCollection();
+        CollectionResponse collectionResponse = collection == null ? null : new CollectionResponse(
+                collection.getId(),
+                collection.getName(),
+                collection.getSlug(),
+                collection.getDescription(),
+                collection.getHeroImageUrl(),
+                collection.getDisplayImageUrl(),
+                collection.getStatus(),
+                collection.isFeatured(),
+                collection.getStartDate(),
+                collection.getEndDate(),
+                collection.getSortOrder(),
+                0,
+                collection.getCreatedAt(),
+                collection.getUpdatedAt()
+        );
+        PromotionService.DiscountQuote quote = promotionService.quote(product);
 
         return new ProductResponse(
                 product.getId(),
@@ -335,10 +458,20 @@ public class ProductServiceImpl implements ProductService {
                 product.getImageUrl(),
                 List.copyOf(product.getImageGallery()),
                 List.copyOf(product.getTags()),
+                List.copyOf(product.getSizes()),
+                List.copyOf(product.getColors()),
+                product.getMaterial(),
+                product.getCareInstructions(),
+                product.getSeason(),
+                product.getGenderTarget(),
+                quote.effectivePrice(),
+                quote.discountAmount(),
+                quote.discountPercent(),
                 product.isFeatured(),
                 product.getStatus(),
                 product.isActive(),
-                categoryResponse
+                categoryResponse,
+                collectionResponse
         );
     }
 }
