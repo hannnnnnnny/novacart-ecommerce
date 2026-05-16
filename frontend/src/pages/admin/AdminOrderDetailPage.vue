@@ -16,14 +16,19 @@
         <h2>Customer</h2>
         <p><strong>{{ order.customerName }}</strong></p>
         <p>{{ order.customerEmail }}</p>
+        <p>{{ order.customerPhone || 'No phone provided' }}</p>
         <p>{{ order.shippingAddress }}</p>
-        <p>{{ order.city }}, {{ order.postalCode }}</p>
+        <p>{{ order.city }}, {{ order.region }}, {{ order.postalCode }}</p>
         <p>{{ order.country }}</p>
       </section>
       <section class="summary-panel">
         <div class="admin-page-header">
           <h2>Status</h2>
-          <StatusBadge :value="order.status" />
+          <div class="status-pair">
+            <StatusBadge :value="order.paymentStatus" />
+            <StatusBadge :value="order.refundStatus" />
+            <StatusBadge :value="order.status" />
+          </div>
         </div>
         <label>
           Order Status
@@ -56,7 +61,10 @@
           </thead>
           <tbody>
             <tr v-for="item in order.items" :key="item.id">
-              <td>{{ item.productName }}</td>
+              <td>
+                {{ item.productName }}
+                <span v-if="item.selectedSize || item.selectedColor">{{ item.selectedSize }} {{ item.selectedColor }}</span>
+              </td>
               <td>{{ item.quantity }}</td>
               <td>{{ formatCurrency(item.unitPrice) }}</td>
               <td>{{ formatCurrency(item.lineTotal) }}</td>

@@ -7,9 +7,15 @@
 
     <nav class="admin-nav" aria-label="Admin navigation">
       <RouterLink to="/admin/dashboard">Dashboard</RouterLink>
+      <RouterLink to="/admin/analytics">Analytics</RouterLink>
       <RouterLink to="/admin/products">Products</RouterLink>
       <RouterLink to="/admin/categories">Categories</RouterLink>
+      <RouterLink to="/admin/collections">Collections</RouterLink>
+      <RouterLink to="/admin/promotions">Promotions</RouterLink>
       <RouterLink to="/admin/orders">Orders</RouterLink>
+      <RouterLink to="/admin/customers">Customers</RouterLink>
+      <RouterLink to="/admin/refunds">Refunds</RouterLink>
+      <RouterLink to="/admin/support">Support</RouterLink>
       <RouterLink to="/admin/inventory">Inventory</RouterLink>
     </nav>
 

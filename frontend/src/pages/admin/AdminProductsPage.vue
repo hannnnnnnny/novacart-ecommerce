@@ -25,6 +25,24 @@
           <option value="out-of-stock">Out of stock</option>
         </select>
       </label>
+      <button class="secondary-button" type="button" :disabled="!selectedIds.length" @click="bulkArchive">
+        Archive Selected
+      </button>
+      <button class="secondary-button" type="button" :disabled="!selectedIds.length" @click="bulkApplyDiscount">
+        Discount Selected
+      </button>
+      <label>
+        Bulk collection
+        <select v-model="bulkCollectionId">
+          <option value="">Choose collection</option>
+          <option v-for="collection in collections" :key="collection.id" :value="String(collection.id)">
+            {{ collection.name }}
+          </option>
+        </select>
+      </label>
+      <button class="secondary-button" type="button" :disabled="!selectedIds.length || !bulkCollectionId" @click="bulkAssignCollection">
+        Assign Collection
+      </button>
     </div>
     <LoadingState v-if="loading" message="Loading products..." />
     <ErrorMessage v-else-if="error" :message="error" />
@@ -37,6 +55,7 @@
       <table class="admin-table">
         <thead>
           <tr>
+            <th><input type="checkbox" :checked="allSelected" aria-label="Select all visible products" @change="toggleAll($event.target.checked)" /></th>
             <th>Name</th>
             <th>Category</th>
             <th>Price</th>
@@ -47,14 +66,15 @@
         </thead>
         <tbody>
           <tr v-for="product in filteredProducts" :key="product.id">
+            <td><input v-model="selectedIds" type="checkbox" :value="product.id" :aria-label="`Select ${product.name}`" /></td>
             <td>
               <strong>{{ product.name }}</strong>
-              <span>{{ product.brand || 'Unbranded' }} · {{ product.sku || product.slug }}</span>
+              <span>{{ product.brand || 'Unbranded' }} / {{ product.sku || product.slug }}</span>
             </td>
             <td>{{ product.category?.name }}</td>
             <td>
-              <strong>{{ formatCurrency(product.price) }}</strong>
-              <span v-if="product.compareAtPrice">{{ formatCurrency(product.compareAtPrice) }} compare-at</span>
+              <strong>{{ formatCurrency(product.effectivePrice ?? product.price) }}</strong>
+              <span v-if="product.compareAtPrice || Number(product.discountAmount) > 0">{{ formatCurrency(product.compareAtPrice || product.price) }} compare-at</span>
             </td>
             <td><StatusBadge :value="stockStatus(product)" :label="stockLabel(product)" /></td>
             <td>
@@ -65,8 +85,15 @@
             </td>
             <td>
               <div class="table-actions">
+                <RouterLink class="text-link" :to="`/products/${product.id}`">Preview</RouterLink>
                 <RouterLink class="text-link" :to="`/admin/products/${product.id}/edit`">Edit</RouterLink>
-                <button class="text-button danger" type="button" @click="removeProduct(product)">Delete</button>
+                <button
+                  class="text-button danger"
+                  type="button"
+                  @click="toggleArchive(product)"
+                >
+                  {{ product.status === 'ARCHIVED' ? 'Reactivate' : 'Archive' }}
+                </button>
               </div>
             </td>
           </tr>
@@ -78,7 +105,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { deleteAdminProduct, fetchAdminProducts } from '../../api/admin'
+import { createAdminPromotion, fetchAdminCollections, fetchAdminProducts, updateAdminProduct } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
@@ -90,8 +117,11 @@ import { formatCurrency, formatStatus } from '../../utils/format'
 const loading = ref(true)
 const error = ref('')
 const products = ref([])
+const collections = ref([])
 const searchTerm = ref('')
 const statusFilter = ref('all')
+const selectedIds = ref([])
+const bulkCollectionId = ref('')
 const filteredProducts = computed(() => {
   const query = searchTerm.value.toLowerCase()
   return products.value.filter((product) => {
@@ -105,6 +135,7 @@ const filteredProducts = computed(() => {
     return matchesQuery && matchesStatus
   })
 })
+const allSelected = computed(() => filteredProducts.value.length > 0 && filteredProducts.value.every((product) => selectedIds.value.includes(product.id)))
 
 onMounted(loadProducts)
 
@@ -112,7 +143,13 @@ async function loadProducts() {
   loading.value = true
   error.value = ''
   try {
-    products.value = await fetchAdminProducts()
+    const [productData, collectionData] = await Promise.all([
+      fetchAdminProducts(),
+      collections.value.length ? Promise.resolve(collections.value) : fetchAdminCollections()
+    ])
+    products.value = productData
+    collections.value = collectionData
+    selectedIds.value = []
   } catch (requestError) {
     error.value = getApiError(requestError, 'Products could not be loaded.')
   } finally {
@@ -120,15 +157,113 @@ async function loadProducts() {
   }
 }
 
-async function removeProduct(product) {
-  const confirmed = window.confirm(`Delete ${product.name}? This action cannot be undone.`)
+async function toggleArchive(product) {
+  const archived = product.status === 'ARCHIVED'
+  const nextStatus = archived ? 'ACTIVE' : 'ARCHIVED'
+  const confirmed = window.confirm(`${archived ? 'Reactivate' : 'Archive'} ${product.name}?`)
   if (!confirmed) return
 
   try {
-    await deleteAdminProduct(product.id)
-    products.value = products.value.filter((entry) => entry.id !== product.id)
+    const updated = await updateAdminProduct(product.id, productPayload(product, {
+      status: nextStatus,
+      active: nextStatus === 'ACTIVE'
+    }))
+    Object.assign(product, updated)
   } catch (requestError) {
-    error.value = getApiError(requestError, 'Product could not be deleted.')
+    error.value = getApiError(requestError, 'Product status could not be updated.')
+  }
+}
+
+function toggleAll(checked) {
+  selectedIds.value = checked ? filteredProducts.value.map((product) => product.id) : []
+}
+
+async function bulkArchive() {
+  if (!window.confirm(`Archive ${selectedIds.value.length} selected products?`)) return
+  try {
+    await Promise.all(selectedProducts().map((product) => updateAdminProduct(product.id, productPayload(product, { status: 'ARCHIVED', active: false }))))
+    await loadProducts()
+  } catch (requestError) {
+    error.value = getApiError(requestError, 'Selected products could not be archived.')
+  }
+}
+
+async function bulkAssignCollection() {
+  const collection = collections.value.find((entry) => String(entry.id) === bulkCollectionId.value)
+  if (!collection) {
+    error.value = 'Choose a collection before assigning selected products.'
+    return
+  }
+  if (!window.confirm(`Assign ${selectedIds.value.length} selected products to ${collection.name}?`)) return
+
+  try {
+    await Promise.all(selectedProducts().map((product) => updateAdminProduct(
+      product.id,
+      productPayload(product, { collectionId: collection.id })
+    )))
+    bulkCollectionId.value = ''
+    await loadProducts()
+  } catch (requestError) {
+    error.value = getApiError(requestError, 'Selected products could not be assigned to the collection.')
+  }
+}
+
+async function bulkApplyDiscount() {
+  const value = window.prompt('Percentage discount for selected products', '15')
+  if (value === null) return
+  const discountValue = Number(value)
+  if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue > 100) {
+    error.value = 'Enter a percentage discount between 1 and 100.'
+    return
+  }
+  try {
+    await createAdminPromotion({
+      name: `Selected product markdown ${new Date().toISOString().slice(0, 10)}`,
+      description: 'Bulk promotion created from selected admin products.',
+      discountType: 'PERCENTAGE',
+      discountValue,
+      startDate: null,
+      endDate: null,
+      active: true,
+      targetType: 'SELECTED_PRODUCTS',
+      targetValues: selectedIds.value.map(String)
+    })
+    await loadProducts()
+  } catch (requestError) {
+    error.value = getApiError(requestError, 'Bulk discount could not be created.')
+  }
+}
+
+function selectedProducts() {
+  return products.value.filter((product) => selectedIds.value.includes(product.id))
+}
+
+function productPayload(product, overrides = {}) {
+  return {
+    name: product.name,
+    slug: product.slug,
+    sku: product.sku,
+    brand: product.brand,
+    description: product.description,
+    price: product.price,
+    compareAtPrice: product.compareAtPrice,
+    stockQuantity: product.stockQuantity,
+    lowStockThreshold: product.lowStockThreshold,
+    imageUrl: product.imageUrl,
+    imageGallery: product.imageGallery || [product.imageUrl],
+    tags: product.tags || [],
+    sizes: product.sizes || [],
+    colors: product.colors || [],
+    material: product.material || null,
+    careInstructions: product.careInstructions || null,
+    season: product.season || null,
+    genderTarget: product.genderTarget || 'UNISEX',
+    featured: product.featured,
+    status: product.status,
+    active: product.active,
+    categoryId: product.category?.id,
+    collectionId: product.collection?.id || null,
+    ...overrides
   }
 }
 

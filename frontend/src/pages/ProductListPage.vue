@@ -6,8 +6,12 @@
       description="Search clothing, bags, jewelry, shoes, sportswear, equipment, accessories, seasonal edits, and sale pieces."
     />
 
+    <button class="secondary-button mobile-filter-toggle" type="button" @click="filtersOpen = !filtersOpen">
+      {{ filtersOpen ? 'Hide Filters' : 'Show Filters' }}
+    </button>
+
     <div class="catalog-browse-layout">
-      <aside class="catalog-filter-panel" aria-label="Catalog filters">
+      <aside class="catalog-filter-panel" :class="{ open: filtersOpen }" aria-label="Catalog filters">
         <form class="filter-form" @submit.prevent="applyFilters">
           <label class="search-field">
             Search products
@@ -20,6 +24,50 @@
               <option v-for="category in categories" :key="category.id" :value="String(category.id)">
                 {{ category.name }}
               </option>
+            </select>
+          </label>
+          <label>
+            Collection
+            <select v-model="selectedCollectionId">
+              <option value="">All collections</option>
+              <option v-for="collection in collections" :key="collection.id" :value="String(collection.id)">
+                {{ collection.name }}
+              </option>
+            </select>
+          </label>
+          <label>
+            Size
+            <select v-model="selectedSize">
+              <option value="">All sizes</option>
+              <option v-for="size in sizeOptions" :key="size" :value="size">{{ size }}</option>
+            </select>
+          </label>
+          <label>
+            Color
+            <select v-model="selectedColor">
+              <option value="">All colors</option>
+              <option v-for="color in colorOptions" :key="color" :value="color">{{ color }}</option>
+            </select>
+          </label>
+          <label>
+            Material
+            <select v-model="selectedMaterial">
+              <option value="">All materials</option>
+              <option v-for="material in materialOptions" :key="material" :value="material">{{ material }}</option>
+            </select>
+          </label>
+          <label>
+            Label
+            <select v-model="selectedBrand">
+              <option value="">All labels</option>
+              <option v-for="brand in brandOptions" :key="brand" :value="brand">{{ brand }}</option>
+            </select>
+          </label>
+          <label>
+            Season
+            <select v-model="selectedSeason">
+              <option value="">All seasons</option>
+              <option v-for="season in seasonOptions" :key="season" :value="season">{{ season }}</option>
             </select>
           </label>
           <div class="price-filter-grid">
@@ -39,12 +87,17 @@
               <option value="newest">Newest</option>
               <option value="price-low">Price: low to high</option>
               <option value="price-high">Price: high to low</option>
-              <option value="stock">Stock availability</option>
+              <option value="best-selling">Best selling</option>
+              <option value="discount">Discount</option>
             </select>
           </label>
           <label class="toggle-control">
             <input v-model="availableOnly" type="checkbox" @change="applyFilters" />
             Show available only
+          </label>
+          <label class="toggle-control">
+            <input v-model="saleOnly" type="checkbox" @change="applyFilters" />
+            Sale only
           </label>
           <div class="filter-actions">
             <button class="primary-button" type="submit">Apply Filters</button>
@@ -109,7 +162,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { fetchCategories, fetchProductPage } from '../api/catalog'
+import { fetchCategories, fetchCollections, fetchProductPage } from '../api/catalog'
 import EmptyState from '../components/EmptyState.vue'
 import ErrorMessage from '../components/ErrorMessage.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -125,10 +178,19 @@ const loading = ref(true)
 const error = ref('')
 const products = ref([])
 const categories = ref([])
+const collections = ref([])
 const selectedCategoryId = ref('')
+const selectedCollectionId = ref('')
+const selectedSize = ref('')
+const selectedColor = ref('')
+const selectedMaterial = ref('')
+const selectedBrand = ref('')
+const selectedSeason = ref('')
 const searchTerm = ref('')
 const sortMode = ref('name')
 const availableOnly = ref(false)
+const saleOnly = ref(false)
+const filtersOpen = ref(false)
 const minPrice = ref('')
 const maxPrice = ref('')
 const pageInfo = ref({
@@ -146,12 +208,27 @@ let toastTimer
 const selectedCategoryLabel = computed(() => {
   return categories.value.find((category) => String(category.id) === selectedCategoryId.value)?.name || ''
 })
+const selectedCollectionLabel = computed(() => {
+  return collections.value.find((collection) => String(collection.id) === selectedCollectionId.value)?.name || ''
+})
+const sizeOptions = ['One Size', 'XS', 'S', 'M', 'L', 'XL', '5', '6', '7', '8', '9', '10', '11']
+const colorOptions = ['Black', 'Ivory', 'Taupe', 'Sand', 'Sky', 'Pearl', 'Wine', 'Slate', 'Pine', 'Gold', 'Silver']
+const materialOptions = ['Cotton blend', 'Linen', 'Silk blend', 'Leather', 'Satin', 'Performance blend', 'Wool blend']
+const brandOptions = ['Aster Row', 'Linden Vale', 'Rue Forme', 'Meridian Atelier', 'Harbor Finch', 'Northline Studio', 'Kinetic Loom', 'Solace Field', 'Vale & Thread']
+const seasonOptions = ['Spring 2026', 'Summer 2026', 'Fall Winter 2026', 'Active Weekend', 'Evening Edit', 'Last Season']
 
 const hasActiveFilters = computed(() => {
   return Boolean(searchTerm.value)
     || Boolean(selectedCategoryId.value)
+    || Boolean(selectedCollectionId.value)
+    || Boolean(selectedSize.value)
+    || Boolean(selectedColor.value)
+    || Boolean(selectedMaterial.value)
+    || Boolean(selectedBrand.value)
+    || Boolean(selectedSeason.value)
     || sortMode.value !== 'name'
     || availableOnly.value
+    || saleOnly.value
     || hasPrice(minPrice.value)
     || hasPrice(maxPrice.value)
 })
@@ -160,7 +237,14 @@ const activeFilterChips = computed(() => {
   const chips = []
   if (searchTerm.value) chips.push({ key: 'search', label: `Search: ${searchTerm.value}` })
   if (selectedCategoryLabel.value) chips.push({ key: 'category', label: selectedCategoryLabel.value })
+  if (selectedCollectionLabel.value) chips.push({ key: 'collection', label: selectedCollectionLabel.value })
+  if (selectedSize.value) chips.push({ key: 'size', label: `Size: ${selectedSize.value}` })
+  if (selectedColor.value) chips.push({ key: 'color', label: selectedColor.value })
+  if (selectedMaterial.value) chips.push({ key: 'material', label: selectedMaterial.value })
+  if (selectedBrand.value) chips.push({ key: 'brand', label: selectedBrand.value })
+  if (selectedSeason.value) chips.push({ key: 'season', label: selectedSeason.value })
   if (availableOnly.value) chips.push({ key: 'available', label: 'Available only' })
+  if (saleOnly.value) chips.push({ key: 'sale', label: 'Sale only' })
   if (hasPrice(minPrice.value)) chips.push({ key: 'minPrice', label: `From ${formatCurrency(minPrice.value)}` })
   if (hasPrice(maxPrice.value)) chips.push({ key: 'maxPrice', label: `Up to ${formatCurrency(maxPrice.value)}` })
   if (sortMode.value !== 'name') chips.push({ key: 'sort', label: sortLabel.value })
@@ -172,14 +256,19 @@ const sortLabel = computed(() => {
     newest: 'Newest',
     'price-low': 'Price: low to high',
     'price-high': 'Price: high to low',
-    stock: 'Stock availability'
+    'best-selling': 'Best selling',
+    discount: 'Discount'
   }
   return labels[sortMode.value] || 'Name'
 })
 
 onMounted(async () => {
   const categoryFromQuery = Number(route.query.category)
+  const collectionFromQuery = Number(route.query.collectionId)
   selectedCategoryId.value = Number.isFinite(categoryFromQuery) && categoryFromQuery > 0 ? String(categoryFromQuery) : ''
+  selectedCollectionId.value = Number.isFinite(collectionFromQuery) && collectionFromQuery > 0 ? String(collectionFromQuery) : ''
+  searchTerm.value = route.query.search ? String(route.query.search) : ''
+  saleOnly.value = route.query.sale === 'true'
   await loadProducts(0)
 })
 
@@ -188,7 +277,9 @@ async function loadProducts(page = 0) {
   error.value = ''
   try {
     if (!categories.value.length) {
-      categories.value = await fetchCategories()
+      const [categoryData, collectionData] = await Promise.all([fetchCategories(), fetchCollections()])
+      categories.value = categoryData
+      collections.value = collectionData
     }
     const productPage = await fetchProductPage(buildQuery(page))
     products.value = productPage.content
@@ -204,6 +295,13 @@ function buildQuery(page) {
   return {
     search: searchTerm.value || undefined,
     categoryId: selectedCategoryId.value || undefined,
+    collectionId: selectedCollectionId.value || undefined,
+    sizeFilter: selectedSize.value || undefined,
+    color: selectedColor.value || undefined,
+    material: selectedMaterial.value || undefined,
+    brand: selectedBrand.value || undefined,
+    season: selectedSeason.value || undefined,
+    saleOnly: saleOnly.value || undefined,
     minPrice: hasPrice(minPrice.value) ? minPrice.value : undefined,
     maxPrice: hasPrice(maxPrice.value) ? maxPrice.value : undefined,
     availableOnly: availableOnly.value,
@@ -219,9 +317,16 @@ function applyFilters() {
 
 function clearFilters() {
   selectedCategoryId.value = ''
+  selectedCollectionId.value = ''
+  selectedSize.value = ''
+  selectedColor.value = ''
+  selectedMaterial.value = ''
+  selectedBrand.value = ''
+  selectedSeason.value = ''
   searchTerm.value = ''
   sortMode.value = 'name'
   availableOnly.value = false
+  saleOnly.value = false
   minPrice.value = ''
   maxPrice.value = ''
   loadProducts(0)
@@ -230,7 +335,14 @@ function clearFilters() {
 function removeFilter(key) {
   if (key === 'search') searchTerm.value = ''
   if (key === 'category') selectedCategoryId.value = ''
+  if (key === 'collection') selectedCollectionId.value = ''
+  if (key === 'size') selectedSize.value = ''
+  if (key === 'color') selectedColor.value = ''
+  if (key === 'material') selectedMaterial.value = ''
+  if (key === 'brand') selectedBrand.value = ''
+  if (key === 'season') selectedSeason.value = ''
   if (key === 'available') availableOnly.value = false
+  if (key === 'sale') saleOnly.value = false
   if (key === 'minPrice') minPrice.value = ''
   if (key === 'maxPrice') maxPrice.value = ''
   if (key === 'sort') sortMode.value = 'name'

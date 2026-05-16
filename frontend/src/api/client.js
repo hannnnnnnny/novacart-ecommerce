@@ -5,7 +5,7 @@ const ADMIN_LOGIN_PATH = '/admin/login'
 const DEFAULT_ERROR_MESSAGE = 'The request could not be completed.'
 
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
   headers: {
     'Content-Type': 'application/json'
   }
@@ -13,8 +13,11 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use((config) => {
   const authStore = useAuthStore()
-  if (authStore.token) {
-    config.headers.Authorization = `Bearer ${authStore.token}`
+  const token = typeof authStore.token === 'string' ? authStore.token.trim() : ''
+  if (token && token !== 'undefined' && token !== 'null') {
+    config.headers.Authorization = `Bearer ${token}`
+  } else if (config.headers.Authorization) {
+    delete config.headers.Authorization
   }
   return config
 })

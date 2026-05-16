@@ -17,6 +17,10 @@
           <option v-for="status in statuses" :key="status" :value="status">{{ formatStatus(status) }}</option>
         </select>
       </label>
+      <label>
+        Region
+        <input v-model.trim="regionFilter" placeholder="Country or region" />
+      </label>
     </div>
     <LoadingState v-if="loading" message="Loading orders..." />
     <ErrorMessage v-else-if="error" :message="error" />
@@ -31,7 +35,10 @@
           <tr>
             <th>Order</th>
             <th>Customer</th>
-            <th>Status</th>
+            <th>Payment</th>
+            <th>Fulfillment</th>
+            <th>Refund</th>
+            <th>Region</th>
             <th>Total</th>
             <th>Placed</th>
             <th>Actions</th>
@@ -39,12 +46,15 @@
         </thead>
         <tbody>
           <tr v-for="order in filteredOrders" :key="order.id">
-            <td>#{{ order.id }}</td>
+            <td>{{ order.orderNumber || `#${order.id}` }}</td>
             <td>
               <strong>{{ order.customerName }}</strong>
-              <span>{{ order.customerEmail }}</span>
+              <span>{{ order.customerEmail }} / {{ order.customerPhone || 'No phone' }}</span>
             </td>
+            <td><StatusBadge :value="order.paymentStatus" /></td>
             <td><StatusBadge :value="order.status" /></td>
+            <td><StatusBadge :value="order.refundStatus" /></td>
+            <td>{{ order.region || order.city }}, {{ order.country }}</td>
             <td>{{ formatCurrency(order.totalAmount) }}</td>
             <td>{{ formatDate(order.createdAt) }}</td>
             <td><RouterLink class="text-link" :to="`/admin/orders/${order.id}`">View</RouterLink></td>
@@ -72,14 +82,19 @@ const error = ref('')
 const orders = ref([])
 const searchTerm = ref('')
 const statusFilter = ref('all')
+const regionFilter = ref('')
 const filteredOrders = computed(() => {
   const query = searchTerm.value.toLowerCase()
+  const regionQuery = regionFilter.value.toLowerCase()
   return orders.value.filter((order) => {
     const matchesQuery = query
-      ? `#${order.id} ${order.customerName} ${order.customerEmail}`.toLowerCase().includes(query)
+      ? `${order.orderNumber || ''} #${order.id} ${order.customerName} ${order.customerEmail}`.toLowerCase().includes(query)
       : true
     const matchesStatus = statusFilter.value === 'all' || order.status === statusFilter.value
-    return matchesQuery && matchesStatus
+    const matchesRegion = regionQuery
+      ? `${order.region || ''} ${order.city || ''} ${order.country || ''}`.toLowerCase().includes(regionQuery)
+      : true
+    return matchesQuery && matchesStatus && matchesRegion
   })
 })
 

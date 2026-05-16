@@ -13,12 +13,15 @@
         </div>
         <div class="status-pair">
           <StatusBadge :value="order.paymentStatus" :label="formatStatus(order.paymentStatus)" />
+          <StatusBadge :value="order.refundStatus" :label="formatStatus(order.refundStatus)" />
           <StatusBadge :value="order.status" :label="formatStatus(order.status)" />
         </div>
         <p class="muted">Payment was handled by NovaCart demo checkout. No real card was charged.</p>
+        <p class="muted">Refund requests can be submitted within 30 days for eligible paid orders.</p>
         <div class="success-actions">
           <RouterLink class="primary-button" to="/products">Continue Shopping</RouterLink>
-          <RouterLink class="secondary-button" to="/">Return Home</RouterLink>
+          <RouterLink class="secondary-button" :to="{ name: 'support', query: { orderNumber: order.orderNumber, email: order.customerEmail } }">Customer Support</RouterLink>
+          <RouterLink class="secondary-button" :to="{ name: 'refund-request', query: { orderNumber: order.orderNumber, email: order.customerEmail } }">Request Refund</RouterLink>
         </div>
       </section>
 
@@ -26,7 +29,7 @@
         <h2>Order Summary</h2>
         <div class="checkout-items">
           <div v-for="item in order.items" :key="item.id" class="checkout-item">
-            <span>{{ item.productName }} x {{ item.quantity }}</span>
+            <span>{{ item.productName }}<small v-if="item.selectedSize || item.selectedColor"> {{ item.selectedSize }} {{ item.selectedColor }}</small> x {{ item.quantity }}</span>
             <strong>{{ formatCurrency(item.lineTotal) }}</strong>
           </div>
         </div>
@@ -42,11 +45,16 @@
           <span>Estimated Tax</span>
           <strong>{{ formatCurrency(order.taxAmount) }}</strong>
         </div>
+        <div v-if="Number(order.discountAmount) > 0" class="summary-line">
+          <span>Discounts</span>
+          <strong>{{ formatCurrency(order.discountAmount) }}</strong>
+        </div>
         <div class="summary-line total-line">
           <span>Total</span>
           <strong>{{ formatCurrency(order.totalAmount) }}</strong>
         </div>
-        <p class="muted">{{ formatStatus(order.shippingMethod) }} selected. A merchant can update the order status from the admin workspace.</p>
+        <p class="muted">{{ formatStatus(order.shippingMethod) }} selected for {{ order.shippingAddress }}, {{ order.city }}, {{ order.region }}, {{ order.country }}.</p>
+        <p class="muted">Customer service can look up this order by order number and email.</p>
       </aside>
     </div>
   </section>

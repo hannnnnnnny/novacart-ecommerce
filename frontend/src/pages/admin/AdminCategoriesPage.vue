@@ -33,6 +33,14 @@
           Description
           <textarea v-model.trim="form.description" maxlength="500" rows="4" placeholder="Describe the category."></textarea>
         </label>
+        <label>
+          Display Image URL
+          <input v-model.trim="form.imageUrl" maxlength="600" placeholder="/catalog/women.svg" />
+        </label>
+        <label>
+          Sort Order
+          <input v-model.number="form.sortOrder" min="0" type="number" />
+        </label>
         <label class="checkbox-field">
           <input v-model="form.active" type="checkbox" />
           Active in storefront
@@ -69,6 +77,7 @@
                 <td>
                   <strong>{{ category.name }}</strong>
                   <span>{{ category.description || 'No description provided.' }}</span>
+                  <span v-if="category.imageUrl">{{ category.imageUrl }}</span>
                 </td>
                 <td>{{ category.slug }}</td>
                 <td>
@@ -119,6 +128,8 @@ const form = reactive({
   name: '',
   slug: '',
   description: '',
+  imageUrl: '',
+  sortOrder: 0,
   active: true
 })
 const filteredCategories = computed(() => {
@@ -151,6 +162,8 @@ function editCategory(category) {
   form.name = category.name
   form.slug = category.slug
   form.description = category.description || ''
+  form.imageUrl = category.imageUrl || ''
+  form.sortOrder = category.sortOrder || 0
   form.active = category.active
   formError.value = ''
 }
@@ -160,6 +173,8 @@ function resetForm() {
   form.name = ''
   form.slug = ''
   form.description = ''
+  form.imageUrl = ''
+  form.sortOrder = 0
   form.active = true
   formError.value = ''
 }
@@ -179,7 +194,9 @@ async function submitCategory() {
   const payload = {
     ...form,
     slug: form.slug || null,
-    description: form.description || null
+    description: form.description || null,
+    imageUrl: form.imageUrl || null,
+    sortOrder: Number(form.sortOrder) || 0
   }
 
   try {

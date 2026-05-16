@@ -20,8 +20,8 @@
           <span>Retail categories</span>
         </article>
         <article>
-          <strong>Demo</strong>
-          <span>Safe payment flow</span>
+          <strong>{{ collections.length || '6' }}</strong>
+          <span>Seasonal collections</span>
         </article>
       </div>
     </section>
@@ -55,7 +55,18 @@
       />
       <LoadingState v-if="loading" message="Loading featured products..." />
       <ErrorMessage v-else-if="error" :message="error" />
-      <div v-else class="product-grid">
+      <div v-else class="campaign-grid">
+        <RouterLink
+          v-for="collection in featuredCollections"
+          :key="collection.id"
+          class="campaign-card"
+          :to="{ name: 'products', query: { collectionId: collection.id } }"
+        >
+          <strong>{{ collection.name }}</strong>
+          <span>{{ collection.description }}</span>
+        </RouterLink>
+      </div>
+      <div v-if="!loading && !error" class="product-grid featured-product-row">
         <ProductCard v-for="product in featuredProducts" :key="product.id" :product="product" />
       </div>
     </section>
@@ -97,7 +108,7 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { ShieldCheck, Sparkles, Truck } from 'lucide-vue-next'
-import { fetchCategories, fetchProducts } from '../api/catalog'
+import { fetchCategories, fetchFeaturedCollections, fetchProducts } from '../api/catalog'
 import { getApiError } from '../api/client'
 import ErrorMessage from '../components/ErrorMessage.vue'
 import LoadingState from '../components/LoadingState.vue'
@@ -108,7 +119,9 @@ const loading = ref(true)
 const error = ref('')
 const products = ref([])
 const categories = ref([])
+const collections = ref([])
 const featuredProducts = computed(() => products.value.slice(0, 3))
+const featuredCollections = computed(() => collections.value.slice(0, 3))
 const valueCards = [
   {
     title: 'Fashion Checkout',
@@ -129,8 +142,9 @@ const valueCards = [
 
 onMounted(async () => {
   try {
-    const [categoryData, productData] = await Promise.all([fetchCategories(), fetchProducts()])
+    const [categoryData, collectionData, productData] = await Promise.all([fetchCategories(), fetchFeaturedCollections(), fetchProducts()])
     categories.value = categoryData
+    collections.value = collectionData
     products.value = productData
   } catch (requestError) {
     error.value = getApiError(requestError, 'Storefront content could not be loaded.')

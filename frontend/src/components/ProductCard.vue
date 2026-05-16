@@ -13,13 +13,19 @@
       </RouterLink>
       <p v-if="product.category?.name" class="product-card-category">{{ product.category.name }}</p>
       <p>{{ product.description }}</p>
-      <div v-if="product.tags?.length" class="mini-tag-row">
+      <div v-if="product.discountPercent" class="mini-tag-row">
+        <span>{{ product.discountPercent }}% off</span>
+        <span v-if="product.collection?.name">{{ product.collection.name }}</span>
+      </div>
+      <div v-else-if="product.tags?.length" class="mini-tag-row">
         <span v-for="tag in product.tags.slice(0, 2)" :key="tag">{{ tag }}</span>
       </div>
       <div class="card-row">
         <div class="price-stack">
-          <strong>{{ formatCurrency(product.price) }}</strong>
-          <span v-if="product.compareAtPrice">{{ formatCurrency(product.compareAtPrice) }}</span>
+          <strong>{{ formatCurrency(product.effectivePrice ?? product.price) }}</strong>
+          <span v-if="product.compareAtPrice || Number(product.discountAmount) > 0">
+            {{ formatCurrency(product.compareAtPrice || product.price) }}
+          </span>
         </div>
         <div class="card-actions">
           <RouterLink class="text-link" :to="`/products/${product.id}`">Details</RouterLink>

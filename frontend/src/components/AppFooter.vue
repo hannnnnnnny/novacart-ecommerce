@@ -11,6 +11,8 @@
     <nav class="footer-nav" aria-label="Footer navigation">
       <RouterLink to="/products">Browse Fashion</RouterLink>
       <RouterLink to="/cart">Cart</RouterLink>
+      <RouterLink to="/support">Support</RouterLink>
+      <RouterLink to="/refund-request">Refunds</RouterLink>
       <RouterLink to="/admin/login">Admin Login</RouterLink>
     </nav>
   </footer>

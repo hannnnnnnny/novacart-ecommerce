@@ -15,6 +15,12 @@
         <MetricCard label="Total Orders" :value="metrics.totalOrders || 0" detail="Orders received" />
         <MetricCard label="Pending Orders" :value="metrics.pendingOrders || 0" detail="Need review" />
         <MetricCard label="Revenue" :value="formatCurrency(metrics.revenue)" detail="Excluding cancelled orders" />
+        <MetricCard label="Daily Sales" :value="formatCurrency(analytics.dailySales)" detail="Last 24 hours" />
+        <MetricCard label="Weekly Sales" :value="formatCurrency(analytics.weeklySales)" detail="Last 7 days" />
+        <MetricCard label="Monthly Sales" :value="formatCurrency(analytics.monthlySales)" detail="Last 30 days" />
+        <MetricCard label="Yearly Sales" :value="formatCurrency(analytics.yearlySales)" detail="Last 365 days" />
+        <MetricCard label="Average Order Value" :value="formatCurrency(analytics.averageOrderValue)" detail="Paid orders" />
+        <MetricCard label="Refund Requests" :value="analytics.refundRequests || 0" detail="Customer care queue" />
       </div>
 
       <section class="operations-strip" aria-label="Admin shortcuts">
@@ -30,6 +36,44 @@
           <strong>Check Inventory</strong>
           <span>Find low-stock products before checkout fails.</span>
         </RouterLink>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="admin-page-header">
+          <h2>Sales Trend</h2>
+          <RouterLink class="text-link" to="/admin/analytics">Open analytics</RouterLink>
+        </div>
+        <div class="trend-bars">
+          <article v-for="point in analytics.salesTrend" :key="point.date" class="trend-bar">
+            <span>{{ shortDate(point.date) }}</span>
+            <div><i :style="{ height: barHeight(point.revenue) }"></i></div>
+            <strong>{{ formatCurrency(point.revenue) }}</strong>
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-section analytics-grid">
+        <article>
+          <h2>Top Regions</h2>
+          <p v-for="region in analytics.topRegions" :key="region.label" class="summary-line">
+            <span>{{ region.label }}</span><strong>{{ formatCurrency(region.revenue) }}</strong>
+          </p>
+          <p v-if="!analytics.topRegions?.length" class="muted">Regional demand appears after checkout.</p>
+        </article>
+        <article>
+          <h2>Customer Preferences</h2>
+          <p v-for="preference in analytics.customerPreferenceOverview" :key="preference.label" class="summary-line">
+            <span>{{ preference.label }}</span><strong>{{ preference.count }}</strong>
+          </p>
+          <p v-if="!analytics.customerPreferenceOverview?.length" class="muted">Size, color, and category signals appear after orders.</p>
+        </article>
+        <article>
+          <h2>Best Sellers</h2>
+          <p v-for="product in analytics.bestSellingProducts" :key="product.productId" class="summary-line">
+            <span>{{ product.productName }}</span><strong>{{ product.unitsSold }}</strong>
+          </p>
+          <p v-if="!analytics.bestSellingProducts?.length" class="muted">Best sellers appear after checkout.</p>
+        </article>
       </section>
 
       <section class="dashboard-section">
@@ -86,7 +130,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { fetchAdminOrders, fetchDashboardMetrics, fetchInventoryWarnings } from '../../api/admin'
+import { fetchAdminAnalytics, fetchAdminOrders, fetchDashboardMetrics, fetchInventoryWarnings } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
@@ -99,18 +143,24 @@ import { formatCurrency } from '../../utils/format'
 const loading = ref(true)
 const error = ref('')
 const metrics = ref({})
+const analytics = ref({})
 const orders = ref([])
 const warnings = ref([])
 const recentOrders = computed(() => orders.value.slice(0, 5))
+const maxTrendRevenue = computed(() => {
+  return Math.max(...(analytics.value.salesTrend || []).map((point) => Number(point.revenue)), 1)
+})
 
 onMounted(async () => {
   try {
-    const [metricData, orderData, warningData] = await Promise.all([
+    const [metricData, analyticsData, orderData, warningData] = await Promise.all([
       fetchDashboardMetrics(),
+      fetchAdminAnalytics(),
       fetchAdminOrders(),
       fetchInventoryWarnings(5)
     ])
     metrics.value = metricData
+    analytics.value = analyticsData
     orders.value = orderData
     warnings.value = warningData
   } catch (requestError) {
@@ -119,4 +169,12 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function barHeight(value) {
+  return `${Math.max(8, (Number(value) / maxTrendRevenue.value) * 120)}px`
+}
+
+function shortDate(value) {
+  return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))
+}
 </script>

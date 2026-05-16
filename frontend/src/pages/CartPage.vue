@@ -14,20 +14,27 @@
     </EmptyState>
     <div v-else class="cart-layout">
       <div class="cart-items">
-        <article v-for="item in cartStore.items" :key="item.productId" class="cart-item">
+        <article v-for="item in cartStore.items" :key="item.lineKey" class="cart-item">
           <img :src="item.imageUrl" :alt="item.name" />
           <div class="cart-item-body">
             <div>
               <h2>{{ item.name }}</h2>
-              <p class="muted">{{ item.stockQuantity }} available</p>
-              <strong>{{ formatCurrency(item.price) }}</strong>
+              <p class="muted">
+                <span v-if="item.selectedSize">Size {{ item.selectedSize }}</span>
+                <span v-if="item.selectedColor"> / {{ item.selectedColor }}</span>
+                <span> / {{ item.stockQuantity }} available</span>
+              </p>
+              <div class="price-stack">
+                <strong>{{ formatCurrency(item.price) }}</strong>
+                <span v-if="item.compareAtPrice || item.discountAmount">{{ formatCurrency(item.compareAtPrice || item.originalPrice) }}</span>
+              </div>
             </div>
             <div class="cart-item-controls">
               <QuantityStepper
                 :model-value="item.quantity"
                 :max="Math.max(item.stockQuantity, 1)"
                 :label="`Quantity for ${item.name}`"
-                @update:model-value="updateQuantity(item.productId, $event)"
+                @update:model-value="updateQuantity(item.lineKey, $event)"
               />
               <button class="text-button danger" type="button" @click="removeItem(item)">Remove</button>
             </div>
@@ -44,6 +51,10 @@
         <div class="summary-line">
           <span>Subtotal</span>
           <strong>{{ formatCurrency(cartStore.subtotal) }}</strong>
+        </div>
+        <div v-if="cartStore.discountTotal" class="summary-line">
+          <span>Discounts</span>
+          <strong>{{ formatCurrency(cartStore.discountTotal) }}</strong>
         </div>
         <p class="muted">Taxes and shipping are estimated in the demo checkout.</p>
         <p class="checkout-note compact-note">
@@ -81,7 +92,7 @@ function updateQuantity(productId, quantity) {
 }
 
 function removeItem(item) {
-  cartStore.removeItem(item.productId)
+  cartStore.removeItem(item.lineKey)
   showToast(`${item.name} removed from cart.`)
 }
 

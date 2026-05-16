@@ -4,6 +4,14 @@ export async function fetchCategories() {
   return getApiData(await apiClient.get('/public/categories'))
 }
 
+export async function fetchCollections() {
+  return getApiData(await apiClient.get('/public/collections'))
+}
+
+export async function fetchFeaturedCollections() {
+  return getApiData(await apiClient.get('/public/collections/featured'))
+}
+
 export async function fetchProductPage(params = {}) {
   const data = getApiData(await apiClient.get('/public/products', { params }))
   return normalizeProductPage(data)

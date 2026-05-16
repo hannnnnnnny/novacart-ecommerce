@@ -30,6 +30,11 @@
               <input v-model.trim="form.customerEmail" :aria-invalid="Boolean(submitted && formErrors.customerEmail)" type="email" placeholder="morgan@example.com" />
               <small v-if="submitted && formErrors.customerEmail" class="field-error">{{ formErrors.customerEmail }}</small>
             </label>
+            <label :class="{ 'has-field-error': submitted && formErrors.customerPhone }">
+              Phone
+              <input v-model.trim="form.customerPhone" :aria-invalid="Boolean(submitted && formErrors.customerPhone)" placeholder="+64 20 0000 0000" />
+              <small v-if="submitted && formErrors.customerPhone" class="field-error">{{ formErrors.customerPhone }}</small>
+            </label>
           </div>
         </section>
         <section class="form-section">
@@ -44,6 +49,11 @@
               City
               <input v-model.trim="form.city" :aria-invalid="Boolean(submitted && formErrors.city)" placeholder="Auckland" />
               <small v-if="submitted && formErrors.city" class="field-error">{{ formErrors.city }}</small>
+            </label>
+            <label :class="{ 'has-field-error': submitted && formErrors.region }">
+              Region / State
+              <input v-model.trim="form.region" :aria-invalid="Boolean(submitted && formErrors.region)" placeholder="Auckland" />
+              <small v-if="submitted && formErrors.region" class="field-error">{{ formErrors.region }}</small>
             </label>
             <label :class="{ 'has-field-error': submitted && formErrors.postalCode }">
               Postal Code
@@ -90,12 +100,19 @@
           </div>
           <p class="demo-payment-note">No real card data is collected or processed in NovaCart.</p>
         </section>
+        <section class="form-section">
+          <label class="checkbox-field" :class="{ 'has-field-error': submitted && formErrors.refundPolicyAcknowledged }">
+            <input v-model="form.refundPolicyAcknowledged" type="checkbox" />
+            I understand eligible paid orders can request a refund within 30 days.
+          </label>
+          <small v-if="submitted && formErrors.refundPolicyAcknowledged" class="field-error">{{ formErrors.refundPolicyAcknowledged }}</small>
+        </section>
       </div>
       <aside class="summary-panel order-summary-card">
         <h2>Order Summary</h2>
         <div class="checkout-items">
-          <div v-for="item in cartStore.items" :key="item.productId" class="checkout-item">
-            <span>{{ item.name }} x {{ item.quantity }}</span>
+          <div v-for="item in cartStore.items" :key="item.lineKey" class="checkout-item">
+            <span>{{ item.name }}<small v-if="item.selectedSize || item.selectedColor"> {{ item.selectedSize }} {{ item.selectedColor }}</small> x {{ item.quantity }}</span>
             <strong>{{ formatCurrency(item.price * item.quantity) }}</strong>
           </div>
         </div>
@@ -106,6 +123,10 @@
         <div class="summary-line">
           <span>Subtotal</span>
           <strong>{{ formatCurrency(cartStore.subtotal) }}</strong>
+        </div>
+        <div v-if="cartStore.discountTotal" class="summary-line">
+          <span>Discounts</span>
+          <strong>{{ formatCurrency(cartStore.discountTotal) }}</strong>
         </div>
         <div class="summary-line">
           <span>Shipping</span>
@@ -151,12 +172,15 @@ const error = ref('')
 const form = reactive({
   customerName: '',
   customerEmail: '',
+  customerPhone: '',
   shippingAddress: '',
   city: '',
+  region: '',
   postalCode: '',
   country: '',
   shippingMethod: 'STANDARD',
-  paymentMethod: 'Demo Card Approved'
+  paymentMethod: 'Demo Card Approved',
+  refundPolicyAcknowledged: false
 })
 const shippingOptions = [
   {
@@ -179,7 +203,17 @@ const shippingOptions = [
   }
 ]
 const formIsComplete = computed(() => {
-  return Object.values(form).every((value) => String(value).trim().length > 0)
+  return form.customerName
+    && form.customerEmail
+    && form.customerPhone
+    && form.shippingAddress
+    && form.city
+    && form.region
+    && form.postalCode
+    && form.country
+    && form.shippingMethod
+    && form.paymentMethod
+    && form.refundPolicyAcknowledged
 })
 const emailIsValid = computed(() => {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.customerEmail)
@@ -194,10 +228,13 @@ const formErrors = computed(() => ({
     : emailIsValid.value
       ? ''
       : 'Enter a valid email address.',
+  customerPhone: form.customerPhone ? '' : 'Phone number is required.',
   shippingAddress: form.shippingAddress ? '' : 'Shipping address is required.',
   city: form.city ? '' : 'City is required.',
+  region: form.region ? '' : 'Region or state is required.',
   postalCode: form.postalCode ? '' : 'Postal code is required.',
-  country: form.country ? '' : 'Country is required.'
+  country: form.country ? '' : 'Country is required.',
+  refundPolicyAcknowledged: form.refundPolicyAcknowledged ? '' : 'Acknowledge the refund policy.'
 }))
 const formIsValid = computed(() => {
   return formIsComplete.value && emailIsValid.value
@@ -234,6 +271,8 @@ async function submitOrder() {
       simulatePaymentFailure: form.paymentMethod === 'Demo Card Declined',
       items: cartStore.items.map((item) => ({
         productId: item.productId,
+        selectedSize: item.selectedSize || null,
+        selectedColor: item.selectedColor || null,
         quantity: item.quantity
       }))
     })

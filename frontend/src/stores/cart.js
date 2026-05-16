@@ -9,7 +9,8 @@ export const useCartStore = defineStore('cart', {
   }),
   getters: {
     itemCount: (state) => state.items.reduce((total, item) => total + item.quantity, 0),
-    subtotal: (state) => state.items.reduce((total, item) => total + Number(item.price) * item.quantity, 0)
+    subtotal: (state) => state.items.reduce((total, item) => total + Number(item.price) * item.quantity, 0),
+    discountTotal: (state) => state.items.reduce((total, item) => total + Number(item.discountAmount || 0) * item.quantity, 0)
   },
   actions: {
     loadCart() {
@@ -26,24 +27,38 @@ export const useCartStore = defineStore('cart', {
         localStorage.removeItem(STORAGE_KEY)
       }
     },
-    addItem(product, quantity = 1) {
+    addItem(product, quantity = 1, options = {}) {
       const stockQuantity = normalizeStock(product?.stockQuantity)
       if (!product || stockQuantity < MIN_QUANTITY) return
 
+      const selectedSize = clean(options.selectedSize) || product.sizes?.[0] || ''
+      const selectedColor = clean(options.selectedColor) || product.colors?.[0] || ''
       const requestedQuantity = Math.min(normalizeQuantity(quantity), stockQuantity)
+      const lineKey = itemKey(product.id, selectedSize, selectedColor)
 
-      const existingItem = this.items.find((item) => item.productId === product.id)
+      const existingItem = this.items.find((item) => item.lineKey === lineKey)
       if (existingItem) {
         existingItem.name = product.name
-        existingItem.price = normalizePrice(product.price)
+        existingItem.price = normalizePrice(product.effectivePrice ?? product.price)
+        existingItem.originalPrice = normalizePrice(product.price)
+        existingItem.compareAtPrice = normalizeNullablePrice(product.compareAtPrice)
+        existingItem.discountAmount = normalizePrice(product.discountAmount)
+        existingItem.discountPercent = product.discountPercent || null
         existingItem.imageUrl = product.imageUrl
         existingItem.stockQuantity = stockQuantity
         existingItem.quantity = Math.min(existingItem.quantity + requestedQuantity, stockQuantity)
       } else {
         this.items.push({
+          lineKey,
           productId: product.id,
           name: product.name,
-          price: normalizePrice(product.price),
+          price: normalizePrice(product.effectivePrice ?? product.price),
+          originalPrice: normalizePrice(product.price),
+          compareAtPrice: normalizeNullablePrice(product.compareAtPrice),
+          discountAmount: normalizePrice(product.discountAmount),
+          discountPercent: product.discountPercent || null,
+          selectedSize,
+          selectedColor,
           imageUrl: product.imageUrl,
           stockQuantity,
           quantity: requestedQuantity
@@ -51,21 +66,27 @@ export const useCartStore = defineStore('cart', {
       }
       this.persist()
     },
-    updateQuantity(productId, quantity) {
+    updateQuantity(lineKeyOrProductId, quantity) {
       if (!Number.isFinite(quantity) || quantity < 1) {
-        this.removeItem(productId)
+        this.removeItem(lineKeyOrProductId)
         return
       }
 
-      const item = this.items.find((entry) => entry.productId === productId)
+      const item = this.findItem(lineKeyOrProductId)
       if (item) {
         item.quantity = Math.min(normalizeQuantity(quantity), item.stockQuantity)
         this.persist()
       }
     },
-    removeItem(productId) {
-      this.items = this.items.filter((item) => item.productId !== productId)
+    removeItem(lineKeyOrProductId) {
+      const item = this.findItem(lineKeyOrProductId)
+      if (!item) return
+      this.items = this.items.filter((entry) => entry.lineKey !== item.lineKey)
       this.persist()
+    },
+    findItem(lineKeyOrProductId) {
+      return this.items.find((entry) => entry.lineKey === lineKeyOrProductId)
+        || this.items.find((entry) => entry.productId === lineKeyOrProductId)
     },
     clearCart() {
       this.items = []
@@ -86,14 +107,31 @@ function normalizeStoredItem(item) {
     return null
   }
 
+  const selectedSize = clean(item.selectedSize)
+  const selectedColor = clean(item.selectedColor)
   return {
+    lineKey: item.lineKey || itemKey(productId, selectedSize, selectedColor),
     productId,
     name: String(item.name),
     price,
+    originalPrice: normalizePrice(item.originalPrice ?? item.price),
+    compareAtPrice: normalizeNullablePrice(item.compareAtPrice),
+    discountAmount: normalizePrice(item.discountAmount),
+    discountPercent: item.discountPercent || null,
+    selectedSize,
+    selectedColor,
     imageUrl: item.imageUrl || '',
     stockQuantity,
     quantity: Math.min(normalizeQuantity(item.quantity), stockQuantity)
   }
+}
+
+function itemKey(productId, selectedSize, selectedColor) {
+  return [productId, clean(selectedSize), clean(selectedColor)].join('|')
+}
+
+function clean(value) {
+  return value ? String(value).trim() : ''
 }
 
 function normalizeQuantity(value) {
@@ -112,4 +150,10 @@ function normalizePrice(value) {
   const price = Number(value)
   if (!Number.isFinite(price)) return 0
   return Math.max(0, price)
+}
+
+function normalizeNullablePrice(value) {
+  const price = Number(value)
+  if (!Number.isFinite(price) || price <= 0) return null
+  return price
 }

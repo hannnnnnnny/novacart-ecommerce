@@ -39,6 +39,15 @@
           </select>
         </label>
         <label>
+          Collection
+          <select v-model.number="form.collectionId">
+            <option value="">No collection</option>
+            <option v-for="collection in collections" :key="collection.id" :value="collection.id">
+              {{ collection.name }}
+            </option>
+          </select>
+        </label>
+        <label>
           Price
           <input v-model.number="form.price" required min="0.01" step="0.01" type="number" />
         </label>
@@ -66,9 +75,38 @@
           Tags
           <input v-model.trim="form.tagsText" placeholder="linen, capsule, workwear" />
         </label>
+        <label>
+          Sizes
+          <input v-model.trim="form.sizesText" placeholder="XS, S, M, L, XL" />
+        </label>
+        <label>
+          Colors
+          <input v-model.trim="form.colorsText" placeholder="Black, Ivory, Taupe" />
+        </label>
+        <label>
+          Material
+          <input v-model.trim="form.material" maxlength="120" placeholder="Cotton blend" />
+        </label>
+        <label>
+          Season
+          <input v-model.trim="form.season" maxlength="80" placeholder="Spring 2026" />
+        </label>
+        <label>
+          Gender Target
+          <select v-model="form.genderTarget">
+            <option value="UNISEX">Unisex</option>
+            <option value="WOMEN">Women</option>
+            <option value="MEN">Men</option>
+            <option value="KIDS">Kids</option>
+          </select>
+        </label>
         <label class="wide-field">
           Description
           <textarea v-model.trim="form.description" required maxlength="2000" rows="6" placeholder="Describe the product clearly."></textarea>
+        </label>
+        <label class="wide-field">
+          Care Instructions
+          <textarea v-model.trim="form.careInstructions" maxlength="800" rows="3" placeholder="Care guidance for customers."></textarea>
         </label>
       </div>
       <aside class="summary-panel product-publish-panel">
@@ -112,6 +150,7 @@ import { useRoute, useRouter } from 'vue-router'
 import {
   createAdminProduct,
   fetchAdminCategories,
+  fetchAdminCollections,
   fetchAdminProduct,
   updateAdminProduct
 } from '../../api/admin'
@@ -127,6 +166,7 @@ const loading = ref(true)
 const submitting = ref(false)
 const error = ref('')
 const categories = ref([])
+const collections = ref([])
 const isEditing = computed(() => Boolean(route.params.id))
 const form = reactive({
   name: '',
@@ -141,10 +181,17 @@ const form = reactive({
   imageUrl: '',
   imageGalleryText: '',
   tagsText: '',
+  sizesText: '',
+  colorsText: '',
+  material: '',
+  careInstructions: '',
+  season: '',
+  genderTarget: 'UNISEX',
   featured: false,
   status: 'ACTIVE',
   active: true,
-  categoryId: ''
+  categoryId: '',
+  collectionId: ''
 })
 const formIsValid = computed(() => {
   return form.name
@@ -178,7 +225,9 @@ const stockLabel = computed(() => {
 
 onMounted(async () => {
   try {
-    categories.value = await fetchAdminCategories()
+    const [categoryData, collectionData] = await Promise.all([fetchAdminCategories(), fetchAdminCollections()])
+    categories.value = categoryData
+    collections.value = collectionData
     if (isEditing.value) {
       const product = await fetchAdminProduct(route.params.id)
       form.name = product.name
@@ -193,10 +242,17 @@ onMounted(async () => {
       form.imageUrl = product.imageUrl
       form.imageGalleryText = (product.imageGallery || []).join('\n')
       form.tagsText = (product.tags || []).join(', ')
+      form.sizesText = (product.sizes || []).join(', ')
+      form.colorsText = (product.colors || []).join(', ')
+      form.material = product.material || ''
+      form.careInstructions = product.careInstructions || ''
+      form.season = product.season || ''
+      form.genderTarget = product.genderTarget || 'UNISEX'
       form.featured = Boolean(product.featured)
       form.status = product.status || 'ACTIVE'
       form.active = product.active
       form.categoryId = product.category.id
+      form.collectionId = product.collection?.id || ''
     }
   } catch (requestError) {
     error.value = getApiError(requestError, 'Product form could not be loaded.')
@@ -219,10 +275,19 @@ async function submitProduct() {
     sku: form.sku || null,
     brand: form.brand || null,
     imageGallery: splitLines(form.imageGalleryText),
-    tags: splitTags(form.tagsText)
+    tags: splitTags(form.tagsText),
+    sizes: splitTags(form.sizesText),
+    colors: splitTags(form.colorsText),
+    material: form.material || null,
+    careInstructions: form.careInstructions || null,
+    season: form.season || null,
+    genderTarget: form.genderTarget || 'UNISEX',
+    collectionId: form.collectionId || null
   }
   delete payload.imageGalleryText
   delete payload.tagsText
+  delete payload.sizesText
+  delete payload.colorsText
 
   try {
     if (isEditing.value) {
