@@ -41,6 +41,17 @@
           </select>
         </label>
         <p class="muted wide-field">{{ targetHelpText }}</p>
+        <section class="affected-products-panel wide-field" aria-label="Affected products preview">
+          <div>
+            <strong>{{ affectedProducts.length }} affected products</strong>
+            <span>{{ affectedProductsDescription }}</span>
+          </div>
+          <ul v-if="affectedProducts.length">
+            <li v-for="product in affectedProducts.slice(0, 8)" :key="product.id">
+              {{ product.name }} / {{ product.category?.name }} / {{ product.collection?.name || 'No collection' }}
+            </li>
+          </ul>
+        </section>
         <label>Start Date<input v-model="form.startDate" type="date" /></label>
         <label>End Date<input v-model="form.endDate" type="date" /></label>
         <label class="checkbox-field"><input v-model="form.active" type="checkbox" /> Active</label>
@@ -138,6 +149,38 @@ const targetHelpText = computed(() => {
     TAGS: 'Enter one or more comma-separated tags such as sale, linen, or active-weekend.'
   }
   return labels[form.targetType] || ''
+})
+const affectedProducts = computed(() => {
+  const targets = targetValuesForPayload.value.map((target) => target.toLowerCase())
+  if (!targets.length) return []
+
+  return products.value.filter((product) => {
+    if (form.targetType === 'SELECTED_PRODUCTS') {
+      return targets.includes(String(product.id).toLowerCase())
+    }
+    if (form.targetType === 'CATEGORY') {
+      return targets.includes(String(product.category?.id).toLowerCase())
+        || targets.includes(String(product.category?.slug || '').toLowerCase())
+        || targets.includes(String(product.category?.name || '').toLowerCase())
+    }
+    if (form.targetType === 'COLLECTION') {
+      return targets.includes(String(product.collection?.id).toLowerCase())
+        || targets.includes(String(product.collection?.slug || '').toLowerCase())
+        || targets.includes(String(product.collection?.name || '').toLowerCase())
+    }
+    if (form.targetType === 'SEASON') {
+      return targets.includes(String(product.season || '').toLowerCase())
+    }
+    if (form.targetType === 'TAGS') {
+      return product.tags?.some((tag) => targets.includes(String(tag).toLowerCase()))
+    }
+    return false
+  })
+})
+const affectedProductsDescription = computed(() => {
+  if (!targetValuesForPayload.value.length) return 'Choose targets to preview the promotion scope.'
+  if (!affectedProducts.value.length) return 'No current products match these targets yet.'
+  return 'Preview is based on the currently loaded merchant catalog.'
 })
 
 onMounted(loadPromotions)

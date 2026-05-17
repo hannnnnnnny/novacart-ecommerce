@@ -25,6 +25,28 @@
           <option value="out-of-stock">Out of stock</option>
         </select>
       </label>
+      <label>
+        Category
+        <select v-model="categoryFilter">
+          <option value="all">All categories</option>
+          <option v-for="category in categories" :key="category.id" :value="String(category.id)">
+            {{ category.name }}
+          </option>
+        </select>
+      </label>
+      <label>
+        Collection
+        <select v-model="collectionFilter">
+          <option value="all">All collections</option>
+          <option v-for="collection in collections" :key="collection.id" :value="String(collection.id)">
+            {{ collection.name }}
+          </option>
+        </select>
+      </label>
+      <label class="toggle-control">
+        <input v-model="saleFilter" type="checkbox" />
+        Sale products
+      </label>
       <button class="secondary-button" type="button" :disabled="!selectedIds.length" @click="bulkArchive">
         Archive Selected
       </button>
@@ -105,7 +127,7 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { createAdminPromotion, fetchAdminCollections, fetchAdminProducts, updateAdminProduct } from '../../api/admin'
+import { createAdminPromotion, fetchAdminCategories, fetchAdminCollections, fetchAdminProducts, updateAdminProduct } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
@@ -117,9 +139,13 @@ import { formatCurrency, formatStatus } from '../../utils/format'
 const loading = ref(true)
 const error = ref('')
 const products = ref([])
+const categories = ref([])
 const collections = ref([])
 const searchTerm = ref('')
 const statusFilter = ref('all')
+const categoryFilter = ref('all')
+const collectionFilter = ref('all')
+const saleFilter = ref(false)
 const selectedIds = ref([])
 const bulkCollectionId = ref('')
 const filteredProducts = computed(() => {
@@ -132,7 +158,10 @@ const filteredProducts = computed(() => {
       || (statusFilter.value === product.status)
       || (statusFilter.value === 'low-stock' && product.stockQuantity > 0 && product.stockQuantity <= (product.lowStockThreshold ?? 5))
       || (statusFilter.value === 'out-of-stock' && product.stockQuantity === 0)
-    return matchesQuery && matchesStatus
+    const matchesCategory = categoryFilter.value === 'all' || String(product.category?.id) === categoryFilter.value
+    const matchesCollection = collectionFilter.value === 'all' || String(product.collection?.id) === collectionFilter.value
+    const matchesSale = !saleFilter.value || Boolean(product.discountPercent || product.tags?.includes('sale'))
+    return matchesQuery && matchesStatus && matchesCategory && matchesCollection && matchesSale
   })
 })
 const allSelected = computed(() => filteredProducts.value.length > 0 && filteredProducts.value.every((product) => selectedIds.value.includes(product.id)))
@@ -143,11 +172,13 @@ async function loadProducts() {
   loading.value = true
   error.value = ''
   try {
-    const [productData, collectionData] = await Promise.all([
+    const [productData, categoryData, collectionData] = await Promise.all([
       fetchAdminProducts(),
+      categories.value.length ? Promise.resolve(categories.value) : fetchAdminCategories(),
       collections.value.length ? Promise.resolve(collections.value) : fetchAdminCollections()
     ])
     products.value = productData
+    categories.value = categoryData
     collections.value = collectionData
     selectedIds.value = []
   } catch (requestError) {

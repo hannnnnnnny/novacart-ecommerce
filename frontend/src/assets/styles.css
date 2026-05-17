@@ -670,6 +670,7 @@ nav a.router-link-active {
 
 .admin-toolbar {
   margin-top: -0.75rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
 }
 
 .search-field {
@@ -1802,6 +1803,33 @@ textarea {
 .admin-form.single-column {
   grid-template-columns: 1fr;
   margin-top: 0;
+}
+
+.affected-products-panel {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(50, 111, 140, 0.18);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  background: var(--color-accent-soft);
+}
+
+.affected-products-panel strong,
+.affected-products-panel span {
+  display: block;
+}
+
+.affected-products-panel span {
+  margin-top: 0.2rem;
+  color: var(--color-muted);
+}
+
+.affected-products-panel ul {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.1rem;
+  color: #314239;
 }
 
 .wide-field,
