@@ -24,9 +24,9 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 ### Storefront Experience
 
 - Responsive fashion storefront homepage with a seasonal hero, campaign links, category highlights, featured products, and retail value cards.
-- Product catalog with fashion categories, server-side search, category, collection, tag, price range, sale, availability filtering, sorting, pagination, stock badges, loading states, empty states, and friendly error states.
-- Product detail pages with large fashion imagery, category context, clear price hierarchy, quantity selection, stock status, related products, and add-to-cart feedback.
-- Cart page with item summaries, quantity controls, stock-aware limits, remove actions, subtotal calculation, and a clear checkout path.
+- Product catalog with fashion categories, collection links, server-side search, category, collection, tag, new-arrival, price range, sale, availability filtering, sorting, pagination, stock badges, loading states, empty states, and friendly error states.
+- Product detail pages with large fashion imagery, category/collection context, label/SKU/season metadata, clear price hierarchy, size and color selectors, quantity selection, stock status, purchase guardrails, shipping/refund notes, related products, and add-to-cart feedback.
+- Cart page with item summaries, selected size/color, quantity controls, stock-aware limits, remove actions, subtotal, discount, estimated shipping, estimated tax, estimated total, and a clear checkout path.
 - Checkout flow with customer information, shipping address fields, demo shipping method selection, demo payment approval or decline handling, order summary, basic validation, idempotency protection, and backend stock validation.
 - Order success page with confirmation messaging, order number, payment status, shipping method, item summary, totals breakdown, and clear next steps.
 - Customer service page for refund, exchange, shipping, product, payment, and other support tickets.
@@ -35,10 +35,10 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 ### Merchant Admin Workspace
 
 - Protected admin login with JWT authentication, persisted sessions, expired-session handling, and BCrypt password support on the backend.
-- Dashboard metrics for total products, active products, total orders, total revenue, low-stock products, and recent order activity.
-- Product management with searchable fashion tables, status filters, inventory indicators, SKU, private label, compare-at price, tags, gallery, featured flag, create/edit forms, validation feedback, and delete confirmation.
+- Dashboard metrics for total products, active products, total orders, total revenue, low-stock products, recent order activity, sales periods, best sellers, top regions, and customer preferences.
+- Product management with searchable fashion tables, status/category/collection/sale filters, inventory indicators, SKU, private label, compare-at price, tags, gallery, featured flag, create/edit forms, validation feedback, archive/reactivate actions, bulk archive, bulk collection assignment, and bulk selected-product markdowns.
 - Collection management for seasonal edits, campaign imagery, featured status, active/draft/archive status, dates, and sort order.
-- Promotion management for bulk markdowns across selected products, categories, collections, seasons, or tags with guided target selection.
+- Promotion management for bulk markdowns across selected products, categories, collections, seasons, or tags with guided target selection and affected-product preview.
 - Category management for Women, Men, Bags, Jewelry, Shoes, Sportswear, Accessories, New Arrivals, Sale, and Seasonal Collection.
 - Order management with search, status filtering, order detail views, customer information, fashion item summaries, totals, and status updates.
 - Refund and support ticket management with status updates for customer care workflows.
@@ -79,7 +79,7 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 
 - Add a real payment provider integration before supporting paid transactions.
 - Add customer accounts, saved addresses, order history, and account-level authorization if customer self-service is required.
-- Add pagination and server-side search for larger product and order datasets.
+- Add deeper pagination and server-side search for very large order, refund, support, and customer datasets.
 - Add audit logging for admin changes and fulfillment status updates.
 - Add reserved stock, supplier notes, and fuller inventory audit reporting.
 - Add production observability, structured logs, rate limiting, backups, and monitoring.
@@ -95,10 +95,10 @@ Outdated static screenshots were removed so the README cannot show generic home 
 
 | Route | What Readers See |
 | --- | --- |
-| `/` | A fashion-first landing page with the NovaCart Fashion Commerce eyebrow, seasonal style hero, category navigation, featured collections, Spring Edit campaign cards, Active Weekend sportswear links, and fashion checkout value cards. |
-| `/products` | A server-filtered catalog for clothing, bags, jewelry, shoes, sportswear, accessories, new arrivals, sale, and seasonal collections. Customers can search by style, fictional label, category, collection, SKU, or tag; filter by size, color, material, season, sale, price, and availability; sort results; paginate; open details; or add available products to cart. |
-| `/products/:id` | A fashion product detail page for pieces such as blouses, jackets, bags, jewelry, trainers, sportswear, or equipment. It shows gallery imagery, fictional label, category/collection, effective sale price, compare-at price, discount badge, stock status, size and color selectors, quantity controls, add-to-cart, buy-now, customer-care link, and related products. |
-| `/cart` | A shopping cart with fashion item imagery, size/color selections, editable quantities, remove actions, stock-aware limits, discount display, subtotal, demo checkout note, and paths to checkout or continue browsing. |
+| `/` | A fashion-first landing page with the Premium Fashion Commerce eyebrow, editorial seasonal hero, new-arrival and sale calls to action, proof chips, campaign panel, category navigation, featured collections, new arrivals, best sellers, editorial shopping paths, sale campaign module, and fashion checkout value cards. |
+| `/products` | A server-filtered catalog for clothing, bags, jewelry, shoes, sportswear, accessories, new arrivals, sale, and seasonal collections. Customers can use campaign shortcut links, search by style, fictional label, category, collection, SKU, or tag; filter by size, color, material, season, new arrival, sale, price, and availability; sort results; paginate; open details; or quick-add products that do not require options. |
+| `/products/:id` | A fashion product detail page for pieces such as blouses, jackets, bags, jewelry, trainers, sportswear, or equipment. It shows gallery imagery, fictional label, SKU, season, category/collection, effective sale price, compare-at price, discount badge, stock status, button-based size and color selectors, quantity controls, add-to-cart, buy-now, shipping/refund notes, customer-care link, and related products. |
+| `/cart` | A shopping cart with fashion item imagery, size/color selections, editable quantities, remove actions, stock-aware limits, discount display, subtotal, estimated shipping, estimated tax, estimated total, demo checkout note, and paths to checkout or continue browsing. |
 | `/checkout` | A demo checkout with customer contact fields, shipping address, delivery method, approved/declined demo payment choices, refund acknowledgement, validation messages, order summary, tax/shipping totals, and backend stock checks. |
 | `/order-success/:id` | A confirmation page showing order number, payment status, refund status, fulfillment status, shipping method, fashion item summary, totals, customer support link, and refund request link. |
 | `/support` and `/refund-request` | Customer-care flows for shipping issues, product issues, exchanges, payment issues, general support, and 30-day refund review using order number and email lookup. |
@@ -109,11 +109,11 @@ Outdated static screenshots were removed so the README cannot show generic home 
 | --- | --- |
 | `/admin/login` | A protected merchant login with password visibility control, clear error feedback, loading state, and JWT-backed session handling. |
 | `/admin/dashboard` | A merchant overview with product counts, active products, categories, total orders, pending orders, revenue, daily/weekly/monthly/yearly sales, average order value, refund request count, sales trend, top regions, customer preferences, best sellers, recent orders, and inventory watch. |
-| `/admin/products` | A searchable fashion product table with SKU, fictional label, category, effective price, compare-at price, stock badge, status badge, featured marker, preview/edit actions, archive/reactivate action, selected-product bulk archive, bulk discount, and bulk collection assignment. |
+| `/admin/products` | A searchable fashion product table with SKU, fictional label, category, effective price, compare-at price, stock badge, status badge, featured marker, category/collection/sale filters, preview/edit actions, archive/reactivate action, selected-product bulk archive, bulk discount, and bulk collection assignment. |
 | `/admin/products/new` and `/admin/products/:id/edit` | Product forms for fashion catalog data: name, slug, SKU, fictional label, category, collection, price, compare-at price, stock, low-stock threshold, image gallery, tags, sizes, colors, material, season, gender target, description, care instructions, featured flag, status, and active visibility. |
 | `/admin/categories` | Category management for Women, Men, Bags, Jewelry, Shoes, Sportswear, Accessories, New Arrivals, Sale, and Seasonal Collection with image, description, sort order, active flag, edit action, and safe delete behavior. |
 | `/admin/collections` | Collection management for Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale with hero/display imagery, featured flag, active/draft/archive status, sort order, and product assignment. |
-| `/admin/promotions` | Promotion and discount management for percentage or fixed-amount markdowns targeted by selected products, categories, collections, seasons, or tags with guided target pickers and validation. |
+| `/admin/promotions` | Promotion and discount management for percentage or fixed-amount markdowns targeted by selected products, categories, collections, seasons, or tags with guided target pickers, validation, and affected-product preview. |
 | `/admin/orders` and `/admin/orders/:id` | Order operations with customer information, payment status, refund status, fulfillment status, region filter, item summary, totals, valid status transition controls, and cancellation stock restoration. |
 | `/admin/refunds` | Refund queue with status filtering, order links, customer details, customer reason, merchant-only notes, approve/reject/refunded transitions, and payment/refund status synchronization. |
 | `/admin/support` | Support ticket queue with status filtering, issue type, order reference, customer message, merchant-only notes, and support workflow updates. |
@@ -127,8 +127,8 @@ Outdated static screenshots were removed so the README cannot show generic home 
 | --- | --- | --- |
 | Storefront Home | `/` | Fashion hero section, seasonal campaign links, category highlights, featured products, trust/value cards, and responsive navigation. |
 | Fashion Catalog | `/products` | Search, filtering, sorting, product cards, stock indicators, and add-to-cart actions. |
-| Product Detail | `/products/:id` | Product imagery, details, price, quantity selector, stock messaging, and related products. |
-| Cart | `/cart` | Cart items, quantity controls, subtotal summary, remove actions, and checkout call to action. |
+| Product Detail | `/products/:id` | Product imagery, metadata, price, size/color selectors, quantity selector, stock messaging, shipping/refund notes, and related products. |
+| Cart | `/cart` | Cart items, selected variants, quantity controls, discount/estimate summary, remove actions, and checkout call to action. |
 | Checkout | `/checkout` | Customer form, shipping address, order summary, validation states, and order creation flow. |
 | Order Success | `/order-success/:id` | Confirmation message, order number, totals, item summary, and next-step actions. |
 | Admin Login | `/admin/login` | Secure admin entry screen with error handling and loading state. |
@@ -339,7 +339,7 @@ The backend seeds:
 
 - One admin account
 - Storefront categories
-- Sample products with English names, descriptions, and image URLs
+- At least 60 fashion products with English names, descriptions, categories, collections, tags, sizes, colors, labels, price data, stock thresholds, material, care instructions, and local image URLs
 
 Default admin account:
 
@@ -399,6 +399,8 @@ Public storefront:
 - `/cart`
 - `/checkout`
 - `/order-success/:id`
+- `/support`
+- `/refund-request`
 
 Admin:
 
@@ -408,8 +410,14 @@ Admin:
 - `/admin/products/new`
 - `/admin/products/:id/edit`
 - `/admin/categories`
+- `/admin/collections`
+- `/admin/promotions`
 - `/admin/orders`
 - `/admin/orders/:id`
+- `/admin/refunds`
+- `/admin/support`
+- `/admin/customers`
+- `/admin/analytics`
 - `/admin/inventory`
 
 ## Frontend UX Notes

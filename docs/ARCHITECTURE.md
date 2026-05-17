@@ -9,7 +9,7 @@ flowchart LR
   Browser["Vue 3 Frontend"] --> Api["Spring Boot REST API"]
   Api --> Database["MySQL"]
   Api --> Security["JWT And BCrypt"]
-  Browser --> LocalStorage["Cart And Admin Session Storage"]
+  Browser --> BrowserPersistence["Cart And Admin Session Persistence"]
 ```
 
 ## Backend Layers
@@ -40,13 +40,13 @@ flowchart LR
 1. An admin submits email and password to `POST /api/admin/auth/login`.
 2. The backend verifies the active admin user and BCrypt password hash.
 3. The backend returns a JWT bearer token with email subject, role claim, and expiration.
-4. The frontend stores the session in local storage and sends `Authorization: Bearer <token>` on admin API requests.
+4. The frontend persists the session in the browser and sends `Authorization: Bearer <token>` on admin API requests.
 5. The JWT filter validates bearer tokens before protected endpoints.
 6. Missing, expired, or invalid tokens return a consistent `401` JSON error. Authenticated users without access receive `403`.
 
 ## Checkout Flow
 
-1. The storefront cart stores product snapshots and quantities in browser local storage.
+1. The storefront cart persists product snapshots and quantities in the browser.
 2. Checkout submits customer information, shipping details, demo payment selection, idempotency key, and product quantities to `POST /api/public/orders`.
 3. The order service aggregates duplicate product IDs into a single requested quantity per product.
 4. Each product is loaded with a pessimistic database lock.
@@ -67,7 +67,7 @@ flowchart LR
 
 ## Fashion Catalog Model
 
-The fashion release extends the catalog around retail merchandising rather than generic ecommerce inventory:
+The fashion release extends the catalog around retail merchandising and campaign-driven fashion operations:
 
 - `Product`: name, slug, description, category, collection, price, compare-at price, computed effective promotion price, SKU, stock quantity, low-stock threshold, status, size options, color options, material, care instructions, primary image, gallery, tags, season, gender target, featured flag, and timestamps.
 - `FashionCollection`: name, slug, description, hero image, display image, active/draft/archive status, featured flag, date window, sort order, and product assignment through product records.
