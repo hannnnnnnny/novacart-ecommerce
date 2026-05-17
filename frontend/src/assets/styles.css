@@ -210,14 +210,14 @@ nav a.router-link-active {
 .hero-section {
   min-height: 72vh;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 460px);
   gap: clamp(2rem, 6vw, 5rem);
   align-items: center;
   padding: clamp(3rem, 8vw, 7rem) clamp(1rem, 6vw, 5rem);
   background:
-    linear-gradient(90deg, rgba(20, 24, 25, 0.92), rgba(47, 48, 48, 0.7), rgba(20, 24, 25, 0.18)),
-    url("/catalog/seasonal.svg") right center/contain no-repeat,
-    #24333b;
+    linear-gradient(110deg, rgba(13, 18, 18, 0.95), rgba(30, 44, 43, 0.78), rgba(13, 18, 18, 0.18)),
+    url("/catalog/new-arrivals.svg") right center/contain no-repeat,
+    #1e2c2b;
   color: #fffdf7;
 }
 
@@ -238,14 +238,68 @@ nav a.router-link-active {
   margin-top: 1.5rem;
 }
 
+.hero-proof-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 1.4rem;
+}
+
+.hero-proof-row span {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 253, 247, 0.84);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
 .hero-secondary {
   background: rgba(255, 255, 255, 0.16);
   color: #fffdf7;
   border: 1px solid rgba(255, 255, 255, 0.32);
 }
 
+.hero-editorial-card {
+  display: grid;
+  gap: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-lg);
+  padding: clamp(1.2rem, 3vw, 1.6rem);
+  background:
+    linear-gradient(180deg, rgba(255, 253, 247, 0.18), rgba(255, 253, 247, 0.06)),
+    rgba(18, 24, 24, 0.46);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(14px);
+}
+
+.hero-editorial-card h2 {
+  margin: 0;
+  max-width: 380px;
+  font-size: clamp(1.55rem, 3vw, 2.45rem);
+  line-height: 1.05;
+}
+
+.hero-editorial-card p {
+  margin: 0;
+  color: rgba(255, 253, 247, 0.82);
+}
+
+.campaign-label {
+  width: fit-content;
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  background: #fffdf7;
+  color: #23342f;
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .hero-stats {
   display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 0.9rem;
 }
 
@@ -259,7 +313,7 @@ nav a.router-link-active {
 
 .hero-stats strong {
   display: block;
-  font-size: 2.3rem;
+  font-size: clamp(1.45rem, 3vw, 2.25rem);
   line-height: 1;
 }
 
@@ -373,12 +427,72 @@ nav a.router-link-active {
   box-shadow: var(--shadow-md);
 }
 
+.campaign-card small {
+  color: rgba(255, 253, 247, 0.7);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .campaign-card strong {
   font-size: 1.35rem;
 }
 
 .campaign-card span {
   color: rgba(255, 253, 247, 0.82);
+}
+
+.home-product-section {
+  padding-top: 1rem;
+}
+
+.sale-band {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(280px, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.sale-band h2 {
+  margin: 0;
+  max-width: 560px;
+  font-size: clamp(1.8rem, 3vw, 3rem);
+  line-height: 1.05;
+}
+
+.sale-band p:not(.eyebrow) {
+  max-width: 560px;
+  color: var(--color-muted);
+}
+
+.sale-product-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.sale-product-list a {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.45fr) minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.9rem 1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.sale-product-list a:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.sale-product-list span,
+.sale-product-list small {
+  color: var(--color-muted);
+  font-weight: 800;
 }
 
 .page-section,
@@ -391,6 +505,13 @@ nav a.router-link-active {
 .section-heading,
 .page-header {
   margin-bottom: 2rem;
+}
+
+.section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .section-heading h2,
@@ -412,6 +533,13 @@ nav a.router-link-active {
 .section-heading p {
   max-width: 680px;
   color: var(--color-muted);
+}
+
+.section-actions {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .page-header-actions {
@@ -1863,6 +1991,10 @@ textarea {
     display: grid;
   }
 
+  .section-heading {
+    display: grid;
+  }
+
   .admin-sidebar {
     position: static;
     height: auto;
@@ -1934,7 +2066,12 @@ textarea {
   }
 
   .analytics-grid,
-  .trend-bars {
+  .trend-bars,
+  .sale-band {
+    grid-template-columns: 1fr;
+  }
+
+  .sale-product-list a {
     grid-template-columns: 1fr;
   }
 }
@@ -1953,6 +2090,10 @@ textarea {
 
 @media (max-width: 900px) {
   .hero-section {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-stats {
     grid-template-columns: 1fr;
   }
 }
