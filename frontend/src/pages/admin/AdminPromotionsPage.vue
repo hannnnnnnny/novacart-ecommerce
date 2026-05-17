@@ -20,7 +20,7 @@
         </label>
         <label>Discount Value<input v-model.number="form.discountValue" required min="0.01" step="0.01" type="number" /></label>
         <label>Target Type
-          <select v-model="form.targetType">
+          <select v-model="form.targetType" @change="resetTargetsForType">
             <option value="SELECTED_PRODUCTS">Selected products</option>
             <option value="CATEGORY">Category</option>
             <option value="COLLECTION">Collection</option>
@@ -28,12 +28,24 @@
             <option value="TAGS">Tags</option>
           </select>
         </label>
-        <label class="wide-field">Target Values<textarea v-model.trim="form.targetValuesText" rows="3" placeholder="sale, last-season or collection slug"></textarea></label>
+        <label v-if="form.targetType === 'TAGS'" class="wide-field">
+          Target Tags
+          <textarea v-model.trim="form.targetValuesText" rows="3" placeholder="sale, last-season, active-weekend"></textarea>
+        </label>
+        <label v-else class="wide-field">
+          Promotion Targets
+          <select v-model="form.targetValues" multiple size="8">
+            <option v-for="option in targetOptions" :key="option.value" :value="option.value">
+              {{ option.label }}
+            </option>
+          </select>
+        </label>
+        <p class="muted wide-field">{{ targetHelpText }}</p>
         <label>Start Date<input v-model="form.startDate" type="date" /></label>
         <label>End Date<input v-model="form.endDate" type="date" /></label>
         <label class="checkbox-field"><input v-model="form.active" type="checkbox" /> Active</label>
         <div class="form-actions">
-          <button class="primary-button" type="submit" :disabled="saving || !form.name || !form.discountValue">{{ saving ? 'Saving...' : 'Save Promotion' }}</button>
+          <button class="primary-button" type="submit" :disabled="saving || !form.name || !form.discountValue || !targetValuesForPayload.length">{{ saving ? 'Saving...' : 'Save Promotion' }}</button>
           <button v-if="editingId" class="secondary-button" type="button" @click="resetForm">Cancel Edit</button>
         </div>
       </form>
@@ -44,7 +56,7 @@
             <tr v-for="promotion in promotions" :key="promotion.id">
               <td><strong>{{ promotion.name }}</strong><span>{{ promotion.description }}</span></td>
               <td>{{ promotion.discountType === 'PERCENTAGE' ? `${promotion.discountValue}%` : formatCurrency(promotion.discountValue) }}</td>
-              <td>{{ formatStatus(promotion.targetType) }}: {{ promotion.targetValues.join(', ') }}</td>
+              <td>{{ formatStatus(promotion.targetType) }}: {{ formatTargetValues(promotion) }}</td>
               <td><StatusBadge :value="promotion.active ? 'ACTIVE' : 'INACTIVE'" /></td>
               <td>
                 <div class="table-actions">
@@ -61,10 +73,13 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import {
   createAdminPromotion,
   deleteAdminPromotion,
+  fetchAdminCategories,
+  fetchAdminCollections,
+  fetchAdminProducts,
   fetchAdminPromotions,
   updateAdminPromotion
 } from '../../api/admin'
@@ -79,8 +94,51 @@ const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
 const promotions = ref([])
+const products = ref([])
+const categories = ref([])
+const collections = ref([])
 const editingId = ref(null)
 const form = reactive(emptyForm())
+const seasonOptions = ['Spring 2026', 'Summer 2026', 'Fall Winter 2026', 'Active Weekend', 'Evening Edit', 'Last Season']
+const targetOptions = computed(() => {
+  if (form.targetType === 'SELECTED_PRODUCTS') {
+    return products.value.map((product) => ({
+      value: String(product.id),
+      label: `${product.name} / ${product.sku || product.slug}`
+    }))
+  }
+  if (form.targetType === 'CATEGORY') {
+    return categories.value.map((category) => ({
+      value: String(category.id),
+      label: category.name
+    }))
+  }
+  if (form.targetType === 'COLLECTION') {
+    return collections.value.map((collection) => ({
+      value: String(collection.id),
+      label: collection.name
+    }))
+  }
+  if (form.targetType === 'SEASON') {
+    return seasonOptions.map((season) => ({ value: season, label: season }))
+  }
+  return []
+})
+const targetValuesForPayload = computed(() => {
+  return form.targetType === 'TAGS'
+    ? splitValues(form.targetValuesText)
+    : form.targetValues.map(String).filter(Boolean)
+})
+const targetHelpText = computed(() => {
+  const labels = {
+    SELECTED_PRODUCTS: 'Choose one or more products that should receive this discount.',
+    CATEGORY: 'Choose one or more categories. Current and future products in those categories can qualify.',
+    COLLECTION: 'Choose one or more seasonal collections.',
+    SEASON: 'Choose one or more season labels used by products.',
+    TAGS: 'Enter one or more comma-separated tags such as sale, linen, or active-weekend.'
+  }
+  return labels[form.targetType] || ''
+})
 
 onMounted(loadPromotions)
 
@@ -88,7 +146,16 @@ async function loadPromotions() {
   loading.value = true
   error.value = ''
   try {
-    promotions.value = await fetchAdminPromotions()
+    const [promotionData, productData, categoryData, collectionData] = await Promise.all([
+      fetchAdminPromotions(),
+      products.value.length ? Promise.resolve(products.value) : fetchAdminProducts(),
+      categories.value.length ? Promise.resolve(categories.value) : fetchAdminCategories(),
+      collections.value.length ? Promise.resolve(collections.value) : fetchAdminCollections()
+    ])
+    promotions.value = promotionData
+    products.value = productData
+    categories.value = categoryData
+    collections.value = collectionData
   } catch (requestError) {
     error.value = getApiError(requestError, 'Promotions could not be loaded.')
   } finally {
@@ -105,7 +172,7 @@ async function savePromotion() {
       discountValue: Number(form.discountValue),
       startDate: form.startDate || null,
       endDate: form.endDate || null,
-      targetValues: splitValues(form.targetValuesText)
+      targetValues: targetValuesForPayload.value
     }
     delete payload.targetValuesText
     if (editingId.value) {
@@ -131,6 +198,7 @@ function editPromotion(promotion) {
     discountValue: Number(promotion.discountValue),
     targetType: promotion.targetType,
     targetValuesText: promotion.targetValues.join(', '),
+    targetValues: promotion.targetValues.map(String),
     startDate: promotion.startDate || '',
     endDate: promotion.endDate || '',
     active: Boolean(promotion.active)
@@ -152,6 +220,11 @@ function resetForm() {
   Object.assign(form, emptyForm())
 }
 
+function resetTargetsForType() {
+  form.targetValues = []
+  form.targetValuesText = form.targetType === 'TAGS' ? 'sale' : ''
+}
+
 function splitValues(value) {
   return String(value || '')
     .split(',')
@@ -167,9 +240,29 @@ function emptyForm() {
     discountValue: 10,
     targetType: 'TAGS',
     targetValuesText: 'sale',
+    targetValues: [],
     startDate: '',
     endDate: '',
     active: true
   }
+}
+
+function formatTargetValues(promotion) {
+  const values = promotion.targetValues || []
+  if (!values.length) return 'No targets'
+  return values.map((value) => targetLabel(promotion.targetType, value)).join(', ')
+}
+
+function targetLabel(targetType, value) {
+  if (targetType === 'SELECTED_PRODUCTS') {
+    return products.value.find((product) => String(product.id) === String(value))?.name || value
+  }
+  if (targetType === 'CATEGORY') {
+    return categories.value.find((category) => String(category.id) === String(value))?.name || value
+  }
+  if (targetType === 'COLLECTION') {
+    return collections.value.find((collection) => String(collection.id) === String(value))?.name || value
+  }
+  return value
 }
 </script>
