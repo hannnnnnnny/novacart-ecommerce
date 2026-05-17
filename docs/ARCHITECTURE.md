@@ -81,7 +81,7 @@ All sample data is original to this repository. Local storefront imagery uses ge
 ## Promotion Flow
 
 1. Admin creates a promotion for selected products, a category, a collection, a season, or one or more tags.
-2. The backend validates discount type, positive discount value, fixed discount price floor, and date range.
+2. The backend validates discount type, positive discount value, fixed discount minimum, and date range.
 3. Public catalog responses quote each product through the promotion service.
 4. Product cards, detail pages, cart, and checkout display the effective price, original price, and discount badge.
 5. Checkout recalculates product prices server-side so local cart snapshots cannot force a stale or invalid total.

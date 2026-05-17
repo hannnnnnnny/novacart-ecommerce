@@ -1,7 +1,7 @@
 <template>
   <section class="page-section">
     <PageHeader
-      eyebrow="Basket"
+      eyebrow="Shopping Cart"
       title="Cart"
       description="Review selected fashion pieces, quantities, stock limits, and order totals before checkout."
     />

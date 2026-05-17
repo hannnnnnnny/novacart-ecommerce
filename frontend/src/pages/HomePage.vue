@@ -29,7 +29,7 @@
     <section class="page-section category-section">
       <SectionHeader
         eyebrow="Category navigation"
-        title="Shop the fashion floor"
+        title="Shop the seasonal edit"
         description="Move quickly between wardrobe, accessory, footwear, sportswear, sale, and campaign edits."
       />
       <LoadingState v-if="loading" message="Loading categories..." />

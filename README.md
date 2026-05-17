@@ -60,7 +60,7 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 - Built as a full-stack production-style project rather than a single-page mockup.
 - Clear separation between controllers, services, repositories, DTOs, entities, security, and frontend API modules.
 - Original visual design, product names, descriptions, fictional labels, seed data, and local catalog artwork created specifically for NovaCart.
-- Responsive layouts for storefront and admin workflows across mobile, tablet, and desktop screens.
+- Responsive layouts for storefront and admin workflows across mobile, tablet, and large screens.
 - Practical merchant workflows covering catalog setup, checkout, fulfillment, and inventory monitoring.
 - Safer checkout behavior through backend stock checks and frontend quantity controls.
 - Developer-friendly setup with Maven wrapper, Vite scripts, environment examples, tests, and troubleshooting notes.
@@ -89,41 +89,37 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 
 Run the backend and frontend locally, then open the Vite app at `http://localhost:5173`.
 
-The screenshots below are generated from the current Vue interface with representative preview data, so readers can see the product experience before running the project locally.
+Outdated static screenshots were removed so the README cannot show generic home or office merchandise from earlier prototypes. The written previews below describe the current fashion commerce UI and match the implemented routes, data model, and admin workflows.
 
-### Storefront Screens
+### Storefront Preview
 
-| Home | Fashion Catalog |
+| Route | What Readers See |
 | --- | --- |
-| ![NovaCart storefront home preview](docs/preview/storefront-home.png) | ![NovaCart product catalog preview](docs/preview/product-catalog.png) |
-| Premium landing page with hero messaging, category highlights, featured products, and trust/value cards. | Searchable catalog with category filters, price sorting, product cards, stock badges, and add-to-cart actions. |
+| `/` | A fashion-first landing page with the NovaCart Fashion Commerce eyebrow, seasonal style hero, category navigation, featured collections, Spring Edit campaign cards, Active Weekend sportswear links, and fashion checkout value cards. |
+| `/products` | A server-filtered catalog for clothing, bags, jewelry, shoes, sportswear, accessories, new arrivals, sale, and seasonal collections. Customers can search by style, fictional label, category, collection, SKU, or tag; filter by size, color, material, season, sale, price, and availability; sort results; paginate; open details; or add available products to cart. |
+| `/products/:id` | A fashion product detail page for pieces such as blouses, jackets, bags, jewelry, trainers, sportswear, or equipment. It shows gallery imagery, fictional label, category/collection, effective sale price, compare-at price, discount badge, stock status, size and color selectors, quantity controls, add-to-cart, buy-now, customer-care link, and related products. |
+| `/cart` | A shopping cart with fashion item imagery, size/color selections, editable quantities, remove actions, stock-aware limits, discount display, subtotal, demo checkout note, and paths to checkout or continue browsing. |
+| `/checkout` | A demo checkout with customer contact fields, shipping address, delivery method, approved/declined demo payment choices, refund acknowledgement, validation messages, order summary, tax/shipping totals, and backend stock checks. |
+| `/order-success/:id` | A confirmation page showing order number, payment status, refund status, fulfillment status, shipping method, fashion item summary, totals, customer support link, and refund request link. |
+| `/support` and `/refund-request` | Customer-care flows for shipping issues, product issues, exchanges, payment issues, general support, and 30-day refund review using order number and email lookup. |
 
-| Product Detail | Cart |
+### Admin Preview
+
+| Route | What Readers See |
 | --- | --- |
-| ![NovaCart product detail preview](docs/preview/product-detail.png) | ![NovaCart cart preview](docs/preview/cart.png) |
-| Detailed product page with image focus, category label, price hierarchy, stock indicator, quantity selector, related products, and cart feedback. | Cart review page with item images, quantity controls, stock-aware limits, line totals, subtotal summary, and checkout action. |
-
-| Checkout | Order Success |
-| --- | --- |
-| ![NovaCart checkout preview](docs/preview/checkout.png) | ![NovaCart order success preview](docs/preview/order-success.png) |
-| Checkout form with customer details, shipping address, order summary, validation states, and protected submit behavior. | Confirmation page with order number, item summary, order total, next-step messaging, and shopping links. |
-
-### Admin Screens
-
-| Admin Login | Dashboard |
-| --- | --- |
-| ![NovaCart admin login preview](docs/preview/admin-login.png) | ![NovaCart admin dashboard preview](docs/preview/admin-dashboard.png) |
-| Professional admin sign-in screen with secure access messaging, password visibility control, loading state, and error feedback. | Merchant dashboard with revenue, order, product, category, recent order, and low-stock signals. |
-
-| Product Management | Order Management |
-| --- | --- |
-| ![NovaCart admin products preview](docs/preview/admin-products.png) | ![NovaCart admin orders preview](docs/preview/admin-orders.png) |
-| Product table with search, status filters, category context, pricing, stock badges, active/inactive badges, edit actions, and delete confirmation. | Order table with customer details, status badges, total amount, placed date, search, status filtering, and order detail links. |
-
-| Inventory Warnings |
-| --- |
-| ![NovaCart admin inventory preview](docs/preview/admin-inventory.png) |
-| Inventory screen with configurable warning threshold, manual stock adjustment, refresh action, low-stock cards, active/inactive context, and recent movement history. |
+| `/admin/login` | A protected merchant login with password visibility control, clear error feedback, loading state, and JWT-backed session handling. |
+| `/admin/dashboard` | A merchant overview with product counts, active products, categories, total orders, pending orders, revenue, daily/weekly/monthly/yearly sales, average order value, refund request count, sales trend, top regions, customer preferences, best sellers, recent orders, and inventory watch. |
+| `/admin/products` | A searchable fashion product table with SKU, fictional label, category, effective price, compare-at price, stock badge, status badge, featured marker, preview/edit actions, archive/reactivate action, selected-product bulk archive, bulk discount, and bulk collection assignment. |
+| `/admin/products/new` and `/admin/products/:id/edit` | Product forms for fashion catalog data: name, slug, SKU, fictional label, category, collection, price, compare-at price, stock, low-stock threshold, image gallery, tags, sizes, colors, material, season, gender target, description, care instructions, featured flag, status, and active visibility. |
+| `/admin/categories` | Category management for Women, Men, Bags, Jewelry, Shoes, Sportswear, Accessories, New Arrivals, Sale, and Seasonal Collection with image, description, sort order, active flag, edit action, and safe delete behavior. |
+| `/admin/collections` | Collection management for Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale with hero/display imagery, featured flag, active/draft/archive status, sort order, and product assignment. |
+| `/admin/promotions` | Promotion and discount management for percentage or fixed-amount markdowns targeted by selected products, categories, collections, seasons, or tags with guided target pickers and validation. |
+| `/admin/orders` and `/admin/orders/:id` | Order operations with customer information, payment status, refund status, fulfillment status, region filter, item summary, totals, valid status transition controls, and cancellation stock restoration. |
+| `/admin/refunds` | Refund queue with status filtering, order links, customer details, customer reason, merchant-only notes, approve/reject/refunded transitions, and payment/refund status synchronization. |
+| `/admin/support` | Support ticket queue with status filtering, issue type, order reference, customer message, merchant-only notes, and support workflow updates. |
+| `/admin/customers` | Guest customer records created from checkout email with location, last order timing, and preference context for fashion merchandising. |
+| `/admin/analytics` | Sales and customer analytics with daily, weekly, monthly, yearly sales, average order value, repeat customers, sales trend, top regions, customer preferences, and best sellers. |
+| `/admin/inventory` | Inventory operations with low-stock threshold controls, manual stock adjustments with signed quantity changes and reason, low-stock warning cards, and recent stock movement history. |
 
 ### Feature Map
 
