@@ -1683,6 +1683,20 @@ textarea {
   color: var(--color-muted);
 }
 
+.inventory-adjustment-section {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0 0 1.75rem;
+}
+
+.inventory-adjustment-section h2 {
+  margin: 0;
+}
+
+.compact-admin-form {
+  margin-top: 0;
+}
+
 .warning-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));

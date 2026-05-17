@@ -1,6 +1,7 @@
 package com.novacart.store.service;
 
 import com.novacart.store.dto.DashboardMetricsResponse;
+import com.novacart.store.dto.InventoryAdjustmentRequest;
 import com.novacart.store.dto.InventoryWarningResponse;
 import com.novacart.store.dto.StockMovementResponse;
 import java.util.List;
@@ -12,4 +13,6 @@ public interface AdminDashboardService {
     List<InventoryWarningResponse> getInventoryWarnings(int threshold);
 
     List<StockMovementResponse> getRecentStockMovements();
+
+    StockMovementResponse adjustInventory(InventoryAdjustmentRequest request);
 }

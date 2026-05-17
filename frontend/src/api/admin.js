@@ -16,6 +16,10 @@ export async function fetchInventoryMovements() {
   return getApiData(await apiClient.get('/admin/inventory/movements'))
 }
 
+export async function adjustInventory(payload) {
+  return getApiData(await apiClient.post('/admin/inventory/adjustments', payload))
+}
+
 export async function fetchAdminProducts() {
   return (await fetchAdminProductPage({ size: 60 })).content
 }

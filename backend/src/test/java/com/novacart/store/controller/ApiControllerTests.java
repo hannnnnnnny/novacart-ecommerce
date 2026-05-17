@@ -378,6 +378,31 @@ class ApiControllerTests {
                 .andExpect(jsonPath("$.data[0].type").value("ORDER_PLACED"));
     }
 
+    @Test
+    void adminInventoryAdjustmentUpdatesStockAndRecordsMovement() throws Exception {
+        Product product = saveProduct("Controller Manual Stock Jacket", 4, "19.00", true);
+
+        mockMvc.perform(post("/api/admin/inventory/adjustments")
+                        .header("Authorization", "Bearer " + adminToken())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "productId": %d,
+                                  "quantityChange": 3,
+                                  "reason": "Received replenishment during controller test."
+                                }
+                                """.formatted(product.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.data.productId").value(product.getId()))
+                .andExpect(jsonPath("$.data.type").value("MANUAL_ADJUSTMENT"))
+                .andExpect(jsonPath("$.data.quantityChange").value(3))
+                .andExpect(jsonPath("$.data.stockAfter").value(7));
+
+        Product updatedProduct = productRepository.findById(product.getId()).orElseThrow();
+        assertThat(updatedProduct.getStockQuantity()).isEqualTo(7);
+    }
+
     private Product saveProduct(String name, int stockQuantity, String price, boolean active) {
         String suffix = UUID.randomUUID().toString().substring(0, 8);
         Category category = categoryRepository.save(new Category(

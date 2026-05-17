@@ -1,11 +1,16 @@
 package com.novacart.store.service.impl;
 
 import com.novacart.store.dto.DashboardMetricsResponse;
+import com.novacart.store.dto.InventoryAdjustmentRequest;
 import com.novacart.store.dto.InventoryWarningResponse;
 import com.novacart.store.dto.StockMovementResponse;
 import com.novacart.store.entity.OrderStatus;
 import com.novacart.store.entity.Product;
 import com.novacart.store.entity.ProductStatus;
+import com.novacart.store.entity.StockMovement;
+import com.novacart.store.entity.StockMovementType;
+import com.novacart.store.exception.BusinessRuleException;
+import com.novacart.store.exception.ResourceNotFoundException;
 import com.novacart.store.repository.CategoryRepository;
 import com.novacart.store.repository.CustomerOrderRepository;
 import com.novacart.store.repository.ProductRepository;
@@ -63,18 +68,35 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
     public List<StockMovementResponse> getRecentStockMovements() {
         return stockMovementRepository.findTop20ByOrderByCreatedAtDesc()
                 .stream()
-                .map(movement -> new StockMovementResponse(
-                        movement.getId(),
-                        movement.getProductId(),
-                        movement.getProductName(),
-                        movement.getOrderId(),
-                        movement.getType(),
-                        movement.getQuantityChange(),
-                        movement.getStockAfter(),
-                        movement.getReason(),
-                        movement.getCreatedAt()
-                ))
+                .map(this::toStockMovementResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public StockMovementResponse adjustInventory(InventoryAdjustmentRequest request) {
+        if (request.quantityChange() == 0) {
+            throw new BusinessRuleException("Quantity change cannot be zero.");
+        }
+
+        Product product = productRepository.findByIdForUpdate(request.productId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product was not found."));
+        int stockAfter = product.getStockQuantity() + request.quantityChange();
+        if (stockAfter < 0) {
+            throw new BusinessRuleException("Inventory adjustment cannot reduce stock below zero.");
+        }
+
+        product.setStockQuantity(stockAfter);
+        StockMovement movement = stockMovementRepository.save(new StockMovement(
+                product.getId(),
+                product.getName(),
+                null,
+                StockMovementType.MANUAL_ADJUSTMENT,
+                request.quantityChange(),
+                stockAfter,
+                request.reason().trim()
+        ));
+        return toStockMovementResponse(movement);
     }
 
     private InventoryWarningResponse toWarning(Product product) {
@@ -86,6 +108,20 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
                 product.getLowStockThreshold(),
                 product.getStatus(),
                 product.isActive()
+        );
+    }
+
+    private StockMovementResponse toStockMovementResponse(StockMovement movement) {
+        return new StockMovementResponse(
+                movement.getId(),
+                movement.getProductId(),
+                movement.getProductName(),
+                movement.getOrderId(),
+                movement.getType(),
+                movement.getQuantityChange(),
+                movement.getStockAfter(),
+                movement.getReason(),
+                movement.getCreatedAt()
         );
     }
 }

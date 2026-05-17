@@ -19,6 +19,35 @@
     <p class="inventory-guidance">
       Products at or below this threshold deserve attention before customers run into size, color, or checkout limits.
     </p>
+    <section class="inventory-adjustment-section">
+      <h2>Manual Stock Adjustment</h2>
+      <form class="admin-form compact-admin-form" @submit.prevent="submitAdjustment">
+        <label>
+          Product
+          <select v-model="adjustment.productId" required>
+            <option disabled value="">Select a product</option>
+            <option v-for="product in products" :key="product.id" :value="String(product.id)">
+              {{ product.name }} / {{ product.stockQuantity }} in stock
+            </option>
+          </select>
+        </label>
+        <label>
+          Quantity Change
+          <input v-model.number="adjustment.quantityChange" required step="1" type="number" placeholder="12 or -3" />
+        </label>
+        <label class="wide-field">
+          Reason
+          <textarea v-model.trim="adjustment.reason" required rows="3" maxlength="500" placeholder="Received replenishment, corrected count, or damaged stock removal."></textarea>
+        </label>
+        <p v-if="selectedAdjustmentProduct" class="muted wide-field">
+          Current stock: {{ selectedAdjustmentProduct.stockQuantity }}.
+          New stock after adjustment: {{ projectedStock }}.
+        </p>
+        <button class="primary-button" type="submit" :disabled="adjusting || !adjustmentIsValid">
+          {{ adjusting ? 'Saving Adjustment...' : 'Save Stock Adjustment' }}
+        </button>
+      </form>
+    </section>
     <LoadingState v-if="loading" message="Loading inventory warnings..." />
     <ErrorMessage v-else-if="error" :message="error" />
     <div v-else>
@@ -76,25 +105,50 @@
         </div>
       </section>
     </div>
+    <ToastMessage :message="toastMessage" />
   </section>
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import { fetchInventoryMovements, fetchInventoryWarnings } from '../../api/admin'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { adjustInventory, fetchAdminProducts, fetchInventoryMovements, fetchInventoryWarnings } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import ToastMessage from '../../components/ToastMessage.vue'
 import { formatDate, formatStatus } from '../../utils/format'
 
 const threshold = ref(5)
 const warnings = ref([])
 const movements = ref([])
+const products = ref([])
 const loading = ref(true)
 const error = ref('')
+const adjusting = ref(false)
+const toastMessage = ref('')
+let toastTimer
+const adjustment = reactive({
+  productId: '',
+  quantityChange: 0,
+  reason: ''
+})
+const selectedAdjustmentProduct = computed(() => {
+  return products.value.find((product) => String(product.id) === adjustment.productId)
+})
+const projectedStock = computed(() => {
+  if (!selectedAdjustmentProduct.value) return 0
+  return selectedAdjustmentProduct.value.stockQuantity + Number(adjustment.quantityChange || 0)
+})
+const adjustmentIsValid = computed(() => {
+  return Boolean(selectedAdjustmentProduct.value)
+    && Number.isInteger(Number(adjustment.quantityChange))
+    && Number(adjustment.quantityChange) !== 0
+    && projectedStock.value >= 0
+    && Boolean(adjustment.reason)
+})
 
 onMounted(loadWarnings)
 
@@ -109,16 +163,54 @@ async function loadWarnings() {
   loading.value = true
   error.value = ''
   try {
-    const [warningData, movementData] = await Promise.all([
+    const [warningData, movementData, productData] = await Promise.all([
       fetchInventoryWarnings(threshold.value),
-      fetchInventoryMovements()
+      fetchInventoryMovements(),
+      fetchAdminProducts()
     ])
     warnings.value = warningData
     movements.value = movementData
+    products.value = productData
   } catch (requestError) {
     error.value = getApiError(requestError, 'Inventory warnings could not be loaded.')
   } finally {
     loading.value = false
   }
+}
+
+async function submitAdjustment() {
+  if (!adjustmentIsValid.value) {
+    error.value = projectedStock.value < 0
+      ? 'Inventory adjustment cannot reduce stock below zero.'
+      : 'Choose a product, enter a non-zero quantity change, and add a reason.'
+    return
+  }
+
+  adjusting.value = true
+  error.value = ''
+  try {
+    await adjustInventory({
+      productId: Number(adjustment.productId),
+      quantityChange: Number(adjustment.quantityChange),
+      reason: adjustment.reason
+    })
+    adjustment.productId = ''
+    adjustment.quantityChange = 0
+    adjustment.reason = ''
+    showToast('Inventory adjustment saved.')
+    await loadWarnings()
+  } catch (requestError) {
+    error.value = getApiError(requestError, 'Inventory adjustment could not be saved.')
+  } finally {
+    adjusting.value = false
+  }
+}
+
+function showToast(message) {
+  toastMessage.value = message
+  window.clearTimeout(toastTimer)
+  toastTimer = window.setTimeout(() => {
+    toastMessage.value = ''
+  }, 2400)
 }
 </script>

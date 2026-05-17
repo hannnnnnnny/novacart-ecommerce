@@ -2,14 +2,18 @@ package com.novacart.store.controller;
 
 import com.novacart.store.dto.ApiResponse;
 import com.novacart.store.dto.DashboardMetricsResponse;
+import com.novacart.store.dto.InventoryAdjustmentRequest;
 import com.novacart.store.dto.InventoryWarningResponse;
 import com.novacart.store.dto.StockMovementResponse;
 import com.novacart.store.service.AdminDashboardService;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import java.util.List;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -42,5 +46,10 @@ public class AdminDashboardController {
     @GetMapping("/inventory/movements")
     public ApiResponse<List<StockMovementResponse>> getRecentStockMovements() {
         return ApiResponse.success("Stock movements loaded successfully.", adminDashboardService.getRecentStockMovements());
+    }
+
+    @PostMapping("/inventory/adjustments")
+    public ApiResponse<StockMovementResponse> adjustInventory(@Valid @RequestBody InventoryAdjustmentRequest request) {
+        return ApiResponse.success("Inventory adjusted successfully.", adminDashboardService.adjustInventory(request));
     }
 }
