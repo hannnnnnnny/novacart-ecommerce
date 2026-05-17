@@ -42,12 +42,15 @@ Returns active storefront categories ordered by name.
 
 Optional query parameters:
 
-- `search`: searches product name, description, brand, SKU, and category name.
+- `search`: searches product name, description, brand, SKU, category name, collection name, collection slug, and product tags.
 - `categoryId`: filters active products by category.
+- `collectionId`: filters active products by seasonal collection.
+- `tag`: filters active products by an exact product tag.
 - `minPrice`: filters products at or above this price.
 - `maxPrice`: filters products at or below this price.
 - `availableOnly`: when `true`, returns products with stock greater than zero.
-- `sort`: supports `name`, `newest`, `price-low`, `price-high`, and `stock`.
+- `saleOnly`: when `true`, returns products with compare-at markdowns, sale tags, or active promotion discounts.
+- `sort`: supports `name`, `newest`, `price-low`, `price-high`, `best-selling`, `discount`, and `stock`.
 - `page`: zero-based page index.
 - `size`: page size, capped at 60.
 
@@ -75,6 +78,7 @@ The current fashion release expands the original API with richer catalog, care, 
 - `material`
 - `brand`
 - `season`
+- `tag`
 - `saleOnly`
 - `minPrice`
 - `maxPrice`
@@ -252,7 +256,21 @@ Returns products with stock at or below the threshold.
 
 `GET /api/admin/inventory/movements`
 
-Returns recent inventory events such as checkout stock deductions and cancellation restorations.
+Returns recent inventory events such as checkout stock deductions, cancellation restorations, and manual adjustments.
+
+### Manual Inventory Adjustment
+
+`POST /api/admin/inventory/adjustments`
+
+```json
+{
+  "productId": 1,
+  "quantityChange": 12,
+  "reason": "Received replenishment from the studio stock room."
+}
+```
+
+The adjustment endpoint is admin-only, rejects zero changes, prevents stock from falling below zero, updates the product stock in a transaction, and records a `MANUAL_ADJUSTMENT` stock movement.
 
 ## Admin Categories
 

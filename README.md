@@ -11,7 +11,7 @@ The project is intentionally original in naming, layout, and content. All visibl
 - Seasonal collection model seeded with Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale.
 - Promotion engine for percentage or fixed-amount discounts targeted to selected products, category, collection, season, or tags. Storefront prices, cart totals, and checkout totals use effective discounted prices.
 - Customer storefront support for product browsing, filters, detail variants, cart, demo checkout, payment decline/approval states, order confirmation, support tickets, and refund requests.
-- Merchant workspace for dashboard analytics, product/category/collection/promotion management, order fulfillment, refund queue, support queue, guest customer records, and inventory warnings.
+- Merchant workspace for dashboard analytics, product/category/collection/promotion management, order fulfillment, refund queue, support queue, guest customer records, inventory warnings, and manual stock adjustments.
 - Guest customer records are created from checkout email and used for repeat customer and preference analytics.
 - Demo payment only. No real payment provider or card collection is connected.
 
@@ -24,7 +24,7 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 ### Storefront Experience
 
 - Responsive fashion storefront homepage with a seasonal hero, campaign links, category highlights, featured products, and retail value cards.
-- Product catalog with fashion categories, server-side search, category filtering, price range filtering, availability filtering, sorting, pagination, stock badges, loading states, empty states, and friendly error states.
+- Product catalog with fashion categories, server-side search, category, collection, tag, price range, sale, availability filtering, sorting, pagination, stock badges, loading states, empty states, and friendly error states.
 - Product detail pages with large fashion imagery, category context, clear price hierarchy, quantity selection, stock status, related products, and add-to-cart feedback.
 - Cart page with item summaries, quantity controls, stock-aware limits, remove actions, subtotal calculation, and a clear checkout path.
 - Checkout flow with customer information, shipping address fields, demo shipping method selection, demo payment approval or decline handling, order summary, basic validation, idempotency protection, and backend stock validation.
@@ -38,19 +38,19 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 - Dashboard metrics for total products, active products, total orders, total revenue, low-stock products, and recent order activity.
 - Product management with searchable fashion tables, status filters, inventory indicators, SKU, private label, compare-at price, tags, gallery, featured flag, create/edit forms, validation feedback, and delete confirmation.
 - Collection management for seasonal edits, campaign imagery, featured status, active/draft/archive status, dates, and sort order.
-- Promotion management for bulk markdowns across selected products, categories, collections, seasons, or tags.
+- Promotion management for bulk markdowns across selected products, categories, collections, seasons, or tags with guided target selection.
 - Category management for Women, Men, Bags, Jewelry, Shoes, Sportswear, Accessories, New Arrivals, Sale, and Seasonal Collection.
 - Order management with search, status filtering, order detail views, customer information, fashion item summaries, totals, and status updates.
 - Refund and support ticket management with status updates for customer care workflows.
 - Customer records and analytics for guest checkout profiles, top regions, best sellers, sales trends, and customer preferences.
-- Inventory warning screen with product thresholds, replenishment indicators, recent stock movement history, and fast navigation back to product management.
+- Inventory warning screen with product thresholds, manual stock adjustments, replenishment indicators, recent stock movement history, and fast navigation back to product management.
 
 ### Platform Capabilities
 
 - RESTful JSON API with consistent response envelopes and centralized error handling.
 - MySQL persistence through Spring Data JPA and Hibernate.
 - Transactional checkout logic that prevents insufficient-stock purchases, negative inventory, and duplicate order creation from repeated submissions.
-- Stock movement history for checkout deductions and cancellation restorations.
+- Stock movement history for checkout deductions, cancellation restorations, and manual inventory adjustments.
 - Public storefront APIs separated from protected admin APIs.
 - Vue 3 frontend with Vue Router, Pinia state management, Axios API wrappers, and reusable UI components.
 - English-only interface, documentation, API messages, seed data, and comments.
@@ -81,7 +81,7 @@ NovaCart is a production-style fashion commerce system for clothing, bags, jewel
 - Add customer accounts, saved addresses, order history, and account-level authorization if customer self-service is required.
 - Add pagination and server-side search for larger product and order datasets.
 - Add audit logging for admin changes and fulfillment status updates.
-- Add richer inventory controls such as stock adjustments, reserved stock, and supplier notes.
+- Add reserved stock, supplier notes, and fuller inventory audit reporting.
 - Add production observability, structured logs, rate limiting, backups, and monitoring.
 - Add broader frontend automated tests and end-to-end coverage for critical checkout and admin flows.
 
@@ -123,7 +123,7 @@ The screenshots below are generated from the current Vue interface with represen
 | Inventory Warnings |
 | --- |
 | ![NovaCart admin inventory preview](docs/preview/admin-inventory.png) |
-| Inventory screen with configurable warning threshold, refresh action, low-stock cards, active/inactive context, and quick product management access. |
+| Inventory screen with configurable warning threshold, manual stock adjustment, refresh action, low-stock cards, active/inactive context, and recent movement history. |
 
 ### Feature Map
 
@@ -140,7 +140,7 @@ The screenshots below are generated from the current Vue interface with represen
 | Admin Products | `/admin/products` | Searchable product table, status badges, stock badges, and management actions. |
 | Admin Categories | `/admin/categories` | Category list, create/edit form, empty state, and delete confirmation. |
 | Admin Orders | `/admin/orders` | Searchable order table, status filters, totals, dates, and detail links. |
-| Admin Inventory | `/admin/inventory` | Low-stock threshold controls and replenishment warning cards. |
+| Admin Inventory | `/admin/inventory` | Low-stock threshold controls, manual adjustments, replenishment warning cards, and recent stock movement history. |
 
 Suggested preview flow:
 
@@ -389,6 +389,7 @@ Admin order and operations APIs:
 - `PATCH /api/admin/orders/{id}/status`
 - `GET /api/admin/dashboard/metrics`
 - `GET /api/admin/inventory/warnings`
+- `POST /api/admin/inventory/adjustments`
 
 All API responses use a consistent JSON envelope. Validation and security errors return English messages without exposing sensitive implementation details.
 

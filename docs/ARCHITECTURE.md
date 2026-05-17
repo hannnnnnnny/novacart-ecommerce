@@ -14,7 +14,7 @@ flowchart LR
 
 ## Backend Layers
 
-- `controller`: REST endpoint boundaries for public catalog, checkout, admin auth, catalog management, order management, dashboard metrics, and inventory warnings.
+- `controller`: REST endpoint boundaries for public catalog, checkout, admin auth, catalog management, order management, dashboard metrics, inventory warnings, and manual stock adjustments.
 - `dto`: Request and response contracts for API payloads, validation errors, login responses, dashboard metrics, and order data.
 - `service`: Business interfaces for catalog, checkout, authentication, and dashboard behavior.
 - `service/impl`: Transactional business logic, stock deduction, slug generation, authentication, and DTO mapping.
@@ -93,6 +93,13 @@ All sample data is original to this repository. Local storefront imagery uses ge
 3. Admin users can move support tickets through `OPEN`, `IN_REVIEW`, `WAITING_FOR_CUSTOMER`, `RESOLVED`, and `CLOSED`.
 4. Admin users can move refunds through `REQUESTED`, `UNDER_REVIEW`, `APPROVED`, `REJECTED`, and `REFUNDED`.
 5. Approved/refunded transitions update the order refund status and payment status consistently.
+
+## Inventory Adjustment Flow
+
+1. Admin users review low-stock warnings from `/api/admin/inventory/warnings`.
+2. A manual stock adjustment posts `productId`, signed `quantityChange`, and a merchant reason to `/api/admin/inventory/adjustments`.
+3. The backend locks the product row, rejects zero changes, prevents negative stock, updates the stock quantity, and records a `MANUAL_ADJUSTMENT` stock movement.
+4. The admin inventory page refreshes warnings and movement history so the merchant can confirm the adjustment immediately.
 
 ## Analytics Flow
 
