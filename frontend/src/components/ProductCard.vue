@@ -1,9 +1,11 @@
 <template>
-  <article class="product-card">
-    <RouterLink :to="`/products/${product.id}`">
+  <article class="product-card fashion-product-card">
+    <RouterLink class="product-image-frame" :to="`/products/${product.id}`">
       <img :src="product.imageUrl" :alt="product.name" />
+      <span v-if="primaryBadge" class="product-image-badge">{{ primaryBadge }}</span>
+      <span v-if="product.collection?.name" class="product-collection-ribbon">{{ product.collection.name }}</span>
     </RouterLink>
-    <div>
+    <div class="product-card-body">
       <div class="product-card-meta">
         <p class="eyebrow">{{ product.brand || product.category?.name }}</p>
         <StatusBadge :value="stockStatus" :label="stockLabel" />
@@ -12,10 +14,20 @@
         <h3>{{ product.name }}</h3>
       </RouterLink>
       <p v-if="product.category?.name" class="product-card-category">{{ product.category.name }}</p>
-      <p>{{ product.description }}</p>
-      <div class="variant-summary" aria-label="Available product options">
-        <span v-if="product.colors?.length">{{ product.colors.slice(0, 3).join(', ') }}</span>
-        <span v-if="product.sizes?.length">{{ product.sizes.slice(0, 5).join(' / ') }}</span>
+      <p class="product-card-description">{{ product.description }}</p>
+      <div class="variant-summary fashion-variant-summary" aria-label="Available product options">
+        <span v-if="displayColors.length" class="swatch-row" aria-label="Available colors">
+          <i
+            v-for="color in displayColors"
+            :key="color"
+            class="color-dot"
+            :title="color"
+            :style="{ background: colorSwatch(color) }"
+            aria-hidden="true"
+          ></i>
+          <small>{{ product.colors.length }} colors</small>
+        </span>
+        <span v-if="displaySizes.length">{{ displaySizes.join(' / ') }}</span>
       </div>
       <div v-if="product.discountPercent" class="mini-tag-row">
         <span>Save {{ product.discountPercent }}%</span>
@@ -80,6 +92,15 @@ const stockLabel = computed(() => {
   return 'In stock'
 })
 const lowStockThreshold = computed(() => props.product.lowStockThreshold ?? 5)
+const displayColors = computed(() => props.product.colors?.slice(0, 4) || [])
+const displaySizes = computed(() => props.product.sizes?.slice(0, 5) || [])
+const primaryBadge = computed(() => {
+  if (props.product.discountPercent) return `${props.product.discountPercent}% off`
+  if (props.product.tags?.includes('new-arrival')) return 'New arrival'
+  if (props.product.featured) return 'Featured'
+  if (props.product.stockQuantity > 0 && props.product.stockQuantity <= lowStockThreshold.value) return 'Low stock'
+  return ''
+})
 const requiresOptionSelection = computed(() => {
   return (props.product.sizes?.length || 0) > 1 || (props.product.colors?.length || 0) > 1
 })
@@ -95,5 +116,22 @@ function addProduct() {
   }
   cartStore.addItem(props.product, 1)
   emit('added', props.product)
+}
+
+function colorSwatch(color) {
+  const swatches = {
+    Black: '#141414',
+    Ivory: '#f5efe1',
+    Taupe: '#97816b',
+    Sand: '#d7ba87',
+    Sky: '#9dc6dd',
+    Pearl: '#f7f5ef',
+    Wine: '#7b263d',
+    Slate: '#596671',
+    Pine: '#284b3a',
+    Gold: '#c4a24a',
+    Silver: '#c5c9cf'
+  }
+  return swatches[color] || '#d9ded8'
 }
 </script>

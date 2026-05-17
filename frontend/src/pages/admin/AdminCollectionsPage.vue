@@ -41,7 +41,26 @@
           </button>
         </div>
       </form>
-      <div class="admin-table-wrap">
+      <div class="collection-admin-panel">
+        <div class="collection-card-grid">
+          <article v-for="collection in collections" :key="collection.id" class="admin-collection-card">
+            <img :src="collection.displayImageUrl || collection.heroImageUrl || '/catalog/seasonal.svg'" :alt="collection.name" />
+            <div>
+              <p class="eyebrow">{{ collection.featured ? 'Featured collection' : 'Collection' }}</p>
+              <h2>{{ collection.name }}</h2>
+              <p>{{ collection.description }}</p>
+              <div class="status-pair">
+                <StatusBadge :value="collection.status" />
+                <span class="featured-marker">{{ collection.productCount }} products</span>
+              </div>
+              <div class="table-actions">
+                <button class="text-button" type="button" @click="editCollection(collection)">Edit</button>
+                <button class="text-button danger" type="button" @click="removeCollection(collection)">Delete</button>
+              </div>
+            </div>
+          </article>
+        </div>
+        <div class="admin-table-wrap">
         <table class="admin-table compact-table">
           <thead><tr><th>Name</th><th>Status</th><th>Products</th><th>Featured</th><th>Actions</th></tr></thead>
           <tbody>
@@ -59,6 +78,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </section>

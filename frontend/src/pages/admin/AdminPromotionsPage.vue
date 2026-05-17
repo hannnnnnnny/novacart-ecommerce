@@ -60,7 +60,26 @@
           <button v-if="editingId" class="secondary-button" type="button" @click="resetForm">Cancel Edit</button>
         </div>
       </form>
-      <div class="admin-table-wrap">
+      <div class="promotion-admin-panel">
+        <div class="promotion-card-grid">
+          <article v-for="promotion in promotions" :key="promotion.id" class="promotion-card">
+            <div>
+              <p class="eyebrow">{{ formatStatus(promotion.targetType) }}</p>
+              <h2>{{ promotion.name }}</h2>
+              <p>{{ promotion.description || 'Promotion without public description.' }}</p>
+            </div>
+            <strong>{{ promotion.discountType === 'PERCENTAGE' ? `${promotion.discountValue}%` : formatCurrency(promotion.discountValue) }}</strong>
+            <div class="status-pair">
+              <StatusBadge :value="promotion.active ? 'ACTIVE' : 'INACTIVE'" />
+              <span class="featured-marker">{{ formatTargetValues(promotion) }}</span>
+            </div>
+            <div class="table-actions">
+              <button class="text-button" type="button" @click="editPromotion(promotion)">Edit</button>
+              <button class="text-button danger" type="button" @click="removePromotion(promotion)">Delete</button>
+            </div>
+          </article>
+        </div>
+        <div class="admin-table-wrap">
         <table class="admin-table compact-table">
           <thead><tr><th>Name</th><th>Discount</th><th>Target</th><th>Active</th><th>Actions</th></tr></thead>
           <tbody>
@@ -78,6 +97,7 @@
             </tr>
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   </section>

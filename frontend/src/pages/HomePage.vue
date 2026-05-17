@@ -1,10 +1,10 @@
 <template>
   <div>
-    <section class="hero-section">
+    <section class="hero-section premium-hero-section">
       <div class="hero-copy">
-        <p class="eyebrow">Premium Fashion Commerce</p>
-        <h1>Curated style for every season.</h1>
-        <p>A modern wardrobe destination for clothing, bags, jewelry, shoes, activewear, and limited sale campaigns, supported by merchant tools that keep every edit shoppable.</p>
+        <p class="eyebrow">NovaCart Fashion</p>
+        <h1>Fashion, movement, and everyday detail.</h1>
+        <p>Curated clothing, bags, jewelry, shoes, sportswear, and seasonal edits with a shopping flow built around real sizes, colors, discounts, delivery, refunds, and support.</p>
         <div class="hero-actions">
           <RouterLink class="primary-button" :to="{ name: 'products', query: { tag: 'new-arrival', sort: 'newest' } }">Shop New Arrivals</RouterLink>
           <RouterLink class="secondary-button hero-secondary" :to="{ name: 'products', query: { sale: 'true', sort: 'discount' } }">Explore Sale</RouterLink>
@@ -15,10 +15,24 @@
           <span>Refund and support flow</span>
         </div>
       </div>
-      <div class="hero-editorial-card" aria-label="Featured seasonal campaign">
+      <div class="hero-editorial-card hero-lookbook-card" aria-label="Featured seasonal campaign">
         <span class="campaign-label">Spring Edit</span>
         <h2>Soft tailoring, sculptural bags, and active layers.</h2>
         <p>Shop a campaign mix built around weekday polish, evening detail, and movement-ready weekend pieces.</p>
+        <div class="hero-lookbook-grid" aria-label="Visual fashion departments">
+          <RouterLink :to="{ name: 'products', query: { category: 1 } }">
+            <img src="/catalog/women.svg" alt="Tailored womenswear preview" />
+            <span>Clothing</span>
+          </RouterLink>
+          <RouterLink :to="{ name: 'products', query: { category: 3 } }">
+            <img src="/catalog/bags.svg" alt="Structured bag preview" />
+            <span>Bags</span>
+          </RouterLink>
+          <RouterLink :to="{ name: 'products', query: { category: 6 } }">
+            <img src="/catalog/sportswear.svg" alt="Activewear preview" />
+            <span>Activewear</span>
+          </RouterLink>
+        </div>
         <RouterLink class="secondary-button hero-secondary" :to="{ name: 'products', query: { search: 'spring', sort: 'newest' } }">View Campaign</RouterLink>
         <div class="hero-stats">
           <article>
@@ -49,7 +63,8 @@
         <RouterLink
           v-for="category in categories"
           :key="category.id"
-          class="category-highlight"
+          class="category-highlight fashion-category-card"
+          :style="{ '--category-image': `url(${categoryImage(category.name)})` }"
           :to="{ name: 'products', query: { category: category.id } }"
         >
           <span>{{ category.name }}</span>
@@ -70,7 +85,8 @@
         <RouterLink
           v-for="collection in featuredCollections"
           :key="collection.id"
-          class="campaign-card"
+          class="campaign-card visual-campaign-card"
+          :style="{ '--campaign-image': `url(${collection.displayImageUrl || collection.heroImageUrl || '/catalog/seasonal.svg'})` }"
           :to="{ name: 'products', query: { collectionId: collection.id } }"
         >
           <strong>{{ collection.name }}</strong>
@@ -218,6 +234,18 @@ const valueCards = [
     icon: ShieldCheck
   }
 ]
+const categoryImages = {
+  Women: '/catalog/women.svg',
+  Men: '/catalog/men.svg',
+  Bags: '/catalog/bags.svg',
+  Jewelry: '/catalog/jewelry.svg',
+  Shoes: '/catalog/shoes.svg',
+  Sportswear: '/catalog/sportswear.svg',
+  Accessories: '/catalog/accessories.svg',
+  'New Arrivals': '/catalog/new-arrivals.svg',
+  Sale: '/catalog/sale.svg',
+  'Seasonal Collection': '/catalog/seasonal.svg'
+}
 
 onMounted(async () => {
   try {
@@ -231,4 +259,8 @@ onMounted(async () => {
     loading.value = false
   }
 })
+
+function categoryImage(name) {
+  return categoryImages[name] || '/catalog/seasonal.svg'
+}
 </script>

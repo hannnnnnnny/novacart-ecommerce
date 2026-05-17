@@ -8,6 +8,27 @@
     <LoadingState v-if="loading" message="Loading dashboard..." />
     <ErrorMessage v-else-if="error" :message="error" />
     <div v-else class="dashboard-layout">
+      <section class="admin-command-hero">
+        <div>
+          <p class="eyebrow">Merchant command center</p>
+          <h2>Today’s retail pulse across revenue, fulfillment, refunds, support, and stock risk.</h2>
+          <p>Use the shortcuts below to move quickly from signal to action without leaving the operations workspace.</p>
+        </div>
+        <div class="command-hero-stats">
+          <article>
+            <span>Total Revenue</span>
+            <strong>{{ formatCurrency(metrics.revenue) }}</strong>
+          </article>
+          <article>
+            <span>Orders</span>
+            <strong>{{ metrics.totalOrders || 0 }}</strong>
+          </article>
+          <article>
+            <span>Low Stock</span>
+            <strong>{{ warnings.length }}</strong>
+          </article>
+        </div>
+      </section>
       <div class="metric-grid">
         <MetricCard label="Total Products" :value="metrics.totalProducts || 0" detail="All catalog records" />
         <MetricCard label="Active Products" :value="metrics.activeProducts || 0" detail="Visible in storefront" />

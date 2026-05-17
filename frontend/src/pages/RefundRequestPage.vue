@@ -5,6 +5,13 @@
       title="Refund Request"
       description="Submit an eligible paid order for merchant review within the demo 30-day refund window."
     />
+    <section class="care-hero-panel refund-care-panel">
+      <div>
+        <p class="eyebrow">Refund review</p>
+        <h2>Connect the order number and email so the merchant can verify the payment and fulfillment state.</h2>
+      </div>
+      <p>Approved requests can update refund status and keep the order record visible to admin teams.</p>
+    </section>
     <form class="support-layout" @submit.prevent="submitRefund">
       <div class="admin-form">
         <ErrorMessage v-if="error" :message="error" />

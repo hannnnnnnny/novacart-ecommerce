@@ -3,8 +3,18 @@
     <LoadingState v-if="loading" message="Loading product..." />
     <ErrorMessage v-else-if="error" :message="error" />
     <div v-else>
-      <div class="detail-layout product-detail-layout">
+      <nav class="product-breadcrumb" aria-label="Product path">
+        <RouterLink to="/products">Catalog</RouterLink>
+        <span>/</span>
+        <RouterLink v-if="product.collection?.id" :to="{ name: 'products', query: { collectionId: product.collection.id } }">
+          {{ product.collection.name }}
+        </RouterLink>
+        <span v-else>{{ product.category?.name }}</span>
+      </nav>
+
+      <div class="detail-layout product-detail-layout premium-detail-layout">
         <div class="product-media-panel">
+          <span v-if="product.discountPercent" class="product-image-badge detail-discount-badge">{{ product.discountPercent }}% off</span>
           <img :src="selectedImage" :alt="product.name" />
           <div v-if="product.imageGallery?.length > 1" class="thumbnail-row" aria-label="Product image gallery">
             <button
@@ -87,7 +97,7 @@
             <RouterLink class="secondary-button" to="/cart">View Cart</RouterLink>
           </div>
 
-          <div class="product-service-notes" aria-label="Purchase support information">
+          <div class="product-service-notes product-promise-row" aria-label="Purchase support information">
             <article>
               <strong>Delivery</strong>
               <span>Standard delivery in 3 to 6 business days.</span>
@@ -95,6 +105,10 @@
             <article>
               <strong>Refund Window</strong>
               <span>Eligible paid orders can request a refund within 30 days.</span>
+            </article>
+            <article>
+              <strong>Support</strong>
+              <span>Customer care can review sizing, shipping, and refund questions.</span>
             </article>
           </div>
         </div>

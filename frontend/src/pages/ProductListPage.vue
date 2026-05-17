@@ -6,6 +6,19 @@
       description="Search clothing, bags, jewelry, shoes, sportswear, equipment, accessories, seasonal edits, and sale pieces."
     />
 
+    <section class="catalog-story-panel" aria-label="Catalog merchandising overview">
+      <div>
+        <p class="eyebrow">Shop by intention</p>
+        <h2>Build a wardrobe edit from campaign stories, colors, sizes, and sale signals.</h2>
+      </div>
+      <div class="catalog-story-links">
+        <RouterLink :to="{ name: 'products', query: { category: 5, sort: 'newest' } }">Shoes</RouterLink>
+        <RouterLink :to="{ name: 'products', query: { category: 4, sort: 'price-high' } }">Jewelry</RouterLink>
+        <RouterLink :to="{ name: 'products', query: { category: 6, tag: 'active-weekend' } }">Activewear</RouterLink>
+        <RouterLink :to="{ name: 'products', query: { sale: 'true', sort: 'discount' } }">Sale</RouterLink>
+      </div>
+    </section>
+
     <button class="secondary-button mobile-filter-toggle" type="button" @click="filtersOpen = !filtersOpen">
       {{ filtersOpen ? 'Hide Filters' : 'Show Filters' }}
     </button>
@@ -20,6 +33,10 @@
     <div class="catalog-browse-layout">
       <aside class="catalog-filter-panel" :class="{ open: filtersOpen }" aria-label="Catalog filters">
         <form class="filter-form" @submit.prevent="applyFilters">
+          <div class="filter-panel-heading">
+            <strong>Refine fashion edit</strong>
+            <span>{{ pageInfo.totalElements }} results</span>
+          </div>
           <label class="search-field">
             Search products
             <input v-model.trim="searchTerm" type="search" placeholder="Search by style, label, category, tag, or SKU" />

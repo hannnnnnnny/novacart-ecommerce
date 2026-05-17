@@ -5,6 +5,13 @@
       title="Secure Demo Checkout"
       description="Confirm contact details, shipping, and demo-safe payment before placing the fashion order."
     />
+    <section class="journey-banner checkout-journey-banner">
+      <div>
+        <p class="eyebrow">Demo payment flow</p>
+        <h2>Confirm delivery, choose a safe test payment outcome, and keep the refund window visible.</h2>
+      </div>
+      <p>No real card data is collected. The merchant backend still validates stock, variants, shipping, payment status, and idempotency.</p>
+    </section>
     <ol class="checkout-progress" aria-label="Checkout progress">
       <li class="active">Cart</li>
       <li class="active">Shipping</li>

@@ -2092,6 +2092,591 @@ textarea {
   font-weight: 800;
 }
 
+/* Premium fashion commerce presentation layer */
+:root {
+  --color-ink: #151514;
+  --color-muted: #6f6a62;
+  --color-subtle: #f1eee8;
+  --color-surface: #fffdf8;
+  --color-surface-strong: #ffffff;
+  --color-border: #ded6ca;
+  --color-primary: #24201b;
+  --color-primary-hover: #3a332b;
+  --color-accent: #8d3346;
+  --color-accent-soft: #faedf0;
+  --color-gold: #b08b48;
+  --shadow-sm: 0 14px 34px rgba(30, 27, 23, 0.08);
+  --shadow-md: 0 28px 70px rgba(30, 27, 23, 0.14);
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(176, 139, 72, 0.12), transparent 32rem),
+    linear-gradient(180deg, #f8f3eb 0%, var(--color-subtle) 34%, #f6f2eb 100%);
+}
+
+.app-header {
+  background: rgba(255, 253, 248, 0.84);
+  box-shadow: 0 12px 40px rgba(30, 27, 23, 0.08);
+}
+
+.brand-mark {
+  background: linear-gradient(135deg, #24201b, #8d3346);
+}
+
+.premium-hero-section {
+  position: relative;
+  width: min(1440px, calc(100% - 1.5rem));
+  min-height: 78vh;
+  margin: 1rem auto 0;
+  overflow: hidden;
+  border-radius: 16px;
+  background:
+    linear-gradient(100deg, rgba(16, 14, 12, 0.92) 0%, rgba(43, 35, 31, 0.82) 44%, rgba(30, 27, 23, 0.2) 100%),
+    image-set(url("/catalog/seasonal.svg") type("image/svg+xml")) right 3% center/48% no-repeat,
+    #201b18;
+  box-shadow: 0 30px 90px rgba(30, 27, 23, 0.22);
+}
+
+.premium-hero-section::before {
+  content: "";
+  position: absolute;
+  inset: auto 7% 10% auto;
+  width: 28rem;
+  height: 28rem;
+  border: 1px solid rgba(255, 253, 248, 0.18);
+  transform: rotate(12deg);
+}
+
+.premium-hero-section > * {
+  position: relative;
+}
+
+.premium-hero-section .hero-copy h1 {
+  max-width: 740px;
+  font-size: clamp(3rem, 7vw, 6.9rem);
+  line-height: 0.9;
+}
+
+.premium-hero-section .hero-copy p:not(.eyebrow) {
+  max-width: 660px;
+}
+
+.hero-lookbook-card {
+  align-self: stretch;
+  align-content: center;
+  border-radius: 16px;
+}
+
+.hero-lookbook-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.hero-lookbook-grid a {
+  position: relative;
+  min-height: 150px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 253, 248, 0.22);
+  border-radius: 10px;
+  background: rgba(255, 253, 248, 0.08);
+}
+
+.hero-lookbook-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: saturate(0.95) contrast(1.04);
+}
+
+.hero-lookbook-grid span {
+  position: absolute;
+  left: 0.7rem;
+  bottom: 0.7rem;
+  border-radius: 999px;
+  padding: 0.3rem 0.55rem;
+  background: rgba(255, 253, 248, 0.88);
+  color: #211d18;
+  font-size: 0.75rem;
+  font-weight: 900;
+}
+
+.fashion-category-card {
+  min-height: 230px;
+  display: grid;
+  align-content: end;
+  overflow: hidden;
+  background:
+    linear-gradient(180deg, rgba(21, 21, 20, 0.02), rgba(21, 21, 20, 0.74)),
+    var(--category-image) center/cover,
+    var(--color-surface);
+  color: #fffdf8;
+}
+
+.fashion-category-card span {
+  font-size: clamp(1.2rem, 2vw, 1.7rem);
+}
+
+.fashion-category-card small {
+  color: rgba(255, 253, 248, 0.84);
+}
+
+.visual-campaign-card {
+  min-height: 260px;
+  background:
+    linear-gradient(180deg, rgba(21, 21, 20, 0.02), rgba(21, 21, 20, 0.78)),
+    var(--campaign-image) center/cover,
+    #2a241f;
+}
+
+.catalog-story-panel,
+.journey-banner,
+.care-hero-panel,
+.admin-command-hero {
+  display: grid;
+  gap: 1rem;
+  margin: -0.5rem 0 1.5rem;
+  border: 1px solid rgba(176, 139, 72, 0.26);
+  border-radius: 14px;
+  padding: clamp(1.1rem, 3vw, 1.6rem);
+  background:
+    linear-gradient(135deg, rgba(255, 253, 248, 0.94), rgba(250, 237, 240, 0.76)),
+    var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.catalog-story-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 0.8fr);
+  align-items: end;
+  background:
+    linear-gradient(90deg, rgba(255, 253, 248, 0.96), rgba(255, 253, 248, 0.62)),
+    url("/catalog/bags.svg") right center/38% no-repeat,
+    var(--color-surface);
+}
+
+.catalog-story-panel h2,
+.journey-banner h2,
+.care-hero-panel h2,
+.admin-command-hero h2 {
+  margin: 0;
+  max-width: 760px;
+  font-size: clamp(1.6rem, 3vw, 2.65rem);
+  line-height: 1.02;
+}
+
+.catalog-story-links,
+.journey-steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.55rem;
+}
+
+.catalog-story-links a,
+.journey-steps span {
+  border: 1px solid rgba(36, 32, 27, 0.12);
+  border-radius: 999px;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 253, 248, 0.9);
+  font-weight: 900;
+}
+
+.filter-panel-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.75rem;
+}
+
+.filter-panel-heading span {
+  color: var(--color-muted);
+  font-weight: 800;
+}
+
+.catalog-filter-panel,
+.summary-panel,
+.form-section,
+.admin-form,
+.dashboard-section,
+.admin-table-wrap {
+  border-radius: 12px;
+}
+
+.fashion-product-card {
+  display: grid;
+  min-height: 100%;
+  background: #fffdf8;
+}
+
+.product-image-frame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #eee7dd;
+}
+
+.fashion-product-card:hover .product-image-frame img {
+  transform: scale(1.035);
+}
+
+.product-image-frame img {
+  aspect-ratio: 4 / 4.6;
+  padding: 1rem;
+  object-fit: contain;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(141, 51, 70, 0.08), transparent 8rem),
+    #eee7dd;
+  transition: transform 220ms ease;
+}
+
+.product-image-badge,
+.product-collection-ribbon {
+  position: absolute;
+  z-index: 1;
+  border-radius: 999px;
+  padding: 0.35rem 0.58rem;
+  font-size: 0.72rem;
+  font-weight: 950;
+}
+
+.product-image-badge {
+  top: 0.75rem;
+  left: 0.75rem;
+  background: #8d3346;
+  color: #fffdf8;
+}
+
+.product-collection-ribbon {
+  right: 0.75rem;
+  bottom: 0.75rem;
+  max-width: calc(100% - 1.5rem);
+  background: rgba(255, 253, 248, 0.9);
+  color: #24201b;
+}
+
+.product-card-body {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.product-card-description {
+  display: -webkit-box;
+  min-height: 3.05rem;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.fashion-variant-summary {
+  align-items: center;
+}
+
+.swatch-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.swatch-row small {
+  color: #5f5a52;
+  font-weight: 900;
+}
+
+.card-row {
+  align-items: end;
+}
+
+.price-stack strong {
+  font-size: 1.12rem;
+}
+
+.product-breadcrumb {
+  display: flex;
+  gap: 0.45rem;
+  margin-bottom: 1rem;
+  color: var(--color-muted);
+  font-weight: 850;
+}
+
+.product-breadcrumb a {
+  color: var(--color-accent);
+}
+
+.premium-detail-layout .product-media-panel {
+  position: relative;
+  padding: 1rem;
+  background:
+    linear-gradient(135deg, rgba(250, 237, 240, 0.64), rgba(255, 253, 248, 0.95)),
+    #fffdf8;
+}
+
+.detail-discount-badge {
+  top: 1.65rem;
+  left: 1.65rem;
+}
+
+.product-buy-panel {
+  border-color: rgba(176, 139, 72, 0.3);
+}
+
+.product-promise-row {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.journey-banner {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+}
+
+.checkout-journey-banner {
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.7fr);
+}
+
+.cart-journey-banner {
+  background:
+    linear-gradient(90deg, rgba(255, 253, 248, 0.96), rgba(255, 253, 248, 0.74)),
+    url("/catalog/shoes.svg") right center/26% no-repeat,
+    var(--color-surface);
+}
+
+.fashion-cart-item {
+  border-radius: 12px;
+}
+
+.fashion-cart-item img {
+  box-shadow: inset 0 0 0 1px rgba(36, 32, 27, 0.08);
+}
+
+.care-hero-panel {
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 0.55fr);
+  align-items: center;
+}
+
+.refund-care-panel {
+  background:
+    linear-gradient(90deg, rgba(255, 253, 248, 0.96), rgba(250, 237, 240, 0.86)),
+    url("/catalog/jewelry.svg") right center/24% no-repeat,
+    var(--color-surface);
+}
+
+.admin-command-hero {
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 0.85fr);
+  align-items: center;
+  margin-top: 0;
+  background:
+    linear-gradient(115deg, rgba(27, 24, 21, 0.96), rgba(66, 45, 50, 0.92)),
+    #1f1b18;
+  color: #fffdf8;
+}
+
+.admin-command-hero .eyebrow {
+  color: #e9c96f;
+}
+
+.admin-command-hero p:not(.eyebrow) {
+  max-width: 720px;
+  color: rgba(255, 253, 248, 0.78);
+}
+
+.command-hero-stats,
+.admin-visual-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.8rem;
+}
+
+.command-hero-stats article,
+.admin-visual-summary article {
+  border: 1px solid rgba(255, 253, 248, 0.16);
+  border-radius: 12px;
+  padding: 1rem;
+  background: rgba(255, 253, 248, 0.08);
+}
+
+.command-hero-stats span,
+.admin-visual-summary span {
+  display: block;
+  color: rgba(255, 253, 248, 0.72);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.command-hero-stats strong,
+.admin-visual-summary strong {
+  display: block;
+  margin-top: 0.4rem;
+  font-size: clamp(1.6rem, 4vw, 2.5rem);
+}
+
+.admin-visual-summary {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: -0.6rem 0 1.2rem;
+}
+
+.admin-visual-summary article {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-visual-summary span {
+  color: var(--color-muted);
+}
+
+.admin-product-workspace,
+.collection-admin-panel,
+.promotion-admin-panel {
+  display: grid;
+  gap: 1rem;
+}
+
+.bulk-action-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  align-items: center;
+  border: 1px solid rgba(141, 51, 70, 0.22);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  background: var(--color-accent-soft);
+  color: #5a2633;
+}
+
+.admin-product-cell {
+  display: grid;
+  grid-template-columns: 74px minmax(0, 1fr);
+  gap: 0.8rem;
+  align-items: center;
+  min-width: 260px;
+}
+
+.admin-product-cell img {
+  width: 74px;
+  aspect-ratio: 4 / 5;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #eee7dd;
+}
+
+.admin-product-cell small {
+  display: block;
+  color: var(--color-muted);
+  font-weight: 750;
+}
+
+.collection-card-grid,
+.promotion-card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.admin-collection-card,
+.promotion-card {
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-collection-card img {
+  width: 100%;
+  aspect-ratio: 16 / 8;
+  object-fit: cover;
+  background: #eee7dd;
+}
+
+.admin-collection-card > div,
+.promotion-card {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+}
+
+.admin-collection-card h2,
+.promotion-card h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.admin-collection-card p:not(.eyebrow),
+.promotion-card p:not(.eyebrow) {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.promotion-card > strong {
+  font-size: 2rem;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.admin-sidebar {
+  background:
+    linear-gradient(180deg, #181512, #2d1f22 58%, #1a1714);
+}
+
+.metric-card {
+  border-left-color: var(--color-accent);
+  border-radius: 12px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.trend-bar i {
+  background: linear-gradient(180deg, #8d3346, #b08b48);
+}
+
+.admin-table th {
+  background: #f3ece4;
+  color: #5a4b3d;
+}
+
+.admin-table tr:hover td {
+  background: rgba(250, 237, 240, 0.28);
+}
+
+@media (max-width: 980px) {
+  .premium-hero-section,
+  .catalog-story-panel,
+  .journey-banner,
+  .checkout-journey-banner,
+  .care-hero-panel,
+  .admin-command-hero,
+  .command-hero-stats,
+  .admin-visual-summary,
+  .product-promise-row {
+    grid-template-columns: 1fr;
+  }
+
+  .catalog-story-links,
+  .journey-steps {
+    justify-content: flex-start;
+  }
+
+  .premium-hero-section {
+    width: 100%;
+    margin-top: 0;
+    border-radius: 0;
+    background:
+      linear-gradient(110deg, rgba(16, 14, 12, 0.94), rgba(43, 35, 31, 0.82)),
+      url("/catalog/seasonal.svg") right bottom/70% no-repeat,
+      #201b18;
+  }
+
+  .hero-lookbook-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-visual-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 820px) {
   .app-header,
   .detail-layout,

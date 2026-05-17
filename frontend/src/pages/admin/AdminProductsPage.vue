@@ -9,6 +9,24 @@
         <RouterLink class="primary-button" to="/admin/products/new">New Product</RouterLink>
       </template>
     </PageHeader>
+    <section class="admin-visual-summary">
+      <article>
+        <span>Visible Products</span>
+        <strong>{{ products.filter((product) => product.status === 'ACTIVE').length }}</strong>
+      </article>
+      <article>
+        <span>Sale Products</span>
+        <strong>{{ products.filter((product) => product.discountPercent || product.tags?.includes('sale')).length }}</strong>
+      </article>
+      <article>
+        <span>Low Stock</span>
+        <strong>{{ products.filter((product) => product.stockQuantity > 0 && product.stockQuantity <= (product.lowStockThreshold ?? 5)).length }}</strong>
+      </article>
+      <article>
+        <span>Archived</span>
+        <strong>{{ products.filter((product) => product.status === 'ARCHIVED').length }}</strong>
+      </article>
+    </section>
     <div class="catalog-toolbar admin-toolbar">
       <label class="search-field">
         Search products
@@ -73,13 +91,19 @@
       title="No products yet"
       message="Adjust the search or create a new product for the catalog."
     />
-    <div v-else class="admin-table-wrap">
+    <div v-else class="admin-product-workspace">
+      <div v-if="selectedIds.length" class="bulk-action-bar">
+        <strong>{{ selectedIds.length }} selected</strong>
+        <span>Archive, assign a collection, or create a markdown for the selected fashion products.</span>
+      </div>
+      <div class="admin-table-wrap">
       <table class="admin-table">
         <thead>
           <tr>
             <th><input type="checkbox" :checked="allSelected" aria-label="Select all visible products" @change="toggleAll($event.target.checked)" /></th>
-            <th>Name</th>
+            <th>Product</th>
             <th>Category</th>
+            <th>Collection</th>
             <th>Price</th>
             <th>Stock</th>
             <th>Status</th>
@@ -90,10 +114,17 @@
           <tr v-for="product in filteredProducts" :key="product.id">
             <td><input v-model="selectedIds" type="checkbox" :value="product.id" :aria-label="`Select ${product.name}`" /></td>
             <td>
-              <strong>{{ product.name }}</strong>
-              <span>{{ product.brand || 'Unbranded' }} / {{ product.sku || product.slug }}</span>
+              <div class="admin-product-cell">
+                <img :src="product.imageUrl" :alt="product.name" />
+                <div>
+                  <strong>{{ product.name }}</strong>
+                  <span>{{ product.brand || 'Unbranded' }} / {{ product.sku || product.slug }}</span>
+                  <small v-if="product.sizes?.length || product.colors?.length">{{ (product.sizes || []).slice(0, 4).join(' / ') }} · {{ (product.colors || []).slice(0, 3).join(', ') }}</small>
+                </div>
+              </div>
             </td>
             <td>{{ product.category?.name }}</td>
+            <td>{{ product.collection?.name || 'No collection' }}</td>
             <td>
               <strong>{{ formatCurrency(product.effectivePrice ?? product.price) }}</strong>
               <span v-if="product.compareAtPrice || Number(product.discountAmount) > 0">{{ formatCurrency(product.compareAtPrice || product.price) }} compare-at</span>
@@ -121,6 +152,7 @@
           </tr>
         </tbody>
       </table>
+      </div>
     </div>
   </section>
 </template>

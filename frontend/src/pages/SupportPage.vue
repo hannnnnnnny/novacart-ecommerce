@@ -5,6 +5,13 @@
       title="Support Request"
       description="Send a refund, exchange, shipping, product, payment, or general service issue to the merchant team."
     />
+    <section class="care-hero-panel">
+      <div>
+        <p class="eyebrow">Fashion care desk</p>
+        <h2>Ask about fit, delivery, payment, refund eligibility, or product condition.</h2>
+      </div>
+      <p>Submitted tickets appear in the merchant support queue with status controls and internal notes.</p>
+    </section>
     <form class="support-layout" @submit.prevent="submitTicket">
       <div class="admin-form">
         <ErrorMessage v-if="error" :message="error" />

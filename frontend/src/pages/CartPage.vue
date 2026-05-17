@@ -5,6 +5,18 @@
       title="Cart"
       description="Review selected fashion pieces, quantities, stock limits, and order totals before checkout."
     />
+    <section v-if="cartStore.items.length" class="journey-banner cart-journey-banner">
+      <div>
+        <p class="eyebrow">Ready to checkout</p>
+        <h2>Your selected wardrobe pieces are reserved only after order placement.</h2>
+      </div>
+      <div class="journey-steps" aria-label="Checkout path">
+        <span>Cart</span>
+        <span>Shipping</span>
+        <span>Demo Payment</span>
+        <span>Support</span>
+      </div>
+    </section>
     <EmptyState
       v-if="!cartStore.items.length"
       title="Your cart is empty"
@@ -14,7 +26,7 @@
     </EmptyState>
     <div v-else class="cart-layout">
       <div class="cart-items">
-        <article v-for="item in cartStore.items" :key="item.lineKey" class="cart-item">
+        <article v-for="item in cartStore.items" :key="item.lineKey" class="cart-item fashion-cart-item">
           <img :src="item.imageUrl" :alt="item.name" />
           <div class="cart-item-body">
             <div>
