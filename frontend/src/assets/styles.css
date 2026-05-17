@@ -967,6 +967,22 @@ nav a.router-link-active {
   font-size: 1.05rem;
 }
 
+.product-meta-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.product-meta-list span {
+  border: 1px solid rgba(105, 116, 109, 0.18);
+  border-radius: 999px;
+  padding: 0.32rem 0.62rem;
+  background: #f8f5ee;
+  color: #5e675f;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+
 .price {
   display: block;
   margin: 1rem 0;
@@ -992,6 +1008,52 @@ nav a.router-link-active {
   margin-top: 0.5rem;
 }
 
+.selector-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.field-label {
+  font-weight: 800;
+}
+
+.option-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.option-pill {
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  padding: 0.54rem 0.76rem;
+  background: var(--color-surface-strong);
+  color: #314239;
+  cursor: pointer;
+  font-weight: 850;
+}
+
+.option-pill:hover,
+.option-pill.active {
+  border-color: rgba(50, 111, 140, 0.38);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px rgba(50, 111, 140, 0.1);
+}
+
+.color-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.color-dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  border: 1px solid rgba(23, 32, 27, 0.16);
+  border-radius: 999px;
+}
+
 .purchase-validation {
   margin: 0;
   border: 1px solid rgba(138, 91, 22, 0.26);
@@ -1000,6 +1062,30 @@ nav a.router-link-active {
   background: var(--color-warning-soft);
   color: var(--color-warning);
   font-weight: 800;
+}
+
+.product-service-notes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.7rem;
+}
+
+.product-service-notes article {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem;
+  background: #f8f5ee;
+}
+
+.product-service-notes strong,
+.product-service-notes span {
+  display: block;
+}
+
+.product-service-notes span {
+  margin-top: 0.2rem;
+  color: var(--color-muted);
+  font-size: 0.88rem;
 }
 
 .product-info-grid {
@@ -2086,6 +2172,10 @@ textarea {
   }
 
   .product-info-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .product-service-notes {
     grid-template-columns: 1fr;
   }
 

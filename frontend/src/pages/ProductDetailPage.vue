@@ -22,6 +22,11 @@
         <div class="product-buy-panel">
           <p class="eyebrow">{{ product.collection?.name || product.category?.name }}</p>
           <h1>{{ product.name }}</h1>
+          <div class="product-meta-list" aria-label="Product merchandising details">
+            <span v-if="product.brand">{{ product.brand }}</span>
+            <span v-if="product.sku">{{ product.sku }}</span>
+            <span v-if="product.season">{{ product.season }}</span>
+          </div>
           <p class="product-description">{{ product.description }}</p>
           <div class="price-stack detail-price">
             <strong class="price">{{ formatCurrency(product.effectivePrice ?? product.price) }}</strong>
@@ -33,20 +38,39 @@
           <StatusBadge :value="stockStatus" :label="stockLabel" />
 
           <div class="purchase-box">
-            <label v-if="product.sizes?.length">
-              Size
-              <select v-model="selectedSize" :aria-invalid="requiresSizeSelection && !selectedSize">
-                <option v-if="requiresSizeSelection" disabled value="">Select a size</option>
-                <option v-for="size in product.sizes" :key="size" :value="size">{{ size }}</option>
-              </select>
-            </label>
-            <label v-if="product.colors?.length">
-              Color
-              <select v-model="selectedColor" :aria-invalid="requiresColorSelection && !selectedColor">
-                <option v-if="requiresColorSelection" disabled value="">Select a color</option>
-                <option v-for="color in product.colors" :key="color" :value="color">{{ color }}</option>
-              </select>
-            </label>
+            <div v-if="product.sizes?.length" class="selector-group">
+              <span class="field-label">Size</span>
+              <div class="option-pill-row" :aria-invalid="requiresSizeSelection && !selectedSize" aria-label="Choose a size">
+                <button
+                  v-for="size in product.sizes"
+                  :key="size"
+                  class="option-pill"
+                  type="button"
+                  :class="{ active: selectedSize === size }"
+                  :aria-pressed="selectedSize === size"
+                  @click="selectedSize = size"
+                >
+                  {{ size }}
+                </button>
+              </div>
+            </div>
+            <div v-if="product.colors?.length" class="selector-group">
+              <span class="field-label">Color</span>
+              <div class="option-pill-row" :aria-invalid="requiresColorSelection && !selectedColor" aria-label="Choose a color">
+                <button
+                  v-for="color in product.colors"
+                  :key="color"
+                  class="option-pill color-option"
+                  type="button"
+                  :class="{ active: selectedColor === color }"
+                  :aria-pressed="selectedColor === color"
+                  @click="selectedColor = color"
+                >
+                  <span class="color-dot" :style="{ background: colorSwatch(color) }" aria-hidden="true"></span>
+                  {{ color }}
+                </button>
+              </div>
+            </div>
             <label>
               Quantity
               <QuantityStepper v-model="quantity" :max="Math.max(product.stockQuantity, 1)" />
@@ -62,6 +86,17 @@
             </button>
             <RouterLink class="secondary-button" to="/cart">View Cart</RouterLink>
           </div>
+
+          <div class="product-service-notes" aria-label="Purchase support information">
+            <article>
+              <strong>Delivery</strong>
+              <span>Standard delivery in 3 to 6 business days.</span>
+            </article>
+            <article>
+              <strong>Refund Window</strong>
+              <span>Eligible paid orders can request a refund within 30 days.</span>
+            </article>
+          </div>
         </div>
       </div>
 
@@ -72,6 +107,7 @@
           <p v-if="product.material"><strong>Material:</strong> {{ product.material }}</p>
           <p v-if="product.careInstructions"><strong>Care:</strong> {{ product.careInstructions }}</p>
           <p v-if="product.season"><strong>Season:</strong> {{ product.season }}</p>
+          <p v-if="product.tags?.length"><strong>Style Tags:</strong> {{ product.tags.join(', ') }}</p>
         </article>
         <article class="summary-panel">
           <h2>Shipping and Returns</h2>
@@ -156,6 +192,19 @@ const purchaseValidationMessage = computed(() => {
   return ''
 })
 const canAddToCart = computed(() => !purchaseValidationMessage.value)
+const swatchMap = {
+  Black: '#151515',
+  Ivory: '#f7f1e3',
+  Taupe: '#9b8770',
+  Sand: '#d8bd92',
+  Sky: '#9ecae1',
+  Pearl: '#f6f3ed',
+  Wine: '#7c293f',
+  Slate: '#5d6872',
+  Pine: '#284d3d',
+  Gold: '#c8a24a',
+  Silver: '#c8ccd0'
+}
 
 watch(
   () => route.params.id,
@@ -212,5 +261,9 @@ function showAddedMessage(addedProduct) {
   toastTimer = window.setTimeout(() => {
     toastMessage.value = ''
   }, 2600)
+}
+
+function colorSwatch(color) {
+  return swatchMap[color] || '#d9ded8'
 }
 </script>
