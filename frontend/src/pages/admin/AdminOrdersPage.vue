@@ -5,6 +5,19 @@
       title="Orders"
       description="Track customer fashion orders, payment state, and fulfillment progress."
     />
+    <section class="order-status-tabs" aria-label="Order status filters">
+      <button
+        v-for="tab in orderTabs"
+        :key="tab.value"
+        class="status-tab-button"
+        type="button"
+        :class="{ active: statusFilter === tab.value }"
+        @click="statusFilter = tab.value"
+      >
+        <span>{{ tab.label }}</span>
+        <strong>{{ tab.count }}</strong>
+      </button>
+    </section>
     <div class="catalog-toolbar admin-toolbar">
       <label class="search-field">
         Search orders
@@ -96,6 +109,15 @@ const filteredOrders = computed(() => {
       : true
     return matchesQuery && matchesStatus && matchesRegion
   })
+})
+const orderTabs = computed(() => {
+  const baseTabs = [{ value: 'all', label: 'All' }, ...statuses.map((status) => ({ value: status, label: formatStatus(status) }))]
+  return baseTabs.map((tab) => ({
+    ...tab,
+    count: tab.value === 'all'
+      ? orders.value.length
+      : orders.value.filter((order) => order.status === tab.value).length
+  }))
 })
 
 onMounted(async () => {

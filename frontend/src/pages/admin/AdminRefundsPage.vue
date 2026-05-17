@@ -5,6 +5,12 @@
       title="Refund Requests"
       description="Review refund requests, approve or reject them, and keep payment/refund status synchronized."
     />
+    <section class="care-queue-summary" aria-label="Refund queue summary">
+      <article v-for="item in refundSummary" :key="item.label">
+        <span>{{ item.label }}</span>
+        <strong>{{ item.count }}</strong>
+      </article>
+    </section>
     <div class="admin-toolbar">
       <label>Status
         <select v-model="statusFilter" @change="loadRefunds">
@@ -56,7 +62,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { fetchAdminRefunds, updateAdminRefund } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
@@ -73,6 +79,13 @@ const refunds = ref([])
 const savingId = ref(null)
 const toastMessage = ref('')
 let toastTimer
+const refundSummary = computed(() => {
+  const statuses = ['REQUESTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'REFUNDED']
+  return statuses.map((status) => ({
+    label: status.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase()),
+    count: refunds.value.filter((refund) => refund.status === status).length
+  }))
+})
 
 onMounted(loadRefunds)
 

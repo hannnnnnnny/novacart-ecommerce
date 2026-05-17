@@ -2615,6 +2615,52 @@ body {
   color: var(--color-accent);
 }
 
+.order-status-tabs,
+.care-queue-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 0.75rem;
+  margin: -0.6rem 0 1.2rem;
+}
+
+.status-tab-button,
+.care-queue-summary article {
+  display: grid;
+  gap: 0.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 0.9rem 1rem;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-ink);
+}
+
+.status-tab-button {
+  cursor: pointer;
+  text-align: left;
+}
+
+.status-tab-button.active,
+.status-tab-button:hover {
+  border-color: rgba(141, 51, 70, 0.36);
+  background: var(--color-accent-soft);
+  transform: translateY(-1px);
+}
+
+.status-tab-button span,
+.care-queue-summary span {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.status-tab-button strong,
+.care-queue-summary strong {
+  font-size: 1.85rem;
+  line-height: 1;
+}
+
 .admin-sidebar {
   background:
     linear-gradient(180deg, #181512, #2d1f22 58%, #1a1714);

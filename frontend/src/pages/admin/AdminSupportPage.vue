@@ -5,6 +5,12 @@
       title="Support Tickets"
       description="Review customer service issues and move tickets through the support workflow."
     />
+    <section class="care-queue-summary" aria-label="Support queue summary">
+      <article v-for="item in ticketSummary" :key="item.label">
+        <span>{{ item.label }}</span>
+        <strong>{{ item.count }}</strong>
+      </article>
+    </section>
     <div class="admin-toolbar">
       <label>Status
         <select v-model="statusFilter">
@@ -78,6 +84,13 @@ const filteredTickets = computed(() => {
   return statusFilter.value
     ? tickets.value.filter((ticket) => ticket.status === statusFilter.value)
     : tickets.value
+})
+const ticketSummary = computed(() => {
+  const statuses = ['OPEN', 'IN_REVIEW', 'WAITING_FOR_CUSTOMER', 'RESOLVED', 'CLOSED']
+  return statuses.map((status) => ({
+    label: formatStatus(status),
+    count: tickets.value.filter((ticket) => ticket.status === status).length
+  }))
 })
 
 onMounted(loadTickets)
