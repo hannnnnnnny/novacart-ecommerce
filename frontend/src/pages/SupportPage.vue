@@ -39,7 +39,7 @@
       <aside class="summary-panel order-summary-card">
         <h2>Support Status</h2>
         <p class="muted">Submitted tickets enter Open status and can be reviewed from the admin support queue.</p>
-        <button class="primary-button" type="submit" :disabled="submitting || !formIsValid">
+        <button class="primary-button" type="submit" :disabled="submitting">
           {{ submitting ? 'Submitting...' : 'Submit Ticket' }}
         </button>
         <RouterLink class="text-link" :to="{ name: 'refund-request', query: { orderNumber: form.orderNumber, email: form.email } }">

@@ -54,9 +54,21 @@
         </div>
         <div v-if="cartStore.discountTotal" class="summary-line">
           <span>Discounts</span>
-          <strong>{{ formatCurrency(cartStore.discountTotal) }}</strong>
+          <strong>-{{ formatCurrency(cartStore.discountTotal) }}</strong>
         </div>
-        <p class="muted">Taxes and shipping are estimated in the demo checkout.</p>
+        <div class="summary-line">
+          <span>Estimated Shipping</span>
+          <strong>{{ formatCurrency(estimatedShipping) }}</strong>
+        </div>
+        <div class="summary-line">
+          <span>Estimated Tax</span>
+          <strong>{{ formatCurrency(estimatedTax) }}</strong>
+        </div>
+        <div class="summary-line total-line">
+          <span>Estimated Total</span>
+          <strong>{{ formatCurrency(estimatedTotal) }}</strong>
+        </div>
+        <p class="muted">Final delivery method, tax, and demo payment status are confirmed during checkout.</p>
         <p class="checkout-note compact-note">
           <strong>Demo checkout</strong>
           <span>Payment is not captured. Inventory is reserved when the order is created.</span>
@@ -70,7 +82,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import EmptyState from '../components/EmptyState.vue'
 import PageHeader from '../components/PageHeader.vue'
 import QuantityStepper from '../components/QuantityStepper.vue'
@@ -81,6 +93,9 @@ import { formatCurrency } from '../utils/format'
 const cartStore = useCartStore()
 const toastMessage = ref('')
 let toastTimer
+const estimatedShipping = computed(() => (cartStore.items.length ? 6 : 0))
+const estimatedTax = computed(() => Number((cartStore.subtotal * 0.08).toFixed(2)))
+const estimatedTotal = computed(() => cartStore.subtotal + estimatedShipping.value + estimatedTax.value)
 
 onMounted(() => {
   cartStore.loadCart()

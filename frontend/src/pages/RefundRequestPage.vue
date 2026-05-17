@@ -24,7 +24,7 @@
       <aside class="summary-panel order-summary-card">
         <h2>Refund Window</h2>
         <p class="muted">Refund requests are stored with Requested status. Admin users can move them under review, approve, reject, or mark refunded.</p>
-        <button class="primary-button" type="submit" :disabled="submitting || !formIsValid">
+        <button class="primary-button" type="submit" :disabled="submitting">
           {{ submitting ? 'Submitting...' : 'Submit Refund Request' }}
         </button>
         <RouterLink class="text-link" :to="{ name: 'support', query: { orderNumber: form.orderNumber, email: form.email } }">

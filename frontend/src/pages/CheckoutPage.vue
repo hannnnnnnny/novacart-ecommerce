@@ -126,7 +126,7 @@
         </div>
         <div v-if="cartStore.discountTotal" class="summary-line">
           <span>Discounts</span>
-          <strong>{{ formatCurrency(cartStore.discountTotal) }}</strong>
+          <strong>-{{ formatCurrency(cartStore.discountTotal) }}</strong>
         </div>
         <div class="summary-line">
           <span>Shipping</span>
