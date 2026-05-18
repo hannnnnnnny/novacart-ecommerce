@@ -2,6 +2,8 @@
 
 NovaCart exposes a RESTful JSON API under `/api`. Public storefront endpoints do not require authentication. Admin endpoints require `Authorization: Bearer <token>` from the admin login endpoint.
 
+NovaCart is being repositioned as a multi-merchant ecommerce website builder. The current backend includes merchant/store groundwork and public store lookup endpoints while the frontend generated storefronts use a mock multi-store data layer for product/cart preview.
+
 ## Response Format
 
 Successful response:
@@ -29,6 +31,18 @@ Error response:
 ```
 
 ## Public Catalog
+
+### List Merchant Stores
+
+`GET /api/public/stores`
+
+Returns seeded merchant stores with merchant name, store slug, template key, branding settings, currency, shipping message, announcement text, and published state.
+
+### Get Merchant Store
+
+`GET /api/public/stores/{slug}`
+
+Returns one merchant store by public slug. Missing stores return `404`.
 
 ### List Categories
 

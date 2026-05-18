@@ -74,7 +74,7 @@ export const usePlatformStore = defineStore('platform', {
         description: payload.description || 'A NovaCart merchant storefront.',
         template: template.id,
         brandColor: payload.brandColor || template.accentColor,
-        logoText: initials(payload.name || 'New Store'),
+        logoText: payload.logoText || initials(payload.name || 'New Store'),
         currency: payload.currency || 'USD',
         shippingMessage: payload.shippingMessage || 'Free shipping on qualifying orders',
         announcement: payload.announcement || payload.shippingMessage || 'Welcome to our new NovaCart store.',
@@ -107,26 +107,41 @@ export const usePlatformStore = defineStore('platform', {
       return nextStore
     },
     updateStore(slug, patch) {
+      const nextPatch = {
+        ...patch,
+        slug: patch.slug ? createSlug(patch.slug) : undefined
+      }
+      if (!patch.slug) {
+        delete nextPatch.slug
+      }
       const index = this.merchantStores.findIndex((store) => store.slug === slug)
       if (index === -1) {
         if (!demoStores.some((store) => store.slug === slug)) return null
         this.storeOverrides[slug] = {
           ...(this.storeOverrides[slug] || {}),
-          ...patch,
+          ...nextPatch,
+          slug,
           setup: {
             ...(this.storeOverrides[slug]?.setup || {}),
-            ...(patch.setup || {})
+            ...(nextPatch.setup || {})
           }
         }
         localStorage.setItem(OVERRIDE_KEY, JSON.stringify(this.storeOverrides))
         return this.getStore(slug)
       }
+      if (nextPatch.slug && nextPatch.slug !== slug) {
+        nextPatch.slug = uniqueSlug(nextPatch.slug, this.stores.filter((store) => store.slug !== slug))
+        if (this.currentStoreSlug === slug) {
+          this.currentStoreSlug = nextPatch.slug
+          localStorage.setItem(CURRENT_STORE_KEY, nextPatch.slug)
+        }
+      }
       this.merchantStores[index] = {
         ...this.merchantStores[index],
-        ...patch,
+        ...nextPatch,
         setup: {
           ...this.merchantStores[index].setup,
-          ...patch.setup
+          ...nextPatch.setup
         }
       }
       this.persistStores()

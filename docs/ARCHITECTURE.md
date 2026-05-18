@@ -1,25 +1,29 @@
 # NovaCart Architecture
 
-NovaCart is organized as a full-stack fashion commerce application with a public storefront, a protected merchant administration workspace, and a Spring Boot API that owns validation, persistence, authentication, and checkout rules.
+NovaCart is organized as a multi-merchant ecommerce website builder with a public platform website, merchant onboarding, generated merchant storefronts, a protected merchant administration workspace, and a Spring Boot API that owns validation, persistence, authentication, and checkout rules.
 
 ## System Overview
 
 ```mermaid
 flowchart LR
-  Browser["Vue 3 Frontend"] --> Api["Spring Boot REST API"]
+  Browser["Vue 3 Frontend"] --> Platform["Platform Pages"]
+  Browser --> GeneratedStores["/store/:storeSlug Storefronts"]
+  Browser --> Admin["Merchant Admin"]
+  GeneratedStores --> BrowserPersistence["Store-Specific Cart Persistence"]
+  Admin --> Api["Spring Boot REST API"]
+  GeneratedStores --> Api
   Api --> Database["MySQL"]
   Api --> Security["JWT And BCrypt"]
-  Browser --> BrowserPersistence["Cart And Admin Session Persistence"]
 ```
 
 ## Backend Layers
 
-- `controller`: REST endpoint boundaries for public catalog, checkout, admin auth, catalog management, order management, dashboard metrics, inventory warnings, and manual stock adjustments.
+- `controller`: REST endpoint boundaries for public stores, public catalog, checkout, admin auth, catalog management, order management, dashboard metrics, inventory warnings, and manual stock adjustments.
 - `dto`: Request and response contracts for API payloads, validation errors, login responses, dashboard metrics, and order data.
 - `service`: Business interfaces for catalog, checkout, authentication, and dashboard behavior.
 - `service/impl`: Transactional business logic, stock deduction, slug generation, authentication, and DTO mapping.
 - `repository`: Spring Data JPA repositories for admins, categories, products, orders, product locking, and stock movement history.
-- `entity`: JPA models for admins, categories, products, customer orders, order items, order statuses, payment statuses, shipping methods, and stock movements.
+- `entity`: JPA models for admins, merchant accounts, merchant stores, categories, products, customer orders, order items, order statuses, payment statuses, shipping methods, and stock movements.
 - `security`: JWT generation/parsing, bearer-token request filtering, and admin user loading.
 - `exception`: Domain exceptions and global JSON error handling.
 - `config`: Security, CORS, password encoding, and seed data configuration.
@@ -29,8 +33,9 @@ flowchart LR
 - `api`: Axios client wrapper and endpoint modules for catalog, orders, and admin APIs.
 - `assets`: Global responsive CSS and design system primitives.
 - `components`: Reusable UI building blocks such as headers, cards, status badges, loading states, empty states, errors, metrics, and quantity controls.
-- `layouts`: Storefront and admin shells.
-- `pages`: Route-level storefront and admin workflows.
+- `data`: Frontend multi-store demo data for templates, platform marketing content, and generated store previews.
+- `layouts`: Platform, generated storefront, and admin shells.
+- `pages`: Route-level platform, onboarding, generated storefront, and admin workflows.
 - `router`: Vue Router configuration and admin route guards.
 - `stores`: Pinia stores for cart and admin session state.
 - `utils`: Formatting helpers for currency, dates, and statuses.
@@ -59,6 +64,8 @@ flowchart LR
 ## Database Entities
 
 - `AdminUser`: Admin email, BCrypt password hash, role, active flag, and timestamps.
+- `MerchantAccount`: Merchant identity groundwork for a SaaS account that can own stores.
+- `MerchantStore`: Store/shop groundwork with merchant relationship, slug, category, description, template key, brand color, logo text, currency, shipping message, announcement, published state, and timestamps.
 - `Category`: Catalog grouping with name, slug, optional description, active flag, and timestamps.
 - `Product`: Product catalog data, SKU, brand, price, compare-at price, stock quantity, low-stock threshold, image gallery, tags, featured flag, product status, active flag, category relationship, and timestamps.
 - `CustomerOrder`: Customer contact/shipping data, order number, idempotency key, payment status, shipping method, fulfillment status, totals breakdown, order items, and timestamps.
@@ -77,6 +84,28 @@ The fashion release extends the catalog around retail merchandising and campaign
 - `SupportTicket` and `RefundRequest`: customer care records linked to order number/email and managed from protected admin screens.
 
 All sample data is original to this repository. Local storefront imagery uses generated SVG assets under `frontend/public/catalog`.
+
+## Multi-Merchant Platform Flow
+
+1. A visitor lands on `/` and sees NovaCart as a platform for building online stores.
+2. The merchant starts `/onboarding`, enters store basics, chooses a template, adds first products, configures brand settings, and creates a store.
+3. The new store is stored in the frontend platform data layer and receives a `/store/:storeSlug` generated storefront.
+4. The merchant admin workspace uses a store switcher to establish current store context.
+5. Store setup, templates, theme editor, settings, and generated storefront previews operate against the selected store.
+6. Backend `MerchantAccount` and `MerchantStore` tables provide persistent groundwork for replacing the frontend mock store layer with API-backed stores in a later migration.
+
+## Storefront Generation Flow
+
+```mermaid
+flowchart LR
+  Onboarding["Merchant Onboarding"] --> StoreData["Store Data Layer"]
+  StoreData --> Template["Selected Template"]
+  StoreData --> Products["Store Products"]
+  Template --> Generated["/store/:storeSlug"]
+  Products --> Generated
+  Generated --> Cart["Store-Specific Cart"]
+  Cart --> Checkout["Demo Store Checkout"]
+```
 
 ## Promotion Flow
 
