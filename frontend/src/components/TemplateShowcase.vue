@@ -1,0 +1,32 @@
+<template>
+  <section class="platform-section">
+    <div class="platform-section-heading">
+      <p class="eyebrow">Store templates</p>
+      <h2>Start with a storefront that fits the merchant</h2>
+      <p>Templates are original NovaCart layouts for different merchant categories, not copied brand identities.</p>
+    </div>
+    <div class="template-showcase-grid">
+      <article v-for="template in templates" :key="template.id" class="template-card">
+        <img :src="template.previewImage" :alt="`${template.name} preview`" />
+        <div>
+          <h3>{{ template.name }}</h3>
+          <p>{{ template.description }}</p>
+          <span>Best for: {{ template.bestFor }}</span>
+        </div>
+        <div class="template-actions">
+          <RouterLink class="secondary-button" :to="{ path: '/templates', query: { preview: template.id } }">Preview</RouterLink>
+          <RouterLink class="primary-button" :to="{ path: '/onboarding', query: { template: template.id } }">Select</RouterLink>
+        </div>
+      </article>
+    </div>
+  </section>
+</template>
+
+<script setup>
+defineProps({
+  templates: {
+    type: Array,
+    required: true
+  }
+})
+</script>

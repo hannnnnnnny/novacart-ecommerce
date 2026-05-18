@@ -12,6 +12,14 @@
 </template>
 
 <script setup>
+import { onMounted } from 'vue'
 import AdminSidebar from '../components/AdminSidebar.vue'
 import AdminTopbar from '../components/AdminTopbar.vue'
+import { usePlatformStore } from '../stores/platform'
+
+const platformStore = usePlatformStore()
+
+onMounted(() => {
+  platformStore.loadPlatform()
+})
 </script>

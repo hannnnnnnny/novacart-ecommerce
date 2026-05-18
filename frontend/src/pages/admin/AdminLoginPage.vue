@@ -5,8 +5,8 @@
         <ShieldCheck aria-hidden="true" />
       </div>
       <p class="eyebrow">Merchant workspace</p>
-      <h1>Manage NovaCart fashion operations.</h1>
-      <p>Review catalog health, keep seasonal inventory visible, and move orders through fulfillment.</p>
+      <h1>Sign in to manage your NovaCart store.</h1>
+      <p>Choose a store, customize the storefront, manage products and orders, and review analytics from one workspace.</p>
     </section>
     <form class="login-panel" @submit.prevent="submitLogin">
       <div>
@@ -32,7 +32,8 @@
       <button class="primary-button" type="submit" :disabled="submitting">
         {{ submitting ? 'Signing In...' : 'Sign In' }}
       </button>
-      <p class="login-hint">Local account: admin@novacart.local</p>
+      <p class="login-hint">Local demo account: admin@novacart.local</p>
+      <RouterLink class="text-link" to="/signup">Create a merchant workspace</RouterLink>
     </form>
   </main>
 </template>
