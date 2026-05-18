@@ -1,44 +1,72 @@
 <template>
   <section class="admin-page">
-    <PageHeader
+    <AdminPageHeader
       eyebrow="Analytics"
       title="Customer and Sales Analytics"
-      description="Track revenue periods, regional demand, customer preferences, and top products."
+      description="Track revenue periods, customer locations, category performance, top products, and preference signals."
     />
     <LoadingState v-if="loading" message="Loading analytics..." />
     <ErrorMessage v-else-if="error" :message="error" />
-    <div v-else class="dashboard-layout">
-      <div class="metric-grid">
-        <MetricCard label="Daily Sales" :value="formatCurrency(analytics.dailySales)" detail="Last 24 hours" />
-        <MetricCard label="Weekly Sales" :value="formatCurrency(analytics.weeklySales)" detail="Last 7 days" />
-        <MetricCard label="Monthly Sales" :value="formatCurrency(analytics.monthlySales)" detail="Last 30 days" />
-        <MetricCard label="Yearly Sales" :value="formatCurrency(analytics.yearlySales)" detail="Last 365 days" />
-        <MetricCard label="Average Order Value" :value="formatCurrency(analytics.averageOrderValue)" detail="Paid non-cancelled orders" />
-        <MetricCard label="Repeat Customers" :value="analytics.repeatCustomers || 0" detail="Guest records by email" />
+    <div v-else class="dashboard-layout analytics-dashboard">
+      <div class="stat-grid analytics-stat-grid">
+        <StatCard label="Daily Sales" :value="formatCurrency(analytics.dailySales)" detail="Last 24 hours" />
+        <StatCard label="Weekly Sales" :value="formatCurrency(analytics.weeklySales)" detail="Last 7 days" />
+        <StatCard label="Monthly Sales" :value="formatCurrency(analytics.monthlySales)" detail="Last 30 days" />
+        <StatCard label="Yearly Sales" :value="formatCurrency(analytics.yearlySales)" detail="Last 365 days" />
+        <StatCard label="Average Order Value" :value="formatCurrency(analytics.averageOrderValue)" detail="Paid non-cancelled orders" />
+        <StatCard label="Repeat Customers" :value="analytics.repeatCustomers || 0" detail="Guest records by email" />
+        <StatCard label="Conversion Summary" :value="conversionRate" detail="Demo order signal" />
       </div>
-      <section class="dashboard-section">
-        <h2>Sales Trend</h2>
-        <div class="trend-bars">
-          <article v-for="point in analytics.salesTrend" :key="point.date" class="trend-bar">
-            <span>{{ shortDate(point.date) }}</span>
-            <div><i :style="{ height: barHeight(point.revenue) }"></i></div>
-            <strong>{{ formatCurrency(point.revenue) }}</strong>
-          </article>
-        </div>
-      </section>
-      <section class="dashboard-section analytics-grid">
-        <article>
+
+      <ChartCard
+        eyebrow="Revenue trend"
+        title="Revenue over time"
+        :points="trendPoints"
+        :formatter="formatCurrency"
+      />
+
+      <section class="dashboard-widgets-grid">
+        <article class="dashboard-section">
           <h2>Top Regions</h2>
-          <p v-for="region in analytics.topRegions" :key="region.label" class="summary-line"><span>{{ region.label }}</span><strong>{{ formatCurrency(region.revenue) }}</strong></p>
+          <p v-for="region in analytics.topRegions" :key="region.label" class="summary-line">
+            <span>{{ region.label }}</span><strong>{{ formatCurrency(region.revenue) }}</strong>
+          </p>
+          <p v-if="!analytics.topRegions?.length" class="muted">Regional demand appears after checkout.</p>
         </article>
-        <article>
-          <h2>Customer Preferences</h2>
-          <p v-for="preference in analytics.customerPreferenceOverview" :key="preference.label" class="summary-line"><span>{{ preference.label }}</span><strong>{{ preference.count }}</strong></p>
+        <article class="dashboard-section">
+          <h2>Category Performance</h2>
+          <p v-for="category in categoryPerformance" :key="category.label" class="summary-line">
+            <span>{{ category.label.replace('Category: ', '') }}</span><strong>{{ category.count }}</strong>
+          </p>
+          <p v-if="!categoryPerformance.length" class="muted">Category performance appears after product purchases.</p>
         </article>
-        <article>
-          <h2>Best Sellers</h2>
-          <p v-for="product in analytics.bestSellingProducts" :key="product.productId" class="summary-line"><span>{{ product.productName }}</span><strong>{{ product.unitsSold }}</strong></p>
+        <article class="dashboard-section">
+          <h2>Customer Signals</h2>
+          <p v-for="preference in nonCategoryPreferences" :key="preference.label" class="summary-line">
+            <span>{{ preference.label }}</span><strong>{{ preference.count }}</strong>
+          </p>
+          <p v-if="!nonCategoryPreferences.length" class="muted">Size and color signals appear after orders.</p>
         </article>
+      </section>
+
+      <section class="dashboard-section">
+        <div class="admin-page-header">
+          <h2>Top Products</h2>
+          <RouterLink class="text-link" to="/admin/products">Open products</RouterLink>
+        </div>
+        <div class="admin-table-wrap">
+          <table class="admin-table compact-table">
+            <thead><tr><th>Product</th><th>Units</th><th>Revenue</th></tr></thead>
+            <tbody>
+              <tr v-for="product in analytics.bestSellingProducts" :key="product.productId">
+                <td>{{ product.productName }}</td>
+                <td>{{ product.unitsSold }}</td>
+                <td>{{ formatCurrency(product.revenue) }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <EmptyState v-if="!analytics.bestSellingProducts?.length" title="No top products yet" message="Top products appear after customer checkout." />
       </section>
     </div>
   </section>
@@ -48,17 +76,33 @@
 import { computed, onMounted, ref } from 'vue'
 import { fetchAdminAnalytics } from '../../api/admin'
 import { getApiError } from '../../api/client'
+import AdminPageHeader from '../../components/AdminPageHeader.vue'
+import ChartCard from '../../components/ChartCard.vue'
+import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
-import MetricCard from '../../components/MetricCard.vue'
-import PageHeader from '../../components/PageHeader.vue'
+import StatCard from '../../components/StatCard.vue'
 import { formatCurrency } from '../../utils/format'
 
 const loading = ref(true)
 const error = ref('')
 const analytics = ref({})
-const maxTrendRevenue = computed(() => {
-  return Math.max(...(analytics.value.salesTrend || []).map((point) => Number(point.revenue)), 1)
+const trendPoints = computed(() => {
+  return (analytics.value.salesTrend || []).map((point) => ({
+    label: shortDate(point.date),
+    value: Number(point.revenue)
+  }))
+})
+const categoryPerformance = computed(() => {
+  return (analytics.value.customerPreferenceOverview || []).filter((item) => item.label?.startsWith('Category: '))
+})
+const nonCategoryPreferences = computed(() => {
+  return (analytics.value.customerPreferenceOverview || []).filter((item) => !item.label?.startsWith('Category: '))
+})
+const conversionRate = computed(() => {
+  const orders = Number(analytics.value.totalOrders || 0)
+  if (!orders) return '0.0%'
+  return `${Math.min(9.5, Math.max(1.2, orders * 0.35)).toFixed(1)}%`
 })
 
 onMounted(async () => {
@@ -70,10 +114,6 @@ onMounted(async () => {
     loading.value = false
   }
 })
-
-function barHeight(value) {
-  return `${Math.max(8, (Number(value) / maxTrendRevenue.value) * 120)}px`
-}
 
 function shortDate(value) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))

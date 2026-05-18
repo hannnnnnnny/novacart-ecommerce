@@ -3813,6 +3813,71 @@ body {
   font-weight: 800;
 }
 
+.customer-management-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.admin-table tr.selected td {
+  background: #eef4ff;
+}
+
+.customer-detail-panel {
+  position: sticky;
+  top: 5.5rem;
+  display: grid;
+  gap: 0.7rem;
+  border: 1px solid #d8dde3;
+  border-radius: 14px;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.05);
+}
+
+.customer-detail-panel h2 {
+  margin: 0;
+}
+
+.customer-detail-panel > strong,
+.customer-detail-panel > span {
+  display: block;
+}
+
+.customer-detail-panel dl {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.customer-detail-panel dl div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid #eef1f4;
+  padding-top: 0.55rem;
+}
+
+.customer-detail-panel dt {
+  color: #667085;
+  font-weight: 850;
+}
+
+.customer-detail-panel dd {
+  margin: 0;
+  text-align: right;
+  font-weight: 850;
+}
+
+.analytics-dashboard {
+  gap: 1rem;
+}
+
+.analytics-stat-grid {
+  grid-template-columns: repeat(7, minmax(140px, 1fr));
+}
+
 @media (max-width: 1180px) {
   .admin-shell {
     grid-template-columns: 1fr;
@@ -3831,6 +3896,7 @@ body {
   .admin-overview-hero,
   .dashboard-main-grid,
   .dashboard-widgets-grid,
+  .customer-management-grid,
   .settings-grid {
     grid-template-columns: 1fr;
   }
@@ -3856,5 +3922,9 @@ body {
   .overview-mini-grid,
   .settings-card dl div {
     grid-template-columns: 1fr;
+  }
+
+  .customer-detail-panel {
+    position: static;
   }
 }

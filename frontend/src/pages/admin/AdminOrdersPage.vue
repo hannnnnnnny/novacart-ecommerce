@@ -31,6 +31,20 @@
         </select>
       </label>
       <label>
+        Payment
+        <select v-model="paymentFilter">
+          <option value="all">All payments</option>
+          <option v-for="status in paymentStatuses" :key="status" :value="status">{{ formatStatus(status) }}</option>
+        </select>
+      </label>
+      <label>
+        Refund
+        <select v-model="refundFilter">
+          <option value="all">All refunds</option>
+          <option v-for="status in refundStatuses" :key="status" :value="status">{{ formatStatus(status) }}</option>
+        </select>
+      </label>
+      <label>
         Region
         <input v-model.trim="regionFilter" placeholder="Country or region" />
       </label>
@@ -90,11 +104,15 @@ import StatusBadge from '../../components/StatusBadge.vue'
 import { formatCurrency, formatDate, formatStatus } from '../../utils/format'
 
 const statuses = ['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED']
+const paymentStatuses = ['UNPAID', 'PAID', 'FAILED', 'REFUNDED']
+const refundStatuses = ['NONE', 'REQUESTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'REFUNDED']
 const loading = ref(true)
 const error = ref('')
 const orders = ref([])
 const searchTerm = ref('')
 const statusFilter = ref('all')
+const paymentFilter = ref('all')
+const refundFilter = ref('all')
 const regionFilter = ref('')
 const filteredOrders = computed(() => {
   const query = searchTerm.value.toLowerCase()
@@ -104,10 +122,12 @@ const filteredOrders = computed(() => {
       ? `${order.orderNumber || ''} #${order.id} ${order.customerName} ${order.customerEmail}`.toLowerCase().includes(query)
       : true
     const matchesStatus = statusFilter.value === 'all' || order.status === statusFilter.value
+    const matchesPayment = paymentFilter.value === 'all' || order.paymentStatus === paymentFilter.value
+    const matchesRefund = refundFilter.value === 'all' || order.refundStatus === refundFilter.value
     const matchesRegion = regionQuery
       ? `${order.region || ''} ${order.city || ''} ${order.country || ''}`.toLowerCase().includes(regionQuery)
       : true
-    return matchesQuery && matchesStatus && matchesRegion
+    return matchesQuery && matchesStatus && matchesPayment && matchesRefund && matchesRegion
   })
 })
 const orderTabs = computed(() => {
