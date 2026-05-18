@@ -197,8 +197,8 @@ function normalizeProducts(products) {
       discountPercent,
       stockQuantity: Number(product.stockQuantity) || 12,
       lowStockThreshold: Number(product.lowStockThreshold) || 5,
-      imageUrl: product.imageUrl || '/catalog/new-arrivals.svg',
-      imageGallery: product.imageGallery || [product.imageUrl || '/catalog/new-arrivals.svg'],
+      imageUrl: product.imageUrl || '/demo-images/products/boutique-shirt.jpg',
+      imageGallery: product.imageGallery || [product.imageUrl || '/demo-images/products/boutique-shirt.jpg'],
       badges: product.badges || (discountPercent ? ['Sale'] : ['New']),
       status: product.status || 'ACTIVE',
       description: product.description || 'A merchant-created product ready for the storefront.'

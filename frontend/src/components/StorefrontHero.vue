@@ -12,7 +12,7 @@
       </div>
     </div>
     <div class="storefront-hero-visual" aria-hidden="true">
-      <img src="/catalog/seasonal.svg" alt="" />
+      <img src="/demo-images/heroes/fashion.jpg" alt="" />
       <div class="hero-visual-note">
         <span>Curated edit</span>
         <strong>Timeless layers, rare finds, everyday polish.</strong>

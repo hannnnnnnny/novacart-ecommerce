@@ -4667,3 +4667,320 @@ body {
     font-size: 2.6rem;
   }
 }
+
+/* Realistic generated merchant storefronts */
+.merchant-store-page,
+.merchant-products-page,
+.merchant-product-detail-page {
+  width: min(1180px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+.merchant-store-hero {
+  grid-template-columns: minmax(0, 0.78fr) minmax(360px, 1fr);
+  gap: clamp(1.25rem, 4vw, 2.5rem);
+  padding: clamp(1.6rem, 4vw, 3rem) 0 1.8rem;
+}
+
+.merchant-store-hero h1 {
+  max-width: 620px;
+  font-size: clamp(2.1rem, 4.8vw, 4.1rem);
+}
+
+.merchant-store-hero img {
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border-radius: 14px;
+  box-shadow: 0 18px 45px rgba(16, 24, 40, 0.11);
+}
+
+.merchant-store-proof {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.merchant-store-proof span {
+  border: 1px solid #e4e7ec;
+  border-radius: 999px;
+  padding: 0.45rem 0.65rem;
+  background: #ffffff;
+  color: #475467;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.storefront-category-strip,
+.storefront-product-section {
+  display: grid;
+  gap: 1rem;
+  padding: 1.35rem 0;
+}
+
+.storefront-category-strip {
+  border-block: 1px solid #e4e7ec;
+}
+
+.storefront-category-strip h2,
+.storefront-section-header h2,
+.merchant-products-header h1 {
+  margin: 0;
+}
+
+.storefront-section-header,
+.merchant-products-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 1rem;
+}
+
+.compact-category-tile {
+  min-height: auto;
+  gap: 0.35rem;
+  border-radius: 999px;
+  padding: 0.72rem 0.9rem;
+  box-shadow: none;
+}
+
+.compact-category-tile span {
+  font-weight: 900;
+}
+
+.compact-category-tile small {
+  display: none;
+}
+
+.merchant-products-page {
+  padding: clamp(1.2rem, 4vw, 2rem) 0 3rem;
+}
+
+.merchant-products-header {
+  margin-bottom: 0.8rem;
+}
+
+.merchant-products-header h1 {
+  font-size: clamp(2rem, 4vw, 3.1rem);
+}
+
+.merchant-category-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 1.1rem;
+}
+
+.merchant-category-pills button {
+  min-height: 36px;
+  border: 1px solid #d8dde3;
+  border-radius: 999px;
+  padding: 0.4rem 0.72rem;
+  background: #ffffff;
+  color: #475467;
+  font-weight: 850;
+}
+
+.merchant-category-pills button.active,
+.merchant-category-pills button:hover {
+  border-color: var(--store-accent, #245c7a);
+  background: color-mix(in srgb, var(--store-accent, #245c7a) 10%, #ffffff);
+  color: #1f2328;
+}
+
+.merchant-products-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.merchant-products-layout.filters-open {
+  grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+}
+
+.merchant-filter-panel {
+  position: sticky;
+  top: 5.25rem;
+  align-self: start;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.06);
+}
+
+.generated-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(205px, 238px));
+  gap: 1rem;
+  justify-content: start;
+}
+
+.generated-product-card {
+  overflow: hidden;
+  border: 1px solid #e4e7ec;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(16, 24, 40, 0.045);
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    transform 180ms ease;
+}
+
+.generated-product-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--store-accent, #245c7a) 32%, #d8dde3);
+  box-shadow: 0 16px 34px rgba(16, 24, 40, 0.08);
+}
+
+.generated-product-image {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  background: #f4f5f6;
+}
+
+.generated-product-image img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  transition: transform 220ms ease;
+}
+
+.generated-product-card:hover .generated-product-image img {
+  transform: scale(1.025);
+}
+
+.generated-product-body {
+  display: grid;
+  gap: 0.42rem;
+  padding: 0.82rem;
+}
+
+.generated-product-meta,
+.generated-product-purchase-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.generated-product-meta span {
+  color: #667085;
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.generated-product-meta .warning {
+  color: #9a3412;
+}
+
+.generated-product-title {
+  color: #1f2328;
+}
+
+.generated-product-title h3 {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.generated-product-body p {
+  display: -webkit-box;
+  min-height: 2.55rem;
+  margin: 0;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: #667085;
+  font-size: 0.86rem;
+  line-height: 1.48;
+}
+
+.generated-product-purchase-row {
+  align-items: end;
+  margin-top: 0.15rem;
+}
+
+.generated-product-purchase-row .compact-button {
+  min-height: 34px;
+  padding: 0.42rem 0.72rem;
+}
+
+.generated-product-card .price-stack strong {
+  font-size: 1rem;
+}
+
+.generated-product-card .price-stack span {
+  font-size: 0.78rem;
+}
+
+.merchant-detail-layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 0.9fr) minmax(320px, 0.7fr);
+  gap: clamp(1.2rem, 4vw, 2.2rem);
+  align-items: start;
+}
+
+.merchant-detail-media {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.merchant-detail-media img {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+}
+
+.merchant-detail-buy-panel {
+  position: sticky;
+  top: 5.25rem;
+  display: grid;
+  gap: 0.85rem;
+  border: 1px solid #e4e7ec;
+  border-radius: 14px;
+  padding: 1.2rem;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(16, 24, 40, 0.06);
+}
+
+.merchant-detail-buy-panel h1 {
+  margin: 0;
+  font-size: clamp(1.7rem, 3vw, 2.5rem);
+}
+
+.merchant-detail-notes {
+  display: grid;
+  gap: 0.4rem;
+  border-top: 1px solid #eef1f4;
+  padding-top: 0.85rem;
+}
+
+.merchant-detail-notes span {
+  color: #667085;
+  font-size: 0.9rem;
+  font-weight: 750;
+}
+
+@media (max-width: 980px) {
+  .storefront-section-header,
+  .merchant-products-header,
+  .merchant-detail-layout,
+  .merchant-products-layout.filters-open {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+
+  .generated-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+
+  .merchant-detail-buy-panel,
+  .merchant-filter-panel {
+    position: static;
+  }
+}

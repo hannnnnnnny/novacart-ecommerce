@@ -41,7 +41,7 @@ const form = reactive({
   description: '',
   template: 'fashion',
   products: [
-    { name: 'Signature launch product', price: 68, category: 'New Arrivals', imageUrl: '/catalog/new-arrivals.svg' }
+    { name: 'Signature launch product', price: 68, category: 'New Arrivals', imageUrl: '/demo-images/products/boutique-shirt.jpg' }
   ],
   logoText: 'NS',
   brandColor: '#6f4f45',

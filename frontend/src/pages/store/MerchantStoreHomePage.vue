@@ -2,27 +2,37 @@
   <div class="merchant-store-page">
     <section class="merchant-store-hero">
       <div>
-        <p class="eyebrow">{{ template.name }}</p>
+        <p class="eyebrow">{{ store.category }} store / {{ template.name }}</p>
         <h1>{{ store.heroTitle }}</h1>
         <p>{{ store.heroText }}</p>
         <div class="hero-actions">
-          <RouterLink class="primary-button" :to="`/store/${store.slug}/products`">Shop products</RouterLink>
+          <RouterLink class="primary-button" :to="`/store/${store.slug}/products`">Shop {{ store.name }}</RouterLink>
           <RouterLink class="secondary-button" :to="{ path: `/store/${store.slug}/products`, query: { category: store.categories[0] } }">Browse {{ store.categories[0] }}</RouterLink>
         </div>
+        <div class="merchant-store-proof">
+          <span>{{ store.products.length }} products</span>
+          <span>{{ store.shippingMessage }}</span>
+          <span>{{ store.analytics?.conversionRate }} conversion demo</span>
+        </div>
       </div>
-      <img :src="template.previewImage" :alt="`${store.name} storefront visual`" />
+      <img :src="store.heroImage || template.previewImage" :alt="`${store.name} storefront visual`" />
     </section>
-    <section class="page-section">
-      <div class="retail-section-heading">
+
+    <section class="storefront-category-strip">
+      <div>
         <p class="eyebrow">Shop by category</p>
-        <h2>Find the right section of {{ store.name }}</h2>
+        <h2>Start with the section that fits</h2>
       </div>
       <CategoryTiles :categories="store.categories" :products-path="`/store/${store.slug}/products`" />
     </section>
-    <section class="page-section">
-      <div class="retail-section-heading">
-        <p class="eyebrow">Featured products</p>
-        <h2>Merchant picks ready for checkout</h2>
+
+    <section class="storefront-product-section">
+      <div class="storefront-section-header">
+        <div>
+          <p class="eyebrow">Featured products</p>
+          <h2>Ready-to-shop picks from {{ store.name }}</h2>
+        </div>
+        <RouterLink class="text-link" :to="`/store/${store.slug}/products`">View all products</RouterLink>
       </div>
       <ProductGrid :products="featuredProducts" :store="store" @add="addToCart" />
     </section>

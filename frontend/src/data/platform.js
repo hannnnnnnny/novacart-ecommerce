@@ -1,10 +1,13 @@
+const heroPath = (name) => `/demo-images/heroes/${name}.jpg`
+const productPath = (name) => `/demo-images/products/${name}.jpg`
+
 export const storeTemplates = [
   {
     id: 'fashion',
     name: 'Fashion Boutique',
-    description: 'Editorial product storytelling for apparel, bags, jewelry, footwear, and seasonal edits.',
+    description: 'Editorial merchandising for apparel, bags, jewelry, footwear, and seasonal edits.',
     bestFor: 'Fashion labels, thrift boutiques, accessory shops',
-    previewImage: '/catalog/women.svg',
+    previewImage: heroPath('fashion'),
     accentColor: '#7c3f47',
     fontStyle: 'Editorial serif'
   },
@@ -13,7 +16,7 @@ export const storeTemplates = [
     name: 'Thrift Classic',
     description: 'A warm discovery-led layout for curated vintage, rare finds, and mixed lifestyle goods.',
     bestFor: 'Secondhand stores, charity shops, vintage sellers',
-    previewImage: '/catalog/seasonal.svg',
+    previewImage: heroPath('boutique'),
     accentColor: '#8a5a35',
     fontStyle: 'Classic sans'
   },
@@ -22,7 +25,7 @@ export const storeTemplates = [
     name: 'Sports Gear',
     description: 'Fast shopping paths for activewear, equipment, accessories, and club-ready collections.',
     bestFor: 'Sports retailers, active lifestyle brands',
-    previewImage: '/catalog/sportswear.svg',
+    previewImage: heroPath('sports'),
     accentColor: '#245c7a',
     fontStyle: 'Modern condensed'
   },
@@ -31,7 +34,7 @@ export const storeTemplates = [
     name: 'Home Living',
     description: 'Quiet merchandising for home goods, gifts, daily essentials, and lifestyle collections.',
     bestFor: 'Homeware, lifestyle, gift stores',
-    previewImage: '/catalog/accessories.svg',
+    previewImage: heroPath('home'),
     accentColor: '#6f614f',
     fontStyle: 'Warm minimal'
   },
@@ -40,7 +43,7 @@ export const storeTemplates = [
     name: 'Minimal Modern',
     description: 'A clean catalog-first template for small merchants that need speed, clarity, and trust.',
     bestFor: 'New stores, digital-first boutiques',
-    previewImage: '/catalog/new-arrivals.svg',
+    previewImage: heroPath('boutique'),
     accentColor: '#30343b',
     fontStyle: 'System clean'
   }
@@ -92,42 +95,28 @@ export const demoStores = [
     name: 'Avery Studio',
     slug: 'demo-fashion',
     category: 'Fashion',
-    description: 'An independent fashion boutique for quiet tailoring, bags, jewelry, shoes, and seasonal wardrobe pieces.',
+    description: 'Independent fashion boutique for quiet tailoring, bags, jewelry, shoes, and seasonal wardrobe pieces.',
     template: 'fashion',
     brandColor: '#7c3f47',
     logoText: 'AS',
     currency: 'USD',
     shippingMessage: 'Free shipping on orders over $75',
     announcement: 'Spring edit now live. Free shipping on orders over $75.',
-    heroTitle: 'Classic, elegant, uniquely yours',
-    heroText: 'Shop timeless fashion and one-of-a-kind wardrobe finds from Avery Studio.',
+    heroTitle: 'Classic pieces for everyday polish',
+    heroText: 'Tailored layers, clean accessories, and event-ready details from Avery Studio.',
+    heroImage: heroPath('fashion'),
     published: true,
-    setup: {
-      details: true,
-      template: true,
-      products: true,
-      shipping: true,
-      preview: true,
-      publish: true
-    },
+    setup: completeSetup(),
     categories: ['New Arrivals', 'Women', 'Bags', 'Jewelry', 'Shoes', 'Sale'],
     products: [
-      product(1001, 'Ivory Collarless Blazer', 'women', 'Women', 128, 168, 14, '/catalog/women.svg', ['New', 'Tailoring'], 'Soft structured blazer with a clean neckline and relaxed weekday polish.'),
-      product(1002, 'Sculpted Day Bag', 'sculpted-day-bag', 'Bags', 96, null, 8, '/catalog/bags.svg', ['Best Seller'], 'A compact structured bag with a top handle and removable crossbody strap.'),
-      product(1003, 'Pearl Drop Earring Set', 'pearl-drop-earring-set', 'Jewelry', 42, 58, 5, '/catalog/jewelry.svg', ['Sale', 'Low Stock'], 'Lightweight pearl drops for everyday styling and evening detail.'),
-      product(1004, 'Sand Knit Midi Dress', 'sand-knit-midi-dress', 'Women', 88, null, 18, '/catalog/seasonal.svg', ['New'], 'A soft knit midi dress with easy drape and a minimal silhouette.'),
-      product(1005, 'Low Profile Leather Sneaker', 'low-profile-leather-sneaker', 'Shoes', 112, 140, 11, '/catalog/shoes.svg', ['Sale'], 'Clean leather sneakers with a cushioned footbed for all-day wear.'),
-      product(1006, 'Black Satin Evening Clutch', 'black-satin-evening-clutch', 'Bags', 64, null, 4, '/catalog/bags.svg', ['Low Stock'], 'A slim satin clutch with a quiet shine and interior card pocket.')
+      product(1001, 'Ivory Collarless Blazer', 'ivory-collarless-blazer', 'Women', 128, 168, 14, productPath('fashion-blazer'), ['Sale'], 'Soft structured blazer with a clean neckline and relaxed weekday polish.'),
+      product(1002, 'Sculpted Day Bag', 'sculpted-day-bag', 'Bags', 96, null, 8, productPath('fashion-bag'), ['Best Seller'], 'Compact structured bag with a top handle and removable strap.'),
+      product(1003, 'Pearl Drop Earring Set', 'pearl-drop-earring-set', 'Jewelry', 42, 58, 5, productPath('fashion-earrings'), ['Sale', 'Low Stock'], 'Lightweight pearl drops for everyday styling and evening detail.'),
+      product(1004, 'Sand Knit Midi Dress', 'sand-knit-midi-dress', 'Women', 88, null, 18, productPath('fashion-dress'), ['New'], 'Soft knit midi dress with easy drape and a minimal silhouette.'),
+      product(1005, 'Low Profile Leather Sneaker', 'low-profile-leather-sneaker', 'Shoes', 112, 140, 11, productPath('fashion-sneaker'), ['Sale'], 'Clean leather sneakers with a cushioned footbed for all-day wear.'),
+      product(1006, 'Black Satin Evening Clutch', 'black-satin-evening-clutch', 'Bags', 64, null, 4, productPath('fashion-clutch'), ['Low Stock'], 'Slim satin clutch with a quiet shine and interior card pocket.')
     ],
-    analytics: {
-      sales: 18420,
-      orders: 214,
-      visitors: 5620,
-      conversionRate: '3.8%',
-      averageOrderValue: 86.07,
-      topProducts: ['Ivory Collarless Blazer', 'Sculpted Day Bag', 'Pearl Drop Earring Set'],
-      trafficSources: ['Direct', 'Search', 'Social']
-    }
+    analytics: analytics(18420, 214, 5620, '3.8%', 86.07, ['Ivory Collarless Blazer', 'Sculpted Day Bag', 'Pearl Drop Earring Set'])
   },
   {
     id: 'store-sports',
@@ -142,35 +131,21 @@ export const demoStores = [
     currency: 'USD',
     shippingMessage: 'Free shipping over $90',
     announcement: 'Training kits, equipment, and active layers ready for the weekend.',
-    heroTitle: 'Built for motion',
-    heroText: 'Shop activewear, sports equipment, and everyday training essentials.',
+    heroTitle: 'Gear that keeps moving',
+    heroText: 'Activewear, sport accessories, and training essentials built for everyday sessions.',
+    heroImage: heroPath('sports'),
     published: true,
-    setup: {
-      details: true,
-      template: true,
-      products: true,
-      shipping: true,
-      preview: true,
-      publish: true
-    },
+    setup: completeSetup(),
     categories: ['New Arrivals', 'Activewear', 'Equipment', 'Bags', 'Shoes', 'Sale'],
     products: [
-      product(2001, 'Pace Training Jacket', 'pace-training-jacket', 'Activewear', 84, null, 21, '/catalog/sportswear.svg', ['New'], 'A breathable training layer with zip pockets and a lightweight shell.'),
-      product(2002, 'Compact Gym Duffel', 'compact-gym-duffel', 'Bags', 58, 72, 9, '/catalog/bags.svg', ['Sale'], 'A compact duffel with separate shoe storage and reinforced handles.'),
-      product(2003, 'Grip Court Sneaker', 'grip-court-sneaker', 'Shoes', 118, null, 13, '/catalog/shoes.svg', ['Best Seller'], 'Court-ready sneakers with stable grip and everyday comfort.'),
-      product(2004, 'Balance Mat Set', 'balance-mat-set', 'Equipment', 46, null, 6, '/catalog/accessories.svg', ['Low Stock'], 'A portable training mat with a carry strap and wipe-clean surface.'),
-      product(2005, 'Core Run Short', 'core-run-short', 'Activewear', 42, 54, 17, '/catalog/sportswear.svg', ['Sale'], 'Quick-dry running shorts with a secure inner pocket.'),
-      product(2006, 'Resistance Band Kit', 'resistance-band-kit', 'Equipment', 32, null, 28, '/catalog/new-arrivals.svg', ['New'], 'A five-piece resistance kit for home, travel, and warmups.')
+      product(2001, 'Pace Training Jacket', 'pace-training-jacket', 'Activewear', 84, null, 21, productPath('sports-jacket'), ['New'], 'Breathable training layer with zip pockets and a lightweight shell.'),
+      product(2002, 'Compact Gym Duffel', 'compact-gym-duffel', 'Bags', 58, 72, 9, productPath('sports-duffel'), ['Sale'], 'Compact duffel with separate shoe storage and reinforced handles.'),
+      product(2003, 'Grip Court Sneaker', 'grip-court-sneaker', 'Shoes', 118, null, 13, productPath('sports-sneaker'), ['Best Seller'], 'Court-ready sneakers with stable grip and everyday comfort.'),
+      product(2004, 'Balance Mat Set', 'balance-mat-set', 'Equipment', 46, null, 6, productPath('sports-mat'), ['Low Stock'], 'Portable training mat with carry strap and wipe-clean surface.'),
+      product(2005, 'Core Run Short', 'core-run-short', 'Activewear', 42, 54, 17, productPath('sports-shorts'), ['Sale'], 'Quick-dry running shorts with a secure inner pocket.'),
+      product(2006, 'Resistance Band Kit', 'resistance-band-kit', 'Equipment', 32, null, 28, productPath('sports-bands'), ['New'], 'Five-piece resistance kit for home, travel, and warmups.')
     ],
-    analytics: {
-      sales: 11980,
-      orders: 148,
-      visitors: 4380,
-      conversionRate: '3.4%',
-      averageOrderValue: 80.94,
-      topProducts: ['Grip Court Sneaker', 'Pace Training Jacket', 'Compact Gym Duffel'],
-      trafficSources: ['Search', 'Partner clubs', 'Email']
-    }
+    analytics: analytics(11980, 148, 4380, '3.4%', 80.94, ['Grip Court Sneaker', 'Pace Training Jacket', 'Compact Gym Duffel'])
   },
   {
     id: 'store-home',
@@ -185,35 +160,50 @@ export const demoStores = [
     currency: 'USD',
     shippingMessage: 'Free shipping on orders over $60',
     announcement: 'New home living pieces for quieter everyday rituals.',
-    heroTitle: 'Make daily spaces softer',
-    heroText: 'Shop home goods, gifts, and small lifestyle details from Harbor Home.',
+    heroTitle: 'Useful goods for softer daily spaces',
+    heroText: 'Homewares, gifting pieces, and quiet details for calm routines.',
+    heroImage: heroPath('home'),
     published: true,
-    setup: {
-      details: true,
-      template: true,
-      products: true,
-      shipping: true,
-      preview: true,
-      publish: true
-    },
+    setup: completeSetup(),
     categories: ['New Arrivals', 'Home Living', 'Kitchen', 'Gifts', 'Textiles', 'Sale'],
     products: [
-      product(3001, 'Linen Table Runner', 'linen-table-runner', 'Textiles', 48, null, 16, '/catalog/seasonal.svg', ['New'], 'A washed linen runner for simple dining tables and layered styling.'),
-      product(3002, 'Stoneware Pourer', 'stoneware-pourer', 'Kitchen', 34, null, 10, '/catalog/accessories.svg', ['Best Seller'], 'A small stoneware pourer for sauces, cream, or countertop styling.'),
-      product(3003, 'Soft Cotton Throw', 'soft-cotton-throw', 'Home Living', 72, 92, 7, '/catalog/new-arrivals.svg', ['Sale'], 'A breathable cotton throw with a subtle ribbed texture.'),
-      product(3004, 'Cedar Drawer Sachet Set', 'cedar-drawer-sachet-set', 'Gifts', 22, null, 32, '/catalog/jewelry.svg', ['Gift'], 'A small cedar sachet set for drawers, wardrobes, and packaged gifts.'),
-      product(3005, 'Minimal Brass Hook', 'minimal-brass-hook', 'Home Living', 18, null, 5, '/catalog/accessories.svg', ['Low Stock'], 'A compact brass wall hook for entryways, closets, and small spaces.'),
-      product(3006, 'Ceramic Tea Cup Pair', 'ceramic-tea-cup-pair', 'Kitchen', 38, 46, 12, '/catalog/sale.svg', ['Sale'], 'A pair of handleless ceramic tea cups with a warm matte glaze.')
+      product(3001, 'Linen Table Runner', 'linen-table-runner', 'Textiles', 48, null, 16, productPath('home-runner'), ['New'], 'Washed linen runner for simple dining tables and layered styling.'),
+      product(3002, 'Stoneware Pourer', 'stoneware-pourer', 'Kitchen', 34, null, 10, productPath('home-pourer'), ['Best Seller'], 'Small stoneware pourer for sauces, cream, or countertop styling.'),
+      product(3003, 'Soft Cotton Throw', 'soft-cotton-throw', 'Home Living', 72, 92, 7, productPath('home-throw'), ['Sale'], 'Breathable cotton throw with a subtle ribbed texture.'),
+      product(3004, 'Cedar Drawer Sachet Set', 'cedar-drawer-sachet-set', 'Gifts', 22, null, 32, productPath('home-sachets'), ['Gift'], 'Cedar sachet set for drawers, wardrobes, and packaged gifts.'),
+      product(3005, 'Minimal Brass Hook', 'minimal-brass-hook', 'Home Living', 18, null, 5, productPath('home-hook'), ['Low Stock'], 'Compact brass wall hook for entryways, closets, and small spaces.'),
+      product(3006, 'Ceramic Tea Cup Pair', 'ceramic-tea-cup-pair', 'Kitchen', 38, 46, 12, productPath('home-cups'), ['Sale'], 'Pair of handleless ceramic tea cups with a warm matte glaze.')
     ],
-    analytics: {
-      sales: 7420,
-      orders: 96,
-      visitors: 2980,
-      conversionRate: '3.2%',
-      averageOrderValue: 77.29,
-      topProducts: ['Soft Cotton Throw', 'Stoneware Pourer', 'Linen Table Runner'],
-      trafficSources: ['Direct', 'Email', 'Search']
-    }
+    analytics: analytics(7420, 96, 2980, '3.2%', 77.29, ['Soft Cotton Throw', 'Stoneware Pourer', 'Linen Table Runner'])
+  },
+  {
+    id: 'store-boutique',
+    merchantName: 'Luma Goods',
+    name: 'Luma Goods',
+    slug: 'demo-boutique',
+    category: 'Minimal boutique',
+    description: 'Small-batch wardrobe staples, simple objects, and refined accessories for a quiet premium shop.',
+    template: 'minimal',
+    brandColor: '#30343b',
+    logoText: 'LG',
+    currency: 'USD',
+    shippingMessage: 'Free shipping on orders over $80',
+    announcement: 'Minimal essentials, edited weekly.',
+    heroTitle: 'Small collection, considered choices',
+    heroText: 'A restrained boutique template for merchants who want clarity, calm, and polished catalog photography.',
+    heroImage: heroPath('boutique'),
+    published: true,
+    setup: completeSetup(),
+    categories: ['New Arrivals', 'Knitwear', 'Shoes', 'Objects', 'Accessories', 'Sale'],
+    products: [
+      product(4001, 'Cream Ribbed Sweater', 'cream-ribbed-sweater', 'Knitwear', 86, null, 18, productPath('boutique-sweater'), ['New'], 'Soft ribbed sweater with a clean neckline and easy drape.'),
+      product(4002, 'Ivory Everyday Loafer', 'ivory-everyday-loafer', 'Shoes', 124, 148, 9, productPath('boutique-loafer'), ['Sale'], 'Minimal loafer with a flexible sole and polished profile.'),
+      product(4003, 'Small Leather Wallet', 'small-leather-wallet', 'Accessories', 48, null, 15, productPath('boutique-wallet'), ['Best Seller'], 'Compact leather wallet with clean slots and a smooth finish.'),
+      product(4004, 'Minimal Ring Set', 'minimal-ring-set', 'Accessories', 52, null, 6, productPath('boutique-rings'), ['Low Stock'], 'Stackable ring set with refined shine and everyday wearability.'),
+      product(4005, 'White Ceramic Vase', 'white-ceramic-vase', 'Objects', 68, null, 11, productPath('boutique-vase'), ['New'], 'Matte ceramic vase sized for stems, shelves, and simple tables.'),
+      product(4006, 'Soft Cotton Shirt', 'soft-cotton-shirt', 'New Arrivals', 74, null, 20, productPath('boutique-shirt'), ['New'], 'Crisp cotton shirt with a relaxed collar and quiet tailoring.')
+    ],
+    analytics: analytics(9830, 121, 3560, '3.4%', 81.24, ['Cream Ribbed Sweater', 'Small Leather Wallet', 'Ivory Everyday Loafer'])
   }
 ]
 
@@ -237,6 +227,29 @@ function product(id, name, slug, category, price, compareAtPrice, stockQuantity,
     badges,
     status: stockQuantity > 0 ? 'ACTIVE' : 'ARCHIVED',
     description
+  }
+}
+
+function completeSetup() {
+  return {
+    details: true,
+    template: true,
+    products: true,
+    shipping: true,
+    preview: true,
+    publish: true
+  }
+}
+
+function analytics(sales, orders, visitors, conversionRate, averageOrderValue, topProducts) {
+  return {
+    sales,
+    orders,
+    visitors,
+    conversionRate,
+    averageOrderValue,
+    topProducts,
+    trafficSources: ['Direct', 'Search', 'Social']
   }
 }
 

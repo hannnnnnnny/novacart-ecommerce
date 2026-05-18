@@ -17,7 +17,7 @@
         <article><span>Conversion</span><strong>3.8%</strong></article>
       </div>
       <div class="preview-store-card">
-        <img src="/catalog/women.svg" alt="Fashion store template preview" />
+        <img src="/demo-images/heroes/fashion.jpg" alt="Fashion store template preview" />
         <div>
           <strong>Avery Studio</strong>
           <span>Fashion Boutique template</span>

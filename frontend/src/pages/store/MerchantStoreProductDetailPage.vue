@@ -1,16 +1,16 @@
 <template>
-  <section v-if="product" class="page-section">
+  <section v-if="product" class="page-section merchant-product-detail-page">
     <nav class="product-breadcrumb" aria-label="Product path">
       <RouterLink :to="`/store/${store.slug}`">{{ store.name }}</RouterLink>
       <span>/</span>
       <RouterLink :to="{ path: `/store/${store.slug}/products`, query: { category: product.category } }">{{ product.category }}</RouterLink>
     </nav>
-    <div class="detail-layout product-detail-layout premium-detail-layout">
-      <div class="product-media-panel">
+    <div class="merchant-detail-layout">
+      <div class="merchant-detail-media">
         <span v-if="product.discountPercent" class="product-image-badge detail-discount-badge">{{ product.discountPercent }}% off</span>
         <img :src="product.imageUrl" :alt="product.name" />
       </div>
-      <div class="product-buy-panel">
+      <div class="merchant-detail-buy-panel">
         <p class="eyebrow">{{ product.category }}</p>
         <h1>{{ product.name }}</h1>
         <p class="product-description">{{ product.description }}</p>
@@ -18,11 +18,15 @@
           <strong class="price">{{ formatCurrency(product.price) }}</strong>
           <span v-if="product.compareAtPrice">{{ formatCurrency(product.compareAtPrice) }}</span>
         </div>
-        <p class="muted">{{ product.stockQuantity }} available from {{ store.name }}.</p>
+        <p class="muted">{{ product.stockQuantity }} available from {{ store.name }}. Demo-safe checkout, no real payment captured.</p>
         <label>Quantity<QuantityStepper v-model="quantity" :max="Math.max(product.stockQuantity, 1)" /></label>
         <div class="card-actions">
           <button class="primary-button" type="button" :disabled="product.stockQuantity < 1" @click="addToCart">Add to cart</button>
           <button class="secondary-button" type="button" :disabled="product.stockQuantity < 1" @click="buyNow">Buy now</button>
+        </div>
+        <div class="merchant-detail-notes">
+          <span>{{ store.shippingMessage }}</span>
+          <span>30-day refund request window</span>
         </div>
       </div>
     </div>

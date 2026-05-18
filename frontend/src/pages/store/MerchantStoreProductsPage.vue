@@ -1,10 +1,10 @@
 <template>
-  <section class="page-section merchant-products-page">
-    <div class="catalog-shop-header">
+  <section class="merchant-products-page">
+    <div class="merchant-products-header">
       <div>
         <p class="eyebrow">{{ store.name }}</p>
         <h1>{{ selectedCategory || 'All products' }}</h1>
-        <p>{{ filteredProducts.length }} products from this merchant storefront.</p>
+        <p>{{ filteredProducts.length }} {{ filteredProducts.length === 1 ? 'product' : 'products' }} from this merchant storefront.</p>
       </div>
       <div class="catalog-shop-actions">
         <SearchInput v-model="searchTerm" label="Search store" placeholder="Search products" />
@@ -13,8 +13,25 @@
         </button>
       </div>
     </div>
-    <div class="retail-catalog-layout" :class="{ 'filters-open': filtersOpen }">
-      <aside v-if="filtersOpen" class="catalog-filter-panel catalog-filter-drawer">
+    <nav class="merchant-category-pills" aria-label="Product categories">
+      <button type="button" :class="{ active: !selectedCategory }" @click="selectedCategory = ''">All</button>
+      <button
+        v-for="category in store.categories"
+        :key="category"
+        type="button"
+        :class="{ active: selectedCategory === category }"
+        @click="selectedCategory = category"
+      >
+        {{ category }}
+      </button>
+    </nav>
+
+    <div class="merchant-products-layout" :class="{ 'filters-open': filtersOpen }">
+      <aside v-if="filtersOpen" class="catalog-filter-panel catalog-filter-drawer merchant-filter-panel">
+        <div class="filter-panel-heading">
+          <strong>Filters</strong>
+          <span>{{ filteredProducts.length }} results</span>
+        </div>
         <label>Category
           <select v-model="selectedCategory">
             <option value="">All categories</option>

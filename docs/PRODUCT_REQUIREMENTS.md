@@ -13,7 +13,7 @@ NovaCart is not one store. It is the platform merchants use to launch stores for
 - Merchant signup/login entry points.
 - Guided onboarding for store basics, template choice, first products, brand configuration, and storefront preview.
 - Store slug routing under `/store/:storeSlug` for local multi-store support without subdomains.
-- Demo stores for `demo-fashion`, `demo-sports`, and `demo-home`.
+- Demo stores for `demo-fashion`, `demo-sports`, `demo-home`, and `demo-boutique`.
 
 ## Generated Customer Storefront Requirements
 
@@ -50,7 +50,7 @@ NovaCart is not one store. It is the platform merchants use to launch stores for
 - At least 10 fashion categories.
 - At least 6 original seasonal collections: Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale.
 - No copyrighted brand names, logos, product photos, or copied product descriptions.
-- Local sample imagery is repository-owned SVG artwork under `frontend/public/catalog`.
+- Local sample imagery is repository-owned generated demo artwork. Generated merchant storefronts use realistic JPEG assets under `frontend/public/demo-images`; legacy SVG catalog assets remain available for backend seed records and older catalog references.
 
 ## Non-Goals
 

@@ -83,7 +83,7 @@ The fashion release extends the catalog around retail merchandising and campaign
 - `CustomerProfile`: guest customer record keyed by checkout email with contact, address summary, country, region, city, creation date, and last order date.
 - `SupportTicket` and `RefundRequest`: customer care records linked to order number/email and managed from protected admin screens.
 
-All sample data is original to this repository. Local storefront imagery uses generated SVG assets under `frontend/public/catalog`.
+All sample data is original to this repository. Generated merchant storefront imagery uses local generated JPEG assets under `frontend/public/demo-images`; legacy SVG assets under `frontend/public/catalog` remain available for older catalog records and admin image fallbacks.
 
 ## Multi-Merchant Platform Flow
 

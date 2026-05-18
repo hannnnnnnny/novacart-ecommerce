@@ -117,6 +117,20 @@ public class DataInitializer {
                 "Free shipping on orders over $60",
                 "New home living pieces for quieter everyday rituals."
         );
+        seedMerchantStore(
+                merchantStoreRepository,
+                demoMerchant,
+                "Luma Goods",
+                "demo-boutique",
+                "Minimal boutique",
+                "Small-batch wardrobe staples, simple objects, and refined accessories for a quiet premium shop.",
+                "minimal",
+                "#30343b",
+                "LG",
+                "USD",
+                "Free shipping on orders over $80",
+                "Minimal essentials, edited weekly."
+        );
     }
 
     private void seedMerchantStore(

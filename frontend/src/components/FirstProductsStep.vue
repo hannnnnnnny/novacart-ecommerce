@@ -24,7 +24,7 @@ const props = defineProps({
 })
 
 function addProduct() {
-  props.model.products.push({ name: '', price: 48, category: 'New Arrivals', imageUrl: '/catalog/new-arrivals.svg' })
+  props.model.products.push({ name: '', price: 48, category: 'New Arrivals', imageUrl: '/demo-images/products/boutique-shirt.jpg' })
 }
 
 function removeProduct(index) {
