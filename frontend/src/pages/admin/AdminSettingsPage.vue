@@ -1,19 +1,20 @@
 <template>
   <section class="admin-page">
     <AdminPageHeader
-      eyebrow="Store configuration"
-      title="Settings"
-      description="Review store profile, admin security, environment details, and future theme controls."
+      eyebrow="Merchant settings"
+      :title="`${store.name} settings`"
+      description="Manage the current store profile, slug, currency, shipping message, security context, and platform environment."
     />
 
     <div class="settings-grid">
       <article class="settings-card">
         <h2>Store Profile</h2>
         <dl>
-          <div><dt>Store name</dt><dd>NovaCart Fashion Commerce</dd></div>
-          <div><dt>Primary channel</dt><dd>Online storefront</dd></div>
-          <div><dt>Catalog focus</dt><dd>Fashion, thrift finds, accessories, sportswear, lifestyle extras</dd></div>
-          <div><dt>Demo currency</dt><dd>USD display formatting</dd></div>
+          <div><dt>Store name</dt><dd>{{ store.name }}</dd></div>
+          <div><dt>Public storefront</dt><dd>/store/{{ store.slug }}</dd></div>
+          <div><dt>Catalog focus</dt><dd>{{ store.category }}</dd></div>
+          <div><dt>Demo currency</dt><dd>{{ store.currency }}</dd></div>
+          <div><dt>Shipping message</dt><dd>{{ store.shippingMessage }}</dd></div>
         </dl>
       </article>
 
@@ -38,15 +39,17 @@
       </article>
 
       <article class="settings-card">
-        <h2>Theme & Operations Roadmap</h2>
+        <h2>Theme, Payments & Operations</h2>
         <p class="muted">
-          Theme controls, real media uploads, tax configuration, channel-specific settings, and notification preferences are intentionally presented as roadmap items until backend support is added.
+          Theme controls work locally for the current merchant store. Real media uploads, custom domains, tax automation, and live payment processors are documented roadmap items until backend support is added.
         </p>
         <div class="settings-placeholder-list">
-          <span>Theme presets</span>
+          <RouterLink to="/admin/theme-editor">Theme editor</RouterLink>
+          <RouterLink to="/admin/templates">Templates</RouterLink>
+          <RouterLink :to="`/store/${store.slug}`">Storefront preview</RouterLink>
           <span>Upload storage</span>
           <span>Tax profiles</span>
-          <span>Notification rules</span>
+          <span>Payment provider setup</span>
         </div>
       </article>
     </div>
@@ -56,7 +59,15 @@
 <script setup>
 import AdminPageHeader from '../../components/AdminPageHeader.vue'
 import { useAuthStore } from '../../stores/auth'
+import { usePlatformStore } from '../../stores/platform'
+import { computed, onMounted } from 'vue'
 
 const authStore = useAuthStore()
+const platformStore = usePlatformStore()
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '/api'
+const store = computed(() => platformStore.currentStore)
+
+onMounted(() => {
+  platformStore.loadPlatform()
+})
 </script>

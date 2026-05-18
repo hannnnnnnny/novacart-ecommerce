@@ -3,7 +3,7 @@
     <PageHeader
       eyebrow="Fulfillment"
       title="Orders"
-      description="Track customer fashion orders, payment state, and fulfillment progress."
+      :description="`Track orders for ${currentStore.name}, payment state, fulfillment progress, and refund context.`"
     />
     <section class="order-status-tabs" aria-label="Order status filters">
       <button
@@ -101,8 +101,10 @@ import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import { usePlatformStore } from '../../stores/platform'
 import { formatCurrency, formatDate, formatStatus } from '../../utils/format'
 
+const platformStore = usePlatformStore()
 const statuses = ['PENDING', 'PAID', 'PROCESSING', 'SHIPPED', 'COMPLETED', 'CANCELLED']
 const paymentStatuses = ['UNPAID', 'PAID', 'FAILED', 'REFUNDED']
 const refundStatuses = ['NONE', 'REQUESTED', 'UNDER_REVIEW', 'APPROVED', 'REJECTED', 'REFUNDED']
@@ -114,6 +116,7 @@ const statusFilter = ref('all')
 const paymentFilter = ref('all')
 const refundFilter = ref('all')
 const regionFilter = ref('')
+const currentStore = computed(() => platformStore.currentStore)
 const filteredOrders = computed(() => {
   const query = searchTerm.value.toLowerCase()
   const regionQuery = regionFilter.value.toLowerCase()
@@ -141,6 +144,7 @@ const orderTabs = computed(() => {
 })
 
 onMounted(async () => {
+  platformStore.loadPlatform()
   try {
     orders.value = await fetchAdminOrders()
   } catch (requestError) {

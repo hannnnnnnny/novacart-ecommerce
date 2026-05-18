@@ -2,8 +2,8 @@
   <section class="admin-page">
     <AdminPageHeader
       eyebrow="Analytics"
-      title="Customer and Sales Analytics"
-      description="Track revenue periods, customer locations, category performance, top products, and preference signals."
+      :title="`${currentStore.name} analytics`"
+      description="Track revenue periods, customer locations, category performance, traffic sources, top products, and preference signals for the selected store."
     />
     <LoadingState v-if="loading" message="Loading analytics..." />
     <ErrorMessage v-else-if="error" :message="error" />
@@ -15,7 +15,7 @@
         <StatCard label="Yearly Sales" :value="formatCurrency(analytics.yearlySales)" detail="Last 365 days" />
         <StatCard label="Average Order Value" :value="formatCurrency(analytics.averageOrderValue)" detail="Paid non-cancelled orders" />
         <StatCard label="Repeat Customers" :value="analytics.repeatCustomers || 0" detail="Guest records by email" />
-        <StatCard label="Conversion Summary" :value="conversionRate" detail="Demo order signal" />
+        <StatCard label="Conversion Rate" :value="currentStore.analytics?.conversionRate || conversionRate" detail="Current store signal" />
       </div>
 
       <ChartCard
@@ -39,6 +39,12 @@
             <span>{{ category.label.replace('Category: ', '') }}</span><strong>{{ category.count }}</strong>
           </p>
           <p v-if="!categoryPerformance.length" class="muted">Category performance appears after product purchases.</p>
+        </article>
+        <article class="dashboard-section">
+          <h2>Traffic Sources</h2>
+          <p v-for="source in currentStore.analytics?.trafficSources || []" :key="source" class="summary-line">
+            <span>{{ source }}</span><strong>Active</strong>
+          </p>
         </article>
         <article class="dashboard-section">
           <h2>Customer Signals</h2>
@@ -82,11 +88,14 @@ import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
 import StatCard from '../../components/StatCard.vue'
+import { usePlatformStore } from '../../stores/platform'
 import { formatCurrency } from '../../utils/format'
 
+const platformStore = usePlatformStore()
 const loading = ref(true)
 const error = ref('')
 const analytics = ref({})
+const currentStore = computed(() => platformStore.currentStore)
 const trendPoints = computed(() => {
   return (analytics.value.salesTrend || []).map((point) => ({
     label: shortDate(point.date),
@@ -106,6 +115,7 @@ const conversionRate = computed(() => {
 })
 
 onMounted(async () => {
+  platformStore.loadPlatform()
   try {
     analytics.value = await fetchAdminAnalytics()
   } catch (requestError) {
