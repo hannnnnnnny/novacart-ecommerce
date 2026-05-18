@@ -1,15 +1,20 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import StorefrontLayout from '../layouts/StorefrontLayout.vue'
+import PlatformLayout from '../layouts/PlatformLayout.vue'
+import MerchantStorefrontLayout from '../layouts/MerchantStorefrontLayout.vue'
 import AdminLayout from '../layouts/AdminLayout.vue'
-import HomePage from '../pages/HomePage.vue'
-import ProductListPage from '../pages/ProductListPage.vue'
-import ProductDetailPage from '../pages/ProductDetailPage.vue'
-import CartPage from '../pages/CartPage.vue'
-import CheckoutPage from '../pages/CheckoutPage.vue'
-import OrderSuccessPage from '../pages/OrderSuccessPage.vue'
-import SupportPage from '../pages/SupportPage.vue'
-import RefundRequestPage from '../pages/RefundRequestPage.vue'
+import PlatformHomePage from '../pages/platform/PlatformHomePage.vue'
+import FeaturesPage from '../pages/platform/FeaturesPage.vue'
+import TemplatesPage from '../pages/platform/TemplatesPage.vue'
+import PricingPage from '../pages/platform/PricingPage.vue'
+import SignupPage from '../pages/platform/SignupPage.vue'
+import OnboardingPage from '../pages/platform/OnboardingPage.vue'
+import MerchantStoreHomePage from '../pages/store/MerchantStoreHomePage.vue'
+import MerchantStoreProductsPage from '../pages/store/MerchantStoreProductsPage.vue'
+import MerchantStoreProductDetailPage from '../pages/store/MerchantStoreProductDetailPage.vue'
+import MerchantStoreCartPage from '../pages/store/MerchantStoreCartPage.vue'
+import MerchantStoreCheckoutPage from '../pages/store/MerchantStoreCheckoutPage.vue'
+import MerchantStoreOrderSuccessPage from '../pages/store/MerchantStoreOrderSuccessPage.vue'
 import AdminLoginPage from '../pages/admin/AdminLoginPage.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminProductsPage from '../pages/admin/AdminProductsPage.vue'
@@ -25,31 +30,51 @@ import AdminRefundsPage from '../pages/admin/AdminRefundsPage.vue'
 import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage.vue'
 import AdminCustomersPage from '../pages/admin/AdminCustomersPage.vue'
 import AdminSettingsPage from '../pages/admin/AdminSettingsPage.vue'
+import AdminStoreSetupPage from '../pages/admin/AdminStoreSetupPage.vue'
+import AdminTemplatesPage from '../pages/admin/AdminTemplatesPage.vue'
+import AdminThemeEditorPage from '../pages/admin/AdminThemeEditorPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
       path: '/',
-      component: StorefrontLayout,
+      component: PlatformLayout,
       children: [
-        { path: '', name: 'home', component: HomePage },
-        { path: 'products', name: 'products', component: ProductListPage },
-        { path: 'products/:id', name: 'product-detail', component: ProductDetailPage },
-        { path: 'cart', name: 'cart', component: CartPage },
-        { path: 'checkout', name: 'checkout', component: CheckoutPage },
-        { path: 'order-success/:id', name: 'order-success', component: OrderSuccessPage },
-        { path: 'support', name: 'support', component: SupportPage },
-        { path: 'refund-request', name: 'refund-request', component: RefundRequestPage }
+        { path: '', name: 'platform-home', component: PlatformHomePage },
+        { path: 'features', name: 'platform-features', component: FeaturesPage },
+        { path: 'templates', name: 'platform-templates', component: TemplatesPage },
+        { path: 'pricing', name: 'platform-pricing', component: PricingPage },
+        { path: 'signup', name: 'merchant-signup', component: SignupPage },
+        { path: 'onboarding', name: 'merchant-onboarding', component: OnboardingPage },
+        { path: 'products', redirect: '/store/demo-fashion/products' },
+        { path: 'products/:id', redirect: (to) => `/store/demo-fashion/products/${to.params.id}` },
+        { path: 'cart', redirect: '/store/demo-fashion/cart' },
+        { path: 'checkout', redirect: '/store/demo-fashion/checkout' }
       ]
     },
-    { path: '/admin/login', name: 'admin-login', component: AdminLoginPage },
+    { path: '/login', name: 'merchant-login', component: AdminLoginPage },
+    { path: '/admin/login', redirect: '/login' },
+    {
+      path: '/store/:storeSlug',
+      component: MerchantStorefrontLayout,
+      children: [
+        { path: '', name: 'merchant-store-home', component: MerchantStoreHomePage, props: true },
+        { path: 'products', name: 'merchant-store-products', component: MerchantStoreProductsPage, props: true },
+        { path: 'products/:productId', name: 'merchant-store-product-detail', component: MerchantStoreProductDetailPage, props: true },
+        { path: 'cart', name: 'merchant-store-cart', component: MerchantStoreCartPage, props: true },
+        { path: 'checkout', name: 'merchant-store-checkout', component: MerchantStoreCheckoutPage, props: true },
+        { path: 'order-success', name: 'merchant-store-order-success', component: MerchantStoreOrderSuccessPage, props: true }
+      ]
+    },
     {
       path: '/admin',
       component: AdminLayout,
       meta: { requiresAuth: true },
       children: [
+        { path: '', redirect: '/admin/dashboard' },
         { path: 'dashboard', name: 'admin-dashboard', component: AdminDashboardPage },
+        { path: 'store-setup', name: 'admin-store-setup', component: AdminStoreSetupPage },
         { path: 'products', name: 'admin-products', component: AdminProductsPage },
         { path: 'products/new', name: 'admin-product-new', component: AdminProductFormPage },
         { path: 'products/:id/edit', name: 'admin-product-edit', component: AdminProductFormPage },
@@ -63,6 +88,8 @@ const router = createRouter({
         { path: 'refunds', name: 'admin-refunds', component: AdminRefundsPage },
         { path: 'customers', name: 'admin-customers', component: AdminCustomersPage },
         { path: 'analytics', name: 'admin-analytics', component: AdminAnalyticsPage },
+        { path: 'templates', name: 'admin-templates', component: AdminTemplatesPage },
+        { path: 'theme-editor', name: 'admin-theme-editor', component: AdminThemeEditorPage },
         { path: 'settings', name: 'admin-settings', component: AdminSettingsPage }
       ]
     }
@@ -78,7 +105,7 @@ router.beforeEach((to) => {
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     return {
-      name: 'admin-login',
+      name: 'merchant-login',
       query: {
         redirect: to.fullPath,
         ...(sessionStatus === 'expired' ? { session: 'expired' } : {})

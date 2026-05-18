@@ -5,6 +5,8 @@ import com.novacart.store.entity.Category;
 import com.novacart.store.entity.CollectionStatus;
 import com.novacart.store.entity.FashionCollection;
 import com.novacart.store.entity.GenderTarget;
+import com.novacart.store.entity.MerchantAccount;
+import com.novacart.store.entity.MerchantStore;
 import com.novacart.store.entity.Product;
 import com.novacart.store.entity.ProductStatus;
 import com.novacart.store.entity.Promotion;
@@ -13,6 +15,8 @@ import com.novacart.store.entity.PromotionTargetType;
 import com.novacart.store.repository.AdminUserRepository;
 import com.novacart.store.repository.CategoryRepository;
 import com.novacart.store.repository.FashionCollectionRepository;
+import com.novacart.store.repository.MerchantAccountRepository;
+import com.novacart.store.repository.MerchantStoreRepository;
 import com.novacart.store.repository.ProductRepository;
 import com.novacart.store.repository.PromotionRepository;
 import java.math.BigDecimal;
@@ -37,6 +41,8 @@ public class DataInitializer {
             ProductRepository productRepository,
             FashionCollectionRepository collectionRepository,
             PromotionRepository promotionRepository,
+            MerchantAccountRepository merchantAccountRepository,
+            MerchantStoreRepository merchantStoreRepository,
             PasswordEncoder passwordEncoder
     ) {
         return args -> {
@@ -52,9 +58,98 @@ public class DataInitializer {
 
             Map<String, Category> categories = seedCategories(categoryRepository);
             Map<String, FashionCollection> collections = seedCollections(collectionRepository);
+            seedMerchantStores(merchantAccountRepository, merchantStoreRepository);
             seedProducts(productRepository, categories, collections);
             seedPromotions(promotionRepository);
         };
+    }
+
+    private void seedMerchantStores(
+            MerchantAccountRepository merchantAccountRepository,
+            MerchantStoreRepository merchantStoreRepository
+    ) {
+        MerchantAccount demoMerchant = merchantAccountRepository.findByEmailIgnoreCase("merchant@novacart.local")
+                .orElseGet(() -> merchantAccountRepository.save(new MerchantAccount(
+                        "NovaCart Demo Merchant",
+                        "merchant@novacart.local",
+                        true
+                )));
+
+        seedMerchantStore(
+                merchantStoreRepository,
+                demoMerchant,
+                "Avery Studio",
+                "demo-fashion",
+                "Fashion",
+                "Independent fashion boutique for tailoring, bags, jewelry, shoes, and seasonal wardrobe edits.",
+                "fashion",
+                "#7c3f47",
+                "AS",
+                "USD",
+                "Free shipping on orders over $75",
+                "Spring edit now live. Free shipping on orders over $75."
+        );
+        seedMerchantStore(
+                merchantStoreRepository,
+                demoMerchant,
+                "Northline Active",
+                "demo-sports",
+                "Sports",
+                "Activewear, training extras, and compact sports equipment for active weekends.",
+                "sports",
+                "#245c7a",
+                "NA",
+                "USD",
+                "Free shipping over $90",
+                "Training kits and active layers ready for the weekend."
+        );
+        seedMerchantStore(
+                merchantStoreRepository,
+                demoMerchant,
+                "Harbor Home",
+                "demo-home",
+                "Home goods",
+                "Warm home pieces, thoughtful gifts, and minimal lifestyle goods.",
+                "home",
+                "#6f614f",
+                "HH",
+                "USD",
+                "Free shipping on orders over $60",
+                "New home living pieces for quieter everyday rituals."
+        );
+    }
+
+    private void seedMerchantStore(
+            MerchantStoreRepository merchantStoreRepository,
+            MerchantAccount merchantAccount,
+            String name,
+            String slug,
+            String category,
+            String description,
+            String templateKey,
+            String brandColor,
+            String logoText,
+            String currency,
+            String shippingMessage,
+            String announcement
+    ) {
+        if (merchantStoreRepository.existsBySlug(slug)) {
+            return;
+        }
+        merchantStoreRepository.save(new MerchantStore(
+                merchantAccount,
+                name,
+                slug,
+                category,
+                description,
+                templateKey,
+                brandColor,
+                logoText,
+                currency,
+                shippingMessage,
+                announcement,
+                true
+        ));
     }
 
     private Map<String, Category> seedCategories(CategoryRepository categoryRepository) {

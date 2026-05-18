@@ -1,13 +1,13 @@
 <template>
   <section class="admin-page admin-dashboard-page">
     <AdminPageHeader
-      eyebrow="Merchant overview"
-      title="Dashboard"
-      description="A focused command center for sales, fulfillment, inventory risk, support, and refunds."
+      eyebrow="Merchant workspace"
+      :title="`${currentStore.name} dashboard`"
+      description="Manage the current store setup, catalog health, sales signals, customer care, and storefront actions."
     >
       <template #actions>
         <RouterLink class="primary-button" to="/admin/products/new">Add product</RouterLink>
-        <RouterLink class="secondary-button" to="/admin/orders">Review orders</RouterLink>
+        <RouterLink class="secondary-button" :to="`/store/${currentStore.slug}`">Preview store</RouterLink>
       </template>
     </AdminPageHeader>
 
@@ -17,29 +17,31 @@
       <section class="admin-overview-hero">
         <div>
           <p class="eyebrow">Today in store</p>
-          <h2>Sales, care queues, and catalog risk in one clean view.</h2>
-          <p>Use this overview to move from a signal to a merchant action without losing context.</p>
+          <h2>{{ currentStore.description }}</h2>
+          <p>NovaCart is managing this as one merchant store inside a multi-store platform workspace.</p>
         </div>
         <div class="overview-mini-grid">
+          <article>
+            <span>Store slug</span>
+            <strong>/store/{{ currentStore.slug }}</strong>
+          </article>
           <article>
             <span>Next action</span>
             <strong>{{ nextAction }}</strong>
           </article>
-          <article>
-            <span>Open care</span>
-            <strong>{{ openSupportCount + pendingRefundCount }}</strong>
-          </article>
         </div>
       </section>
+
+      <SetupChecklist :store="currentStore" />
 
       <div class="stat-grid">
         <StatCard label="Total sales" :value="formatCurrency(analytics.totalRevenue || metrics.revenue || 0)" detail="All non-cancelled orders" />
         <StatCard label="Orders" :value="analytics.totalOrders || metrics.totalOrders || 0" detail="Orders received" />
-        <StatCard label="Customers" :value="customers.length" detail="Guest profiles by email" />
+        <StatCard label="Visitors" :value="currentStore.analytics?.visitors || 0" detail="Current store demo signal" />
         <StatCard label="Conversion rate" :value="conversionRate" detail="Demo storefront signal" />
+        <StatCard label="Average order value" :value="formatCurrency(analytics.averageOrderValue || currentStore.analytics?.averageOrderValue || 0)" detail="Paid order signal" />
         <StatCard label="Pending refunds" :value="pendingRefundCount" detail="Needs merchant review" />
         <StatCard label="Open support tickets" :value="openSupportCount" detail="Customer care queue" />
-        <StatCard label="Low stock alerts" :value="warnings.length" detail="At or below threshold" />
       </div>
 
       <div class="dashboard-main-grid">
@@ -59,18 +61,10 @@
           <div class="admin-page-header">
             <h2>Quick Actions</h2>
           </div>
-          <RouterLink to="/admin/products/new">
-            <strong>Add product</strong>
-            <span>Create a fashion, thrift, or lifestyle item.</span>
-          </RouterLink>
-          <RouterLink to="/admin/promotions">
-            <strong>Create promotion</strong>
-            <span>Launch markdowns by product, category, collection, season, or tag.</span>
-          </RouterLink>
-          <RouterLink to="/admin/inventory">
-            <strong>Adjust stock</strong>
-            <span>Resolve low-stock alerts and review movement history.</span>
-          </RouterLink>
+          <QuickActionCard title="Add product" description="Create an item for the current store catalog." to="/admin/products/new" />
+          <QuickActionCard title="Customize theme" description="Edit logo, brand color, hero text, and announcement." to="/admin/theme-editor" />
+          <QuickActionCard title="Create discount" description="Launch a product, category, collection, season, or tag markdown." to="/admin/promotions" />
+          <QuickActionCard title="Preview store" description="Open the generated customer storefront." :to="`/store/${currentStore.slug}`" />
         </section>
       </div>
 
@@ -160,10 +154,14 @@ import ChartCard from '../../components/ChartCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
+import QuickActionCard from '../../components/QuickActionCard.vue'
+import SetupChecklist from '../../components/SetupChecklist.vue'
 import StatCard from '../../components/StatCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import { usePlatformStore } from '../../stores/platform'
 import { formatCurrency } from '../../utils/format'
 
+const platformStore = usePlatformStore()
 const loading = ref(true)
 const error = ref('')
 const metrics = ref({})
@@ -173,6 +171,7 @@ const warnings = ref([])
 const customers = ref([])
 const supportTickets = ref([])
 const refunds = ref([])
+const currentStore = computed(() => platformStore.currentStore)
 const recentOrders = computed(() => orders.value.slice(0, 6))
 const openSupportCount = computed(() => supportTickets.value.filter((ticket) => !['RESOLVED', 'CLOSED'].includes(ticket.status)).length)
 const pendingRefundCount = computed(() => refunds.value.filter((refund) => ['REQUESTED', 'UNDER_REVIEW'].includes(refund.status)).length)
@@ -195,6 +194,7 @@ const trendPoints = computed(() => {
 })
 
 onMounted(async () => {
+  platformStore.loadPlatform()
   try {
     const [metricData, analyticsData, orderData, warningData, customerData, supportData, refundData] = await Promise.all([
       fetchDashboardMetrics(),

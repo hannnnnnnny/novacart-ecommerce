@@ -1,0 +1,43 @@
+<template>
+  <section class="page-section">
+    <div class="success-panel">
+      <p class="eyebrow">Order placed</p>
+      <h1>Thanks for shopping {{ store.name }}</h1>
+      <p>Your demo order has been saved locally for this generated merchant storefront.</p>
+      <div v-if="order" class="summary-panel">
+        <div class="summary-line"><span>Order number</span><strong>{{ order.id }}</strong></div>
+        <div class="summary-line"><span>Payment status</span><strong>{{ order.paymentStatus }}</strong></div>
+        <div class="summary-line"><span>Total</span><strong>{{ formatCurrency(order.total) }}</strong></div>
+        <div class="summary-line"><span>Refund window</span><strong>30 days</strong></div>
+      </div>
+      <div class="hero-actions">
+        <RouterLink class="primary-button" :to="`/store/${store.slug}`">Back to store</RouterLink>
+        <RouterLink class="secondary-button" to="/admin/orders">Merchant orders</RouterLink>
+      </div>
+    </div>
+  </section>
+</template>
+
+<script setup>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { formatCurrency } from '../../utils/format'
+
+defineProps({
+  store: {
+    type: Object,
+    required: true
+  }
+})
+
+const route = useRoute()
+const order = computed(() => {
+  const rawOrder = localStorage.getItem(`novacart_order_${route.query.order}`)
+  if (!rawOrder) return null
+  try {
+    return JSON.parse(rawOrder)
+  } catch {
+    return null
+  }
+})
+</script>

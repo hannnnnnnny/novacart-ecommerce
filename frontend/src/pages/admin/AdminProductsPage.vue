@@ -1,9 +1,9 @@
 <template>
   <section class="admin-page">
     <PageHeader
-      eyebrow="Catalog"
+      eyebrow="Store catalog"
       title="Products"
-      description="Search fashion products, review inventory levels, and manage storefront visibility."
+      :description="`Search products for ${currentStore.name}, review inventory levels, and manage storefront visibility.`"
     >
       <template #actions>
         <RouterLink class="primary-button" to="/admin/products/new">New Product</RouterLink>
@@ -138,7 +138,7 @@
             </td>
             <td>
               <div class="table-actions">
-                <RouterLink class="text-link" :to="`/products/${product.id}`">Preview</RouterLink>
+                <RouterLink class="text-link" :to="{ path: `/store/${currentStore.slug}/products`, query: { category: product.category?.name || '' } }">Preview</RouterLink>
                 <RouterLink class="text-link" :to="`/admin/products/${product.id}/edit`">Edit</RouterLink>
                 <button
                   class="text-button danger"
@@ -167,8 +167,10 @@ import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import { usePlatformStore } from '../../stores/platform'
 import { formatCurrency, formatStatus } from '../../utils/format'
 
+const platformStore = usePlatformStore()
 const loading = ref(true)
 const error = ref('')
 const route = useRoute()
@@ -182,6 +184,7 @@ const collectionFilter = ref('all')
 const saleFilter = ref(false)
 const selectedIds = ref([])
 const bulkCollectionId = ref('')
+const currentStore = computed(() => platformStore.currentStore)
 const filteredProducts = computed(() => {
   const query = searchTerm.value.toLowerCase()
   return products.value.filter((product) => {
@@ -200,7 +203,10 @@ const filteredProducts = computed(() => {
 })
 const allSelected = computed(() => filteredProducts.value.length > 0 && filteredProducts.value.every((product) => selectedIds.value.includes(product.id)))
 
-onMounted(loadProducts)
+onMounted(() => {
+  platformStore.loadPlatform()
+  loadProducts()
+})
 
 watch(
   () => route.query.search,

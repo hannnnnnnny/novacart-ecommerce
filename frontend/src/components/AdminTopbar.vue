@@ -9,6 +9,7 @@
       />
     </form>
     <div class="admin-topbar-controls">
+      <StoreSwitcher />
       <label>
         <CalendarDays aria-hidden="true" />
         <select v-model="dateRange">
@@ -32,9 +33,9 @@
         <span v-if="notificationCount">{{ notificationCount }}</span>
       </RouterLink>
       <RouterLink class="admin-profile-chip" to="/admin/settings">
-        <span class="profile-avatar">N</span>
+        <span class="profile-avatar">{{ currentStore.logoText || 'N' }}</span>
         <span>
-          <strong>NovaCart</strong>
+          <strong>{{ currentStore.name }}</strong>
           <small>{{ authStore.email || 'Administrator' }}</small>
         </span>
       </RouterLink>
@@ -43,11 +44,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Bell, CalendarDays, PanelsTopLeft } from 'lucide-vue-next'
 import SearchInput from './SearchInput.vue'
+import StoreSwitcher from './StoreSwitcher.vue'
 import { useAuthStore } from '../stores/auth'
+import { usePlatformStore } from '../stores/platform'
 
 defineProps({
   notificationCount: {
@@ -58,9 +61,11 @@ defineProps({
 
 const router = useRouter()
 const authStore = useAuthStore()
+const platformStore = usePlatformStore()
 const searchTerm = ref('')
 const dateRange = ref('Last 30 days')
 const channel = ref('All channels')
+const currentStore = computed(() => platformStore.currentStore)
 
 function submitSearch() {
   const search = searchTerm.value.trim()

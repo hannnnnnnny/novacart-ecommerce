@@ -1,8 +1,18 @@
-# NovaCart Fashion Commerce Platform
+# NovaCart Multi-Merchant Ecommerce Website Builder
 
-NovaCart is a production-style portfolio ecommerce platform for fashion and lifestyle merchants. It combines a premium customer storefront with a protected merchant operations workspace for catalog, collections, promotions, orders, refunds, support, customers, analytics, and inventory.
+NovaCart is a production-style portfolio SaaS ecommerce platform where many merchants can create, customize, manage, and publish their own online stores. It now includes a platform marketing website, merchant onboarding flow, template selector, store builder controls, protected merchant admin workspace, and generated customer storefront routes.
 
 NovaCart is original in naming, layout, copy, seed data, and local artwork. It is a demo-safe project, not a live payment-processing store.
+
+## Platform Direction
+
+NovaCart is no longer positioned as one fashion store. It is a website builder and commerce operations platform for independent merchants.
+
+- Public platform site: `/`, `/features`, `/templates`, `/pricing`
+- Merchant access: `/login`, `/signup`, `/onboarding`
+- Merchant workspace: `/admin/dashboard`, `/admin/store-setup`, `/admin/products`, `/admin/orders`, `/admin/customers`, `/admin/inventory`, `/admin/promotions`, `/admin/analytics`, `/admin/templates`, `/admin/theme-editor`, `/admin/support`, `/admin/refunds`, `/admin/settings`
+- Generated storefronts: `/store/demo-fashion`, `/store/demo-sports`, `/store/demo-home`
+- Store-specific shopping paths: `/store/:storeSlug/products`, `/store/:storeSlug/products/:productId`, `/store/:storeSlug/cart`, `/store/:storeSlug/checkout`, `/store/:storeSlug/order-success`
 
 ## Visual Preview
 
@@ -54,23 +64,32 @@ NovaCart is original in naming, layout, copy, seed data, and local artwork. It i
 
 ## What NovaCart Is
 
-NovaCart is a full-stack fashion commerce system for clothing, bags, jewelry, accessories, shoes, sportswear, activewear, sports equipment, seasonal collections, and sale campaigns.
+NovaCart is a multi-merchant ecommerce website builder. Merchants can choose a template, define store basics, add products, configure brand settings, preview the generated storefront, and operate commerce workflows from a dashboard.
 
-The project demonstrates real ecommerce architecture: a Spring Boot REST API, MySQL persistence, JPA entities, DTO validation, service-layer business logic, JWT-protected admin APIs, transactional checkout, stock movement tracking, a Vue 3 storefront, and a merchant admin workspace.
+The project demonstrates real ecommerce architecture: a Spring Boot REST API, MySQL persistence, JPA entities, DTO validation, service-layer business logic, JWT-protected admin APIs, transactional checkout, stock movement tracking, Vue 3 platform and storefront experiences, and a merchant admin workspace.
 
-## Customer Storefront
+## Multi-Merchant Store Builder
 
-- Premium fashion homepage with editorial hero, seasonal campaign, category navigation, featured collections, new arrivals, best sellers, sale campaign, and customer-care highlights.
-- Catalog browsing with server-backed search, category, collection, size, color, material, label, season, tag, sale, availability, price range, sorting, active filter chips, and pagination.
-- Product cards with fashion artwork, collection ribbons, discount badges, stock status, color swatches, size availability, quick add, and detail links.
-- Product detail pages with gallery artwork, collection path, fictional label, SKU, season, price hierarchy, size/color selectors, quantity control, stock guardrails, add-to-cart, buy-now, shipping notes, refund window, support link, and related products.
-- Cart and checkout with selected size/color, quantity editing, discount totals, shipping estimate, tax estimate, demo payment method, refund acknowledgement, validation, and order creation.
-- Order success, support ticket, and refund request flows that use order number and email context.
+- Merchant onboarding creates a store name, slug, category, description, template, first products, brand color, logo text, currency, and shipping message.
+- Template options include Fashion Boutique, Thrift Classic, Sports Gear, Home Living, and Minimal Modern.
+- Store switcher lets the admin workspace move between demo and merchant-created stores.
+- Theme editor updates logo text, brand color, hero copy, announcement text, font style, and button style through a frontend store data layer.
+- Generated storefronts use store-specific names, colors, template styling, categories, products, cart, and local demo checkout.
+- Backend groundwork includes `MerchantAccount` and `MerchantStore` entities, repositories, seed demo stores, and public store lookup endpoints.
+
+## Generated Customer Storefronts
+
+- Storefronts live under `/store/:storeSlug`, which keeps the platform homepage separate from merchant stores.
+- Each storefront displays the merchant logo/name, selected template style, announcement bar, hero section, category navigation, featured products, product grid, cart, checkout, and order success.
+- Demo stores are included for fashion, sports, and home goods so visitors can see multiple merchant storefronts.
+- Generated storefront checkout is demo-safe and local for mock stores. The existing backend checkout remains available for backend-powered commerce flows.
 
 ## Merchant Admin
 
 - JWT-protected admin login with persisted session handling and clear expired-session behavior.
-- Dashboard with revenue, order, refund, stock, sales trend, top regions, best sellers, and customer preference signals.
+- Dashboard with current store context, store setup checklist, revenue, order, visitor, conversion, average order value, refund, support, stock, sales trend, top products, and quick actions.
+- Store setup page for details, slug, description, shipping message, preview, and publish state.
+- Templates page and theme editor for store builder workflows.
 - Product management with thumbnail table, search, status/category/collection/sale filters, active/draft/archive status, stock badges, featured markers, preview links, edit links, archive/reactivate, bulk archive, bulk collection assignment, and selected-product markdown creation.
 - Collection management for Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale with campaign images and product assignment.
 - Promotion management for percentage or fixed discounts targeted by selected products, categories, collections, seasons, or tags.

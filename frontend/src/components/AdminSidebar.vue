@@ -28,6 +28,7 @@
 import {
   BarChart3,
   Boxes,
+  Brush,
   Gauge,
   Gift,
   Headphones,
@@ -38,27 +39,33 @@ import {
   RotateCcw,
   Settings,
   Tag,
+  WandSparkles,
   Users
 } from 'lucide-vue-next'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { usePlatformStore } from '../stores/platform'
 
 const router = useRouter()
 const authStore = useAuthStore()
+const platformStore = usePlatformStore()
 const navItems = [
-  { label: 'Home / Dashboard', to: '/admin/dashboard', icon: Home },
-  { label: 'Orders', to: '/admin/orders', icon: ReceiptText },
+  { label: 'Dashboard', to: '/admin/dashboard', icon: Home },
+  { label: 'Store Setup', to: '/admin/store-setup', icon: Gauge },
   { label: 'Products', to: '/admin/products', icon: Package },
-  { label: 'Collections', to: '/admin/collections', icon: Layers3 },
+  { label: 'Orders', to: '/admin/orders', icon: ReceiptText },
   { label: 'Customers', to: '/admin/customers', icon: Users },
-  { label: 'Marketing / Promotions', to: '/admin/promotions', icon: Gift },
-  { label: 'Discounts', to: { path: '/admin/promotions', query: { view: 'discounts' } }, icon: Tag },
   { label: 'Inventory', to: '/admin/inventory', icon: Boxes },
+  { label: 'Promotions', to: '/admin/promotions', icon: Gift },
+  { label: 'Collections', to: '/admin/collections', icon: Layers3 },
+  { label: 'Discounts', to: { path: '/admin/promotions', query: { view: 'discounts' } }, icon: Tag },
+  { label: 'Templates', to: '/admin/templates', icon: WandSparkles },
+  { label: 'Theme Editor', to: '/admin/theme-editor', icon: Brush },
   { label: 'Support', to: '/admin/support', icon: Headphones },
   { label: 'Refunds', to: '/admin/refunds', icon: RotateCcw },
   { label: 'Analytics', to: '/admin/analytics', icon: BarChart3 },
   { label: 'Settings', to: '/admin/settings', icon: Settings },
-  { label: 'Storefront', to: '/', icon: Gauge }
+  { label: 'Storefront', to: `/store/${platformStore.currentStoreSlug || 'demo-fashion'}`, icon: Gauge }
 ]
 
 function logout() {
