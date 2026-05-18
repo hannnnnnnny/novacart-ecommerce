@@ -2,12 +2,16 @@
   <div class="admin-shell">
     <a class="skip-link" href="#admin-content">Skip to admin content</a>
     <AdminSidebar />
-    <main id="admin-content" class="admin-main" tabindex="-1">
-      <RouterView />
-    </main>
+    <div class="admin-workspace">
+      <AdminTopbar :notification-count="0" />
+      <main id="admin-content" class="admin-main" tabindex="-1">
+        <RouterView />
+      </main>
+    </div>
   </div>
 </template>
 
 <script setup>
 import AdminSidebar from '../components/AdminSidebar.vue'
+import AdminTopbar from '../components/AdminTopbar.vue'
 </script>

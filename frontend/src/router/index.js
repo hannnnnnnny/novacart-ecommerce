@@ -24,6 +24,7 @@ import AdminSupportPage from '../pages/admin/AdminSupportPage.vue'
 import AdminRefundsPage from '../pages/admin/AdminRefundsPage.vue'
 import AdminAnalyticsPage from '../pages/admin/AdminAnalyticsPage.vue'
 import AdminCustomersPage from '../pages/admin/AdminCustomersPage.vue'
+import AdminSettingsPage from '../pages/admin/AdminSettingsPage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -61,7 +62,8 @@ const router = createRouter({
         { path: 'support', name: 'admin-support', component: AdminSupportPage },
         { path: 'refunds', name: 'admin-refunds', component: AdminRefundsPage },
         { path: 'customers', name: 'admin-customers', component: AdminCustomersPage },
-        { path: 'analytics', name: 'admin-analytics', component: AdminAnalyticsPage }
+        { path: 'analytics', name: 'admin-analytics', component: AdminAnalyticsPage },
+        { path: 'settings', name: 'admin-settings', component: AdminSettingsPage }
       ]
     }
   ],

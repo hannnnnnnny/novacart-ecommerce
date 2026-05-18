@@ -158,7 +158,8 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useRoute } from 'vue-router'
 import { createAdminPromotion, fetchAdminCategories, fetchAdminCollections, fetchAdminProducts, updateAdminProduct } from '../../api/admin'
 import { getApiError } from '../../api/client'
 import EmptyState from '../../components/EmptyState.vue'
@@ -170,6 +171,7 @@ import { formatCurrency, formatStatus } from '../../utils/format'
 
 const loading = ref(true)
 const error = ref('')
+const route = useRoute()
 const products = ref([])
 const categories = ref([])
 const collections = ref([])
@@ -199,6 +201,14 @@ const filteredProducts = computed(() => {
 const allSelected = computed(() => filteredProducts.value.length > 0 && filteredProducts.value.every((product) => selectedIds.value.includes(product.id)))
 
 onMounted(loadProducts)
+
+watch(
+  () => route.query.search,
+  (value) => {
+    searchTerm.value = value ? String(value) : ''
+  },
+  { immediate: true }
+)
 
 async function loadProducts() {
   loading.value = true

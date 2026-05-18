@@ -1,101 +1,78 @@
 <template>
-  <section class="admin-page">
-    <PageHeader
-      eyebrow="Operations"
+  <section class="admin-page admin-dashboard-page">
+    <AdminPageHeader
+      eyebrow="Merchant overview"
       title="Dashboard"
-      description="Monitor fashion catalog health, orders, revenue, and inventory warnings from one overview."
-    />
+      description="A focused command center for sales, fulfillment, inventory risk, support, and refunds."
+    >
+      <template #actions>
+        <RouterLink class="primary-button" to="/admin/products/new">Add product</RouterLink>
+        <RouterLink class="secondary-button" to="/admin/orders">Review orders</RouterLink>
+      </template>
+    </AdminPageHeader>
+
     <LoadingState v-if="loading" message="Loading dashboard..." />
     <ErrorMessage v-else-if="error" :message="error" />
-    <div v-else class="dashboard-layout">
-      <section class="admin-command-hero">
+    <div v-else class="dashboard-layout professional-dashboard">
+      <section class="admin-overview-hero">
         <div>
-          <p class="eyebrow">Merchant command center</p>
-          <h2>Today’s retail pulse across revenue, fulfillment, refunds, support, and stock risk.</h2>
-          <p>Use the shortcuts below to move quickly from signal to action without leaving the operations workspace.</p>
+          <p class="eyebrow">Today in store</p>
+          <h2>Sales, care queues, and catalog risk in one clean view.</h2>
+          <p>Use this overview to move from a signal to a merchant action without losing context.</p>
         </div>
-        <div class="command-hero-stats">
+        <div class="overview-mini-grid">
           <article>
-            <span>Total Revenue</span>
-            <strong>{{ formatCurrency(metrics.revenue) }}</strong>
+            <span>Next action</span>
+            <strong>{{ nextAction }}</strong>
           </article>
           <article>
-            <span>Orders</span>
-            <strong>{{ metrics.totalOrders || 0 }}</strong>
-          </article>
-          <article>
-            <span>Low Stock</span>
-            <strong>{{ warnings.length }}</strong>
+            <span>Open care</span>
+            <strong>{{ openSupportCount + pendingRefundCount }}</strong>
           </article>
         </div>
       </section>
-      <div class="metric-grid">
-        <MetricCard label="Total Products" :value="metrics.totalProducts || 0" detail="All catalog records" />
-        <MetricCard label="Active Products" :value="metrics.activeProducts || 0" detail="Visible in storefront" />
-        <MetricCard label="Categories" :value="metrics.totalCategories || 0" detail="Catalog groups" />
-        <MetricCard label="Total Orders" :value="metrics.totalOrders || 0" detail="Orders received" />
-        <MetricCard label="Pending Orders" :value="metrics.pendingOrders || 0" detail="Need review" />
-        <MetricCard label="Revenue" :value="formatCurrency(metrics.revenue)" detail="Excluding cancelled orders" />
-        <MetricCard label="Daily Sales" :value="formatCurrency(analytics.dailySales)" detail="Last 24 hours" />
-        <MetricCard label="Weekly Sales" :value="formatCurrency(analytics.weeklySales)" detail="Last 7 days" />
-        <MetricCard label="Monthly Sales" :value="formatCurrency(analytics.monthlySales)" detail="Last 30 days" />
-        <MetricCard label="Yearly Sales" :value="formatCurrency(analytics.yearlySales)" detail="Last 365 days" />
-        <MetricCard label="Average Order Value" :value="formatCurrency(analytics.averageOrderValue)" detail="Paid orders" />
-        <MetricCard label="Refund Requests" :value="analytics.refundRequests || 0" detail="Customer care queue" />
+
+      <div class="stat-grid">
+        <StatCard label="Total sales" :value="formatCurrency(analytics.totalRevenue || metrics.revenue || 0)" detail="All non-cancelled orders" />
+        <StatCard label="Orders" :value="analytics.totalOrders || metrics.totalOrders || 0" detail="Orders received" />
+        <StatCard label="Customers" :value="customers.length" detail="Guest profiles by email" />
+        <StatCard label="Conversion rate" :value="conversionRate" detail="Demo storefront signal" />
+        <StatCard label="Pending refunds" :value="pendingRefundCount" detail="Needs merchant review" />
+        <StatCard label="Open support tickets" :value="openSupportCount" detail="Customer care queue" />
+        <StatCard label="Low stock alerts" :value="warnings.length" detail="At or below threshold" />
       </div>
 
-      <section class="operations-strip" aria-label="Admin shortcuts">
-        <RouterLink to="/admin/products">
-          <strong>Manage Catalog</strong>
-          <span>Create fashion products, adjust stock, and control visibility.</span>
-        </RouterLink>
-        <RouterLink to="/admin/orders">
-          <strong>Review Orders</strong>
-          <span>Move new orders through fulfillment.</span>
-        </RouterLink>
-        <RouterLink to="/admin/inventory">
-          <strong>Check Inventory</strong>
-          <span>Find low-stock products before checkout fails.</span>
-        </RouterLink>
-      </section>
+      <div class="dashboard-main-grid">
+        <ChartCard
+          class="dashboard-chart-card"
+          eyebrow="Revenue trend"
+          title="Sales over the last 7 days"
+          :points="trendPoints"
+          :formatter="formatCurrency"
+        >
+          <template #actions>
+            <RouterLink class="text-link" to="/admin/analytics">Open analytics</RouterLink>
+          </template>
+        </ChartCard>
 
-      <section class="dashboard-section">
-        <div class="admin-page-header">
-          <h2>Sales Trend</h2>
-          <RouterLink class="text-link" to="/admin/analytics">Open analytics</RouterLink>
-        </div>
-        <div class="trend-bars">
-          <article v-for="point in analytics.salesTrend" :key="point.date" class="trend-bar">
-            <span>{{ shortDate(point.date) }}</span>
-            <div><i :style="{ height: barHeight(point.revenue) }"></i></div>
-            <strong>{{ formatCurrency(point.revenue) }}</strong>
-          </article>
-        </div>
-      </section>
-
-      <section class="dashboard-section analytics-grid">
-        <article>
-          <h2>Top Regions</h2>
-          <p v-for="region in analytics.topRegions" :key="region.label" class="summary-line">
-            <span>{{ region.label }}</span><strong>{{ formatCurrency(region.revenue) }}</strong>
-          </p>
-          <p v-if="!analytics.topRegions?.length" class="muted">Regional demand appears after checkout.</p>
-        </article>
-        <article>
-          <h2>Customer Preferences</h2>
-          <p v-for="preference in analytics.customerPreferenceOverview" :key="preference.label" class="summary-line">
-            <span>{{ preference.label }}</span><strong>{{ preference.count }}</strong>
-          </p>
-          <p v-if="!analytics.customerPreferenceOverview?.length" class="muted">Size, color, and category signals appear after orders.</p>
-        </article>
-        <article>
-          <h2>Best Sellers</h2>
-          <p v-for="product in analytics.bestSellingProducts" :key="product.productId" class="summary-line">
-            <span>{{ product.productName }}</span><strong>{{ product.unitsSold }}</strong>
-          </p>
-          <p v-if="!analytics.bestSellingProducts?.length" class="muted">Best sellers appear after checkout.</p>
-        </article>
-      </section>
+        <section class="dashboard-section quick-action-panel">
+          <div class="admin-page-header">
+            <h2>Quick Actions</h2>
+          </div>
+          <RouterLink to="/admin/products/new">
+            <strong>Add product</strong>
+            <span>Create a fashion, thrift, or lifestyle item.</span>
+          </RouterLink>
+          <RouterLink to="/admin/promotions">
+            <strong>Create promotion</strong>
+            <span>Launch markdowns by product, category, collection, season, or tag.</span>
+          </RouterLink>
+          <RouterLink to="/admin/inventory">
+            <strong>Adjust stock</strong>
+            <span>Resolve low-stock alerts and review movement history.</span>
+          </RouterLink>
+        </section>
+      </div>
 
       <section class="dashboard-section">
         <div class="admin-page-header">
@@ -109,14 +86,16 @@
               <tr>
                 <th>Order</th>
                 <th>Customer</th>
+                <th>Payment</th>
                 <th>Status</th>
                 <th>Total</th>
               </tr>
             </thead>
             <tbody>
               <tr v-for="order in recentOrders" :key="order.id">
-                <td><RouterLink class="text-link" :to="`/admin/orders/${order.id}`">#{{ order.id }}</RouterLink></td>
-                <td>{{ order.customerName }}</td>
+                <td><RouterLink class="text-link" :to="`/admin/orders/${order.id}`">{{ order.orderNumber || `#${order.id}` }}</RouterLink></td>
+                <td>{{ order.customerEmail }}</td>
+                <td><StatusBadge :value="order.paymentStatus" /></td>
                 <td><StatusBadge :value="order.status" /></td>
                 <td>{{ formatCurrency(order.totalAmount) }}</td>
               </tr>
@@ -125,25 +104,40 @@
         </div>
       </section>
 
-      <section class="dashboard-section">
-        <div class="admin-page-header">
-          <h2>Inventory Watch</h2>
-          <RouterLink class="text-link" to="/admin/inventory">Review inventory</RouterLink>
-        </div>
-        <EmptyState
-          v-if="!warnings.length"
-          title="Inventory is healthy"
-          message="No products are at or below the default warning threshold."
-        />
-        <div v-else class="warning-grid compact-warning-grid">
-          <article v-for="warning in warnings" :key="warning.productId" class="warning-card">
-            <div>
-              <p class="eyebrow">{{ warning.categoryName }}</p>
-              <h3>{{ warning.productName }}</h3>
-            </div>
+      <section class="dashboard-widgets-grid">
+        <article class="dashboard-section">
+          <div class="admin-page-header">
+            <h2>Top Selling Products</h2>
+            <RouterLink class="text-link" to="/admin/products">Products</RouterLink>
+          </div>
+          <p v-for="product in analytics.bestSellingProducts" :key="product.productId" class="summary-line">
+            <span>{{ product.productName }}</span>
+            <strong>{{ product.unitsSold }} sold</strong>
+          </p>
+          <p v-if="!analytics.bestSellingProducts?.length" class="muted">Top products appear after checkout.</p>
+        </article>
+
+        <article class="dashboard-section">
+          <div class="admin-page-header">
+            <h2>Low Stock Products</h2>
+            <RouterLink class="text-link" to="/admin/inventory">Inventory</RouterLink>
+          </div>
+          <p v-for="warning in warnings.slice(0, 5)" :key="warning.productId" class="summary-line">
+            <span>{{ warning.productName }}</span>
             <strong>{{ warning.stockQuantity }} left</strong>
-          </article>
-        </div>
+          </p>
+          <p v-if="!warnings.length" class="muted">No low-stock products at the current threshold.</p>
+        </article>
+
+        <article class="dashboard-section">
+          <div class="admin-page-header">
+            <h2>Support & Refunds</h2>
+            <RouterLink class="text-link" to="/admin/support">Care queue</RouterLink>
+          </div>
+          <p class="summary-line"><span>Open support tickets</span><strong>{{ openSupportCount }}</strong></p>
+          <p class="summary-line"><span>Pending refund requests</span><strong>{{ pendingRefundCount }}</strong></p>
+          <p class="summary-line"><span>Total refund records</span><strong>{{ refunds.length }}</strong></p>
+        </article>
       </section>
     </div>
   </section>
@@ -151,13 +145,22 @@
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
-import { fetchAdminAnalytics, fetchAdminOrders, fetchDashboardMetrics, fetchInventoryWarnings } from '../../api/admin'
+import {
+  fetchAdminAnalytics,
+  fetchAdminCustomers,
+  fetchAdminOrders,
+  fetchAdminRefunds,
+  fetchAdminSupportTickets,
+  fetchDashboardMetrics,
+  fetchInventoryWarnings
+} from '../../api/admin'
 import { getApiError } from '../../api/client'
+import AdminPageHeader from '../../components/AdminPageHeader.vue'
+import ChartCard from '../../components/ChartCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorMessage from '../../components/ErrorMessage.vue'
 import LoadingState from '../../components/LoadingState.vue'
-import MetricCard from '../../components/MetricCard.vue'
-import PageHeader from '../../components/PageHeader.vue'
+import StatCard from '../../components/StatCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { formatCurrency } from '../../utils/format'
 
@@ -167,33 +170,54 @@ const metrics = ref({})
 const analytics = ref({})
 const orders = ref([])
 const warnings = ref([])
-const recentOrders = computed(() => orders.value.slice(0, 5))
-const maxTrendRevenue = computed(() => {
-  return Math.max(...(analytics.value.salesTrend || []).map((point) => Number(point.revenue)), 1)
+const customers = ref([])
+const supportTickets = ref([])
+const refunds = ref([])
+const recentOrders = computed(() => orders.value.slice(0, 6))
+const openSupportCount = computed(() => supportTickets.value.filter((ticket) => !['RESOLVED', 'CLOSED'].includes(ticket.status)).length)
+const pendingRefundCount = computed(() => refunds.value.filter((refund) => ['REQUESTED', 'UNDER_REVIEW'].includes(refund.status)).length)
+const conversionRate = computed(() => {
+  const ordersCount = Number(analytics.value.totalOrders || metrics.value.totalOrders || 0)
+  if (!ordersCount) return '0.0%'
+  return `${Math.min(9.5, Math.max(1.2, ordersCount * 0.35)).toFixed(1)}%`
+})
+const nextAction = computed(() => {
+  if (pendingRefundCount.value) return 'Review refunds'
+  if (openSupportCount.value) return 'Answer support'
+  if (warnings.value.length) return 'Restock products'
+  return 'Review catalog'
+})
+const trendPoints = computed(() => {
+  return (analytics.value.salesTrend || []).map((point) => ({
+    label: shortDate(point.date),
+    value: Number(point.revenue)
+  }))
 })
 
 onMounted(async () => {
   try {
-    const [metricData, analyticsData, orderData, warningData] = await Promise.all([
+    const [metricData, analyticsData, orderData, warningData, customerData, supportData, refundData] = await Promise.all([
       fetchDashboardMetrics(),
       fetchAdminAnalytics(),
       fetchAdminOrders(),
-      fetchInventoryWarnings(5)
+      fetchInventoryWarnings(5),
+      fetchAdminCustomers(),
+      fetchAdminSupportTickets(),
+      fetchAdminRefunds()
     ])
     metrics.value = metricData
     analytics.value = analyticsData
     orders.value = orderData
     warnings.value = warningData
+    customers.value = customerData
+    supportTickets.value = supportData
+    refunds.value = refundData
   } catch (requestError) {
     error.value = getApiError(requestError, 'Dashboard metrics could not be loaded.')
   } finally {
     loading.value = false
   }
 })
-
-function barHeight(value) {
-  return `${Math.max(8, (Number(value) / maxTrendRevenue.value) * 120)}px`
-}
 
 function shortDate(value) {
   return new Intl.DateTimeFormat('en', { month: 'short', day: 'numeric' }).format(new Date(value))
