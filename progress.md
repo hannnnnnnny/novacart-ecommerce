@@ -37,6 +37,12 @@
 - Phase 2 checks passed:
   - `npm.cmd run test:unit`
   - `npm.cmd run build`
+- Implemented Phase 3 code-quality/productivity polish:
+  - Replaced the browser-prompt bulk discount workflow with an inline, validated merchant admin control.
+  - Added saving/disabled states for the bulk discount creation action.
+- Phase 3 checks passed:
+  - `npm.cmd run test:unit`
+  - `npm.cmd run build`
 
 ## Commands Run
 
@@ -54,6 +60,8 @@ C:\Users\harry\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\p
 npm.cmd run test:unit
 npm.cmd run build
 .\mvnw.cmd test
+npm.cmd run test:unit
+npm.cmd run build
 npm.cmd run test:unit
 npm.cmd run build
 ```

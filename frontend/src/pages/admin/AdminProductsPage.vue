@@ -68,9 +68,6 @@
       <button class="secondary-button" type="button" :disabled="!selectedIds.length" @click="bulkArchive">
         Archive Selected
       </button>
-      <button class="secondary-button" type="button" :disabled="!selectedIds.length" @click="bulkApplyDiscount">
-        Discount Selected
-      </button>
       <label>
         Bulk collection
         <select v-model="bulkCollectionId">
@@ -95,6 +92,18 @@
       <div v-if="selectedIds.length" class="bulk-action-bar">
         <strong>{{ selectedIds.length }} selected</strong>
         <span>Archive, assign a collection, or create a markdown for the selected fashion products.</span>
+        <label class="bulk-inline-field">
+          Markdown %
+          <input v-model.number="bulkDiscountValue" min="1" max="95" step="1" type="number" />
+        </label>
+        <button
+          class="secondary-button compact-button"
+          type="button"
+          :disabled="bulkDiscountSaving || !bulkDiscountIsValid"
+          @click="bulkApplyDiscount"
+        >
+          {{ bulkDiscountSaving ? 'Creating...' : 'Create Discount' }}
+        </button>
       </div>
       <div class="admin-table-wrap">
       <table class="admin-table">
@@ -184,6 +193,8 @@ const collectionFilter = ref('all')
 const saleFilter = ref(false)
 const selectedIds = ref([])
 const bulkCollectionId = ref('')
+const bulkDiscountValue = ref(15)
+const bulkDiscountSaving = ref(false)
 const currentStore = computed(() => platformStore.currentStore)
 const filteredProducts = computed(() => {
   const query = searchTerm.value.toLowerCase()
@@ -202,6 +213,10 @@ const filteredProducts = computed(() => {
   })
 })
 const allSelected = computed(() => filteredProducts.value.length > 0 && filteredProducts.value.every((product) => selectedIds.value.includes(product.id)))
+const bulkDiscountIsValid = computed(() => {
+  const value = Number(bulkDiscountValue.value)
+  return selectedIds.value.length > 0 && Number.isFinite(value) && value > 0 && value <= 95
+})
 
 onMounted(() => {
   platformStore.loadPlatform()
@@ -288,13 +303,12 @@ async function bulkAssignCollection() {
 }
 
 async function bulkApplyDiscount() {
-  const value = window.prompt('Percentage discount for selected products', '15')
-  if (value === null) return
-  const discountValue = Number(value)
-  if (!Number.isFinite(discountValue) || discountValue <= 0 || discountValue > 100) {
-    error.value = 'Enter a percentage discount between 1 and 100.'
+  const discountValue = Number(bulkDiscountValue.value)
+  if (!bulkDiscountIsValid.value) {
+    error.value = 'Enter a percentage discount between 1 and 95 for selected products.'
     return
   }
+  bulkDiscountSaving.value = true
   try {
     await createAdminPromotion({
       name: `Selected product markdown ${new Date().toISOString().slice(0, 10)}`,
@@ -307,9 +321,12 @@ async function bulkApplyDiscount() {
       targetType: 'SELECTED_PRODUCTS',
       targetValues: selectedIds.value.map(String)
     })
+    bulkDiscountValue.value = 15
     await loadProducts()
   } catch (requestError) {
     error.value = getApiError(requestError, 'Bulk discount could not be created.')
+  } finally {
+    bulkDiscountSaving.value = false
   }
 }
 

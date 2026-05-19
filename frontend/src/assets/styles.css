@@ -2552,6 +2552,25 @@ body {
   color: #5a2633;
 }
 
+.bulk-inline-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+  color: #5a2633;
+  font-size: 0.82rem;
+  font-weight: 850;
+  text-transform: uppercase;
+  letter-spacing: 0;
+}
+
+.bulk-inline-field input {
+  width: 82px;
+  min-height: 38px;
+  border-color: rgba(141, 51, 70, 0.28);
+  background: #fffdf9;
+}
+
 .admin-product-cell {
   display: grid;
   grid-template-columns: 74px minmax(0, 1fr);
