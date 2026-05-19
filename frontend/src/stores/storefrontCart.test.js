@@ -1,0 +1,66 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import { createPinia, setActivePinia } from 'pinia'
+import { useStorefrontCartStore } from './storefrontCart'
+
+describe('storefront cart store', () => {
+  let storage
+
+  beforeEach(() => {
+    storage = new Map()
+    Object.defineProperty(globalThis, 'localStorage', {
+      configurable: true,
+      value: {
+        getItem: (key) => storage.get(key) || null,
+        setItem: (key, value) => storage.set(key, value),
+        removeItem: (key) => storage.delete(key)
+      }
+    })
+    setActivePinia(createPinia())
+  })
+
+  it('keeps generated storefront variants as separate cart lines', () => {
+    const cartStore = useStorefrontCartStore()
+    const product = {
+      id: 1001,
+      name: 'Ivory Collarless Blazer',
+      price: 128,
+      compareAtPrice: 168,
+      imageUrl: '/demo-images/products/fashion-blazer.jpg',
+      stockQuantity: 4,
+      discountPercent: 24
+    }
+
+    cartStore.addItem('demo-fashion', product, 1, { size: 'S', color: 'Ivory' })
+    cartStore.addItem('demo-fashion', product, 2, { size: 'M', color: 'Black' })
+
+    const items = cartStore.itemsForStore('demo-fashion')
+    expect(items).toHaveLength(2)
+    expect(items.map((item) => item.itemId)).toEqual(['1001::S::Ivory', '1001::M::Black'])
+    expect(cartStore.itemCountForStore('demo-fashion')).toBe(3)
+    expect(cartStore.discountTotalForStore('demo-fashion')).toBe(120)
+  })
+
+  it('updates and removes the selected generated storefront variant', () => {
+    const cartStore = useStorefrontCartStore()
+    const product = {
+      id: 2003,
+      name: 'Grip Court Sneaker',
+      price: 118,
+      imageUrl: '/demo-images/products/sports-sneaker.jpg',
+      stockQuantity: 5
+    }
+
+    cartStore.addItem('demo-sports', product, 1, { size: '8', color: 'Ivory' })
+    cartStore.addItem('demo-sports', product, 1, { size: '9', color: 'Black' })
+    cartStore.updateQuantity('demo-sports', '2003::9::Black', 4)
+    cartStore.removeItem('demo-sports', '2003::8::Ivory')
+
+    const items = cartStore.itemsForStore('demo-sports')
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({
+      itemId: '2003::9::Black',
+      quantity: 4,
+      options: { size: '9', color: 'Black' }
+    })
+  })
+})

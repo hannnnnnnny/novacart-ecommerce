@@ -16,12 +16,23 @@
           <h3>{{ product.name }}</h3>
         </RouterLink>
         <p>{{ product.description }}</p>
+        <div v-if="hasOptions(product)" class="generated-option-summary" aria-label="Available product options">
+          <span v-if="product.colors?.length">{{ product.colors.slice(0, 3).join(', ') }}</span>
+          <span v-if="product.sizes?.length">{{ product.sizes.slice(0, 4).join(' / ') }}</span>
+        </div>
         <div class="generated-product-purchase-row">
           <div class="price-stack">
             <strong>{{ formatCurrency(product.price) }}</strong>
             <span v-if="product.compareAtPrice">{{ formatCurrency(product.compareAtPrice) }}</span>
           </div>
-          <button class="primary-button compact-button" type="button" :disabled="product.stockQuantity < 1" @click="$emit('add', product)">
+          <RouterLink
+            v-if="requiresSelection(product) && product.stockQuantity > 0"
+            class="secondary-button compact-button"
+            :to="`/store/${store.slug}/products/${product.id}`"
+          >
+            Choose
+          </RouterLink>
+          <button v-else class="primary-button compact-button" type="button" :disabled="product.stockQuantity < 1" @click="$emit('add', product)">
             <span>{{ product.stockQuantity < 1 ? 'Unavailable' : 'Add' }}</span>
           </button>
         </div>
@@ -56,5 +67,13 @@ function stockLabel(product) {
   if (product.stockQuantity < 1) return 'Out'
   if (product.stockQuantity <= (product.lowStockThreshold || 5)) return `${product.stockQuantity} left`
   return 'In stock'
+}
+
+function hasOptions(product) {
+  return Boolean(product.sizes?.length || product.colors?.length)
+}
+
+function requiresSelection(product) {
+  return (product.sizes?.length || 0) > 1 || (product.colors?.length || 0) > 1
 }
 </script>

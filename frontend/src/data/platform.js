@@ -211,6 +211,7 @@ function product(id, name, slug, category, price, compareAtPrice, stockQuantity,
   const discountPercent = compareAtPrice
     ? Math.round(((Number(compareAtPrice) - Number(price)) / Number(compareAtPrice)) * 100)
     : 0
+  const options = productOptionsForCategory(category)
   return {
     id,
     name,
@@ -224,9 +225,55 @@ function product(id, name, slug, category, price, compareAtPrice, stockQuantity,
     lowStockThreshold: 6,
     imageUrl,
     imageGallery: [imageUrl],
+    sizes: options.sizes,
+    colors: options.colors,
+    material: options.material,
+    careInstructions: options.careInstructions,
     badges,
     status: stockQuantity > 0 ? 'ACTIVE' : 'ARCHIVED',
     description
+  }
+}
+
+function productOptionsForCategory(category) {
+  const key = String(category || '').toLowerCase()
+  if (['women', 'knitwear', 'activewear', 'new arrivals'].includes(key)) {
+    return {
+      sizes: ['XS', 'S', 'M', 'L', 'XL'],
+      colors: ['Ivory', 'Black', 'Taupe'],
+      material: 'Responsibly sourced cotton blend',
+      careInstructions: 'Machine wash cold, reshape, and lay flat to dry.'
+    }
+  }
+  if (key === 'shoes') {
+    return {
+      sizes: ['6', '7', '8', '9', '10', '11'],
+      colors: ['Ivory', 'Black', 'Sand'],
+      material: 'Leather upper with cushioned footbed',
+      careInstructions: 'Wipe clean with a soft cloth and store away from direct heat.'
+    }
+  }
+  if (['bags', 'accessories', 'jewelry'].includes(key)) {
+    return {
+      sizes: [],
+      colors: ['Black', 'Taupe', 'Wine'],
+      material: key === 'jewelry' ? 'Polished brass and glass pearl finish' : 'Structured vegan leather',
+      careInstructions: 'Store in the dust bag and avoid prolonged moisture.'
+    }
+  }
+  if (key === 'equipment') {
+    return {
+      sizes: ['Standard'],
+      colors: ['Slate', 'Pine'],
+      material: 'Performance-grade mixed materials',
+      careInstructions: 'Wipe clean after use and air dry before storage.'
+    }
+  }
+  return {
+    sizes: [],
+    colors: ['Natural', 'Charcoal'],
+    material: 'Small-batch mixed materials',
+    careInstructions: 'Follow the merchant care card included with the order.'
   }
 }
 

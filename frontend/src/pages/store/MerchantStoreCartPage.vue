@@ -10,17 +10,18 @@
     </EmptyState>
     <div v-else class="cart-layout">
       <div class="cart-items">
-        <article v-for="item in items" :key="item.productId" class="cart-item fashion-cart-item">
+        <article v-for="item in items" :key="item.itemId || item.productId" class="cart-item fashion-cart-item">
           <img :src="item.imageUrl" :alt="item.name" />
           <div class="cart-item-body">
             <h2>{{ item.name }}</h2>
+            <p v-if="selectedOptionsLabel(item)" class="cart-variant-line">{{ selectedOptionsLabel(item) }}</p>
             <div class="price-stack">
               <strong>{{ formatCurrency(item.price) }}</strong>
               <span v-if="item.compareAtPrice">{{ formatCurrency(item.compareAtPrice) }}</span>
             </div>
             <div class="cart-item-controls">
-              <QuantityStepper :model-value="item.quantity" :max="Math.max(item.stockQuantity, 1)" @update:model-value="cartStore.updateQuantity(store.slug, item.productId, $event)" />
-              <button class="text-button danger" type="button" @click="cartStore.removeItem(store.slug, item.productId)">Remove</button>
+              <QuantityStepper :model-value="item.quantity" :max="Math.max(item.stockQuantity, 1)" @update:model-value="cartStore.updateQuantity(store.slug, item.itemId || item.productId, $event)" />
+              <button class="text-button danger" type="button" @click="cartStore.removeItem(store.slug, item.itemId || item.productId)">Remove</button>
             </div>
           </div>
         </article>
@@ -60,4 +61,10 @@ const itemCount = computed(() => cartStore.itemCountForStore(props.store.slug))
 const subtotal = computed(() => cartStore.subtotalForStore(props.store.slug))
 const discountTotal = computed(() => cartStore.discountTotalForStore(props.store.slug))
 const shipping = computed(() => (items.value.length ? 6 : 0))
+
+function selectedOptionsLabel(item) {
+  return [item.options?.size ? `Size ${item.options.size}` : '', item.options?.color ? `Color ${item.options.color}` : '']
+    .filter(Boolean)
+    .join(' / ')
+}
 </script>

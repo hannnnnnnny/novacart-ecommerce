@@ -15,6 +15,7 @@ import MerchantStoreProductDetailPage from '../pages/store/MerchantStoreProductD
 import MerchantStoreCartPage from '../pages/store/MerchantStoreCartPage.vue'
 import MerchantStoreCheckoutPage from '../pages/store/MerchantStoreCheckoutPage.vue'
 import MerchantStoreOrderSuccessPage from '../pages/store/MerchantStoreOrderSuccessPage.vue'
+import MerchantStoreSupportPage from '../pages/store/MerchantStoreSupportPage.vue'
 import AdminLoginPage from '../pages/admin/AdminLoginPage.vue'
 import AdminDashboardPage from '../pages/admin/AdminDashboardPage.vue'
 import AdminProductsPage from '../pages/admin/AdminProductsPage.vue'
@@ -64,7 +65,8 @@ const router = createRouter({
         { path: 'products/:productId', name: 'merchant-store-product-detail', component: MerchantStoreProductDetailPage, props: true },
         { path: 'cart', name: 'merchant-store-cart', component: MerchantStoreCartPage, props: true },
         { path: 'checkout', name: 'merchant-store-checkout', component: MerchantStoreCheckoutPage, props: true },
-        { path: 'order-success', name: 'merchant-store-order-success', component: MerchantStoreOrderSuccessPage, props: true }
+        { path: 'order-success', name: 'merchant-store-order-success', component: MerchantStoreOrderSuccessPage, props: true },
+        { path: 'support', name: 'merchant-store-support', component: MerchantStoreSupportPage, props: true }
       ]
     },
     {

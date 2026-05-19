@@ -19,7 +19,7 @@ NovaCart is not one store. It is the platform merchants use to launch stores for
 
 - Storefront homepage displays merchant name/logo, template styling, announcement bar, hero, categories, and featured products.
 - Product listing is scoped by store slug and uses store-specific products and categories.
-- Product detail, cart, checkout, and order success paths stay under `/store/:storeSlug`.
+- Product detail, cart, checkout, order success, and support/refund paths stay under `/store/:storeSlug`.
 - Checkout remains demo-safe and local for frontend-generated stores until backend multi-store checkout is fully wired.
 - Storefront styling changes based on selected template and merchant brand settings.
 - Support ticket flow for refund, exchange, shipping, product, payment, and other customer issues.
