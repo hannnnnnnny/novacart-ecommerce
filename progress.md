@@ -1,0 +1,33 @@
+# NovaCart Improvement Progress
+
+## 2026-05-20 Session
+
+- Loaded and followed `planning-with-files`, `ui-ux-pro-max`, and `find-skills` instructions.
+- Verified repository remote and branch state.
+- Ran `find-skills` search for Figma/design-system skills and decided not to install a Figma skill without a concrete Figma source.
+- Ran `ui-ux-pro-max` design-system and Vue stack searches using bundled Python after the system Python alias failed.
+- Created persistent planning files:
+  - `task_plan.md`
+  - `findings.md`
+  - `progress.md`
+- Audited repository file map, package manifests, route configuration, entrypoint, and page/component inventory.
+- Logged initial issues around stale metadata, legacy page leftovers, missing catch-all route, and possible accidental backend npm lockfile.
+- Audited Pinia stores and API wrappers. Logged generated-cart normalization and legacy named route concerns.
+- Audited generated storefront product listing, product detail, checkout, support/refund flow, and route-link usage.
+- Audited admin dashboard/product/order/theme-editor pages, backend merchant-store/order implementation, docs, and package metadata.
+- Updated `task_plan.md` with concrete problems found before coding and moved Phase 1 into progress.
+
+## Commands Run
+
+```powershell
+Get-Content "$env:USERPROFILE\.agents\skills\planning-with-files\SKILL.md"
+Get-Content "$env:USERPROFILE\.agents\skills\ui-ux-pro-max\SKILL.md"
+Get-Content "$env:USERPROFILE\.agents\skills\find-skills\SKILL.md"
+git status --short --branch
+git remote -v
+npx.cmd skills find "figma design system"
+git fetch origin main
+python "$env:USERPROFILE\.agents\skills\ui-ux-pro-max\scripts\search.py" "premium fashion ecommerce SaaS multi merchant Vue dashboard" --design-system -f markdown -p "NovaCart"
+C:\Users\harry\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe "$env:USERPROFILE\.agents\skills\ui-ux-pro-max\scripts\search.py" "premium fashion ecommerce SaaS multi merchant Vue dashboard" --design-system -f markdown -p "NovaCart"
+C:\Users\harry\.cache\codex-runtimes\codex-primary-runtime\dependencies\python\python.exe "$env:USERPROFILE\.agents\skills\ui-ux-pro-max\scripts\search.py" "ecommerce product listing checkout dashboard accessibility responsive" --stack vue
+```
