@@ -6,8 +6,16 @@
       <p>Templates are original NovaCart layouts for different merchant categories, not copied brand identities.</p>
     </div>
     <div class="template-showcase-grid">
-      <article v-for="template in templates" :key="template.id" class="template-card">
-        <img :src="template.previewImage" :alt="`${template.name} preview`" />
+      <article
+        v-for="template in templates"
+        :key="template.id"
+        class="template-card"
+        :style="{ '--template-accent': template.accentColor }"
+      >
+        <figure>
+          <img :src="template.previewImage" :alt="`${template.name} preview`" />
+          <figcaption>{{ template.fontStyle }}</figcaption>
+        </figure>
         <div>
           <h3>{{ template.name }}</h3>
           <p>{{ template.description }}</p>

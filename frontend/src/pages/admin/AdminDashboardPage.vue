@@ -15,10 +15,15 @@
     <ErrorMessage v-else-if="error" :message="error" />
     <div v-else class="dashboard-layout professional-dashboard">
       <section class="admin-overview-hero">
-        <div>
+        <div class="overview-hero-copy">
           <p class="eyebrow">Today in store</p>
           <h2>{{ currentStore.description }}</h2>
           <p>NovaCart is managing this as one merchant store inside a multi-store platform workspace.</p>
+          <div class="overview-action-strip" aria-label="Dashboard operating signals">
+            <span>Care queue: {{ openSupportCount }}</span>
+            <span>Refund review: {{ pendingRefundCount }}</span>
+            <span>Conversion: {{ conversionRate }}</span>
+          </div>
         </div>
         <div class="overview-mini-grid">
           <article>
