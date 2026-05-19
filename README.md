@@ -1,8 +1,8 @@
-# NovaCart Multi-Merchant Ecommerce Website Builder
+# NovaCart Multi-Merchant Ecommerce Website Builder Platform
 
-NovaCart is a production-style portfolio SaaS ecommerce platform where many merchants can create, customize, manage, and publish their own online stores. It now includes a platform marketing website, merchant onboarding flow, template selector, store builder controls, protected merchant admin workspace, and generated customer storefront routes.
+NovaCart is a production-style portfolio SaaS ecommerce platform where many merchants can create, customize, manage, and publish their own online stores. It includes a platform marketing website, merchant onboarding flow, template selector, store builder controls, protected merchant admin workspace, and generated customer storefront routes.
 
-NovaCart is original in naming, layout, copy, seed data, and local artwork. It is a demo-safe project, not a live payment-processing store.
+NovaCart is original in naming, layout, copy, seed data, and local artwork. It is a demo-safe project, not a live payment-processing store or a clone of any existing ecommerce platform.
 
 ## Platform Direction
 
@@ -54,6 +54,14 @@ NovaCart is a multi-merchant ecommerce website builder. Merchants can choose a t
 
 The project demonstrates real ecommerce architecture: a Spring Boot REST API, MySQL persistence, JPA entities, DTO validation, service-layer business logic, JWT-protected admin APIs, transactional checkout, stock movement tracking, Vue 3 platform and storefront experiences, and a merchant admin workspace.
 
+## Current Product Scope
+
+NovaCart is designed around three connected experiences:
+
+- Platform experience: landing pages, feature pages, template showcase, pricing/demo plans, login, signup, and onboarding.
+- Merchant experience: protected admin workspace for store setup, catalog, orders, customers, inventory, promotions, templates, theme editing, support, refunds, analytics, and settings.
+- Shopper experience: generated storefronts under `/store/:storeSlug` with merchant-specific branding, product discovery, cart, checkout, order success, support, and refund request flows.
+
 ## Multi-Merchant Store Builder
 
 - Merchant onboarding creates a store name, slug, category, description, template, first products, brand color, logo text, currency, and shipping message.
@@ -69,7 +77,9 @@ The project demonstrates real ecommerce architecture: a Spring Boot REST API, My
 - Each storefront displays the merchant logo/name, selected template style, announcement bar, hero section, category navigation, featured products, product grid, variant-aware product detail pages, cart, checkout, order success, and support/refund request flow.
 - Demo stores are included for fashion, sports, home goods, and a minimal boutique so visitors can see multiple merchant storefronts.
 - Generated storefront imagery uses original local demo JPEG assets under `frontend/public/demo-images` for realistic ecommerce photography-style previews.
+- Shoppers can save products per store, filter to saved products, select size/color variants, edit cart quantities, choose delivery methods, enter postal details, and submit demo support or refund requests.
 - Generated storefront checkout is demo-safe and local for mock stores. The existing backend checkout remains available for backend-powered commerce flows.
+- Legacy single-store paths such as `/products`, `/cart`, `/checkout`, `/support`, and `/refund-request` redirect into the `demo-fashion` generated storefront so older links do not break.
 
 ## Merchant Admin
 
@@ -77,11 +87,11 @@ The project demonstrates real ecommerce architecture: a Spring Boot REST API, My
 - Dashboard with current store context, store setup checklist, revenue, order, visitor, conversion, average order value, refund, support, stock, sales trend, top products, and quick actions.
 - Store setup page for details, slug, description, shipping message, preview, and publish state.
 - Templates page and theme editor for store builder workflows.
-- Product management with thumbnail table, search, status/category/collection/sale filters, active/draft/archive status, stock badges, featured markers, preview links, edit links, archive/reactivate, bulk archive, bulk collection assignment, and selected-product markdown creation.
+- Product management with thumbnail table, search, status/category/collection/sale filters, active/draft/archive status, stock badges, featured markers, preview links, edit links, archive/reactivate, bulk archive, bulk collection assignment, and inline selected-product markdown creation.
 - Collection management for Spring Edit, Summer Essentials, Workwear Capsule, Evening Details, Active Weekend, and End of Season Sale with campaign images and product assignment.
 - Promotion management for percentage or fixed discounts targeted by selected products, categories, collections, seasons, or tags.
 - Order management with status tabs, search, region filtering, payment state, refund state, fulfillment state, order detail, and safe status transitions.
-- Refund and support queues with status summaries, merchant-only notes, and workflow updates.
+- Refund and support queues with status summaries, topbar notification counts, merchant-only notes, and workflow updates.
 - Customer records and analytics based on guest checkout email.
 - Inventory workspace with low-stock thresholds, manual adjustments with reasons, warning cards, and stock movement history.
 
@@ -133,7 +143,7 @@ flowchart LR
 ## Project Structure
 
 ```text
-novacart-ecommerce/
+NovaCart-Fashion-Commerce-Platform/
   backend/
     src/main/java/com/novacart/store/
       config/ controller/ dto/ entity/ exception/
@@ -256,6 +266,8 @@ npm install
 npm run build
 npm run test:unit
 ```
+
+Smoke checks used during this pass included platform pages, generated storefront pages, legacy redirects, admin routes, support/refund routes, and the global not-found route through a temporary Vite dev server.
 
 ## Documentation
 
