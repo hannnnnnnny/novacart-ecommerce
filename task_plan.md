@@ -30,8 +30,8 @@ Upgrade NovaCart into a polished, reliable, premium multi-merchant ecommerce web
 | 1. Storefront UX and ecommerce reliability | Complete | Improve product browsing, cart/checkout validation, product-card accessibility, image loading, wishlist/favorites if scoped safely, and mobile storefront polish. | Storefront routes render cleanly; all visible controls have behavior/disabled states; build/tests pass. |
 | 2. Platform/admin polish | Complete | Improve SaaS homepage, auth/onboarding, admin dashboard hierarchy, tables, filters, empty states, and settings/theme-editor clarity. | Admin care notifications, setup/theme save feedback, publish guard, and template-preview routing are implemented; frontend build/tests pass. |
 | 3. Code quality and performance | Complete | Remove dead code, reduce duplication, optimize images/lazy loading, improve component semantics and maintainability. | Removed the browser-prompt bulk discount path and replaced it with validated inline admin controls; frontend build/tests pass. |
-| 4. Accessibility and SEO | In Progress | Add/verify labels, aria state, keyboard focus, semantic landmarks, meta title/description/Open Graph/social metadata. | Focus states visible; metadata describes NovaCart platform; checks pass. |
-| 5. Final verification and delivery | Pending | Run backend/frontend tests/builds, route smoke checks, update docs/plan, commit and push. | Working tree clean, commits pushed, final report includes commands and remaining limitations. |
+| 4. Accessibility and SEO | Complete | Add/verify labels, aria state, keyboard focus, semantic landmarks, meta title/description/Open Graph/social metadata. | Product favorites use ARIA pressed state, generated checkout inputs have labels/autocomplete, images use alt/lazy/async decoding, and metadata describes NovaCart as a multi-merchant platform. |
+| 5. Final verification and delivery | In Progress | Run backend/frontend tests/builds, route smoke checks, update docs/plan, commit and push. | Backend tests, frontend install/build/unit tests, Docker config, and route smoke checks pass; final commit and push remain. |
 
 ## Errors Encountered
 
@@ -43,4 +43,5 @@ Upgrade NovaCart into a polished, reliable, premium multi-merchant ecommerce web
 - `33c3784 chore: add project improvement roadmap`
 - `8582a6d feat: improve generated storefront shopping reliability`
 - `7e1225b feat: polish merchant admin interactions`
-- Pending implementation commit for Phase 3 admin bulk discount polish.
+- `bcaf0be refactor: improve admin bulk discount controls`
+- Pending final verification commit.

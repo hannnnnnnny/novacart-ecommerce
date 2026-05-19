@@ -13,7 +13,7 @@
 ## Repository State
 - Branch: `main`.
 - Remote: `origin` points to `https://github.com/hannnnnnnny/NovaCart-Fashion-Commerce-Platform.git`.
-- Local branch is currently aligned with `origin/main`.
+- Local branch is ahead of `origin/main` with this task's improvement commits.
 
 ## Audit Findings
 - Technology stack:
@@ -24,13 +24,13 @@
   - Merchant generated storefront routes under `/store/:storeSlug`.
   - Protected merchant admin routes under `/admin/*`.
 - Legacy single-store customer pages still exist under `frontend/src/pages` (`HomePage`, `ProductListPage`, `ProductDetailPage`, `CartPage`, `CheckoutPage`, `SupportPage`, `RefundRequestPage`, `OrderSuccessPage`) but public `/products`, `/cart`, and `/checkout` redirect to `/store/demo-fashion/...`.
-- `frontend/index.html` still says `NovaCart Fashion Commerce Platform`; metadata has not been updated for the multi-merchant SaaS positioning and has no description/Open Graph/Twitter metadata.
-- `backend/pom.xml` still describes the backend as `NovaCart Fashion Commerce Platform`; wording should be refreshed to multi-merchant ecommerce builder.
-- `backend/package-lock.json` exists even though the backend is Maven/Spring Boot. It should be checked before removal because it may have been accidentally added by npm tooling.
-- The current route map has no global catch-all/404 route. Unknown routes may render a blank or router default experience.
+- `frontend/index.html` metadata is now updated for the multi-merchant NovaCart SaaS positioning.
+- `backend/pom.xml` description now reflects the multi-merchant ecommerce website builder direction.
+- Removed accidental `backend/package-lock.json`; the backend remains Maven/Spring Boot only.
+- A global catch-all/404 route now exists.
 - Store/state audit:
   - `cart.js` has good normalization for the legacy backend-powered cart, including variant line keys and invalid localStorage cleanup.
-  - `storefrontCart.js` is simpler and does not normalize loaded localStorage carts. Corrupt or stale store cart data can leak invalid quantities/prices into generated storefronts.
+  - `storefrontCart.js` now normalizes generated-store cart data loaded from localStorage.
   - `storefrontCart.js` computes totals from local product snapshots only, which is acceptable for frontend-generated demo stores but must be clearly treated as demo-safe.
   - Platform-created stores are stored in localStorage; this is intentional frontend groundwork but not backend-persistent yet.
 - API audit:
@@ -39,14 +39,13 @@
   - Admin API wrappers cover products, categories, collections, promotions, orders, refunds, support, analytics, customers, and inventory.
 - Interaction audit:
   - Many buttons have real handlers or disabled states.
-  - Need inspect legacy pages/components because they still reference route names like `products`, `support`, and `refund-request` even though those named routes are absent from the current router.
-  - Need inspect template preview action: `/store/:slug?templatePreview=...` may not actually switch the storefront template.
+  - Legacy route names and support/refund redirects are restored so older customer components can resolve routes safely.
+  - Template preview actions now apply template-specific preview color/image data on generated storefront routes.
 - Generated storefront audit:
   - Product cards now show option summaries and correctly route shoppers to product detail when size/color selection is required.
   - Product detail supports size/color selectors and disables add/buy controls until required selections are made.
-  - Generated checkout lacks postal code and delivery method fields, has weak email validation, and has no submitting/loading state even though the button places an order.
-  - Generated support/refund flow works for backend requests and local demo refunds, but does not initialize refund mode from a `mode=refund` query yet.
-  - Wishlist/favorites are not implemented for generated storefronts.
+  - Generated checkout now includes postal code, delivery methods, email validation, and a submitting/loading state.
+  - Generated support/refund flow now initializes refund mode from a `mode=refund` query.
+  - Generated storefront favorites are implemented per store with saved-product filtering.
 - Routing audit:
-  - Legacy `/products`, `/cart`, and `/checkout` path redirects exist, but they are unnamed. Legacy components that use named route objects can throw route resolution errors if reused.
-  - Legacy `/support` and `/refund-request` paths are not defined in the current router, despite links existing in legacy header/footer/order pages.
+  - Legacy `/products`, `/cart`, `/checkout`, `/support`, and `/refund-request` route names/paths redirect into `demo-fashion` generated-store routes while preserving useful query parameters.

@@ -43,6 +43,12 @@
 - Phase 3 checks passed:
   - `npm.cmd run test:unit`
   - `npm.cmd run build`
+- Final verification completed:
+  - Route smoke checked key platform, generated storefront, legacy redirect, admin, support/refund, and not-found URLs through a temporary Vite server.
+  - `npm.cmd install` completed with no vulnerabilities.
+  - Backend Maven tests passed: 30 tests, 0 failures.
+  - `docker compose config --quiet` completed successfully.
+  - Final frontend build and unit tests passed.
 
 ## Commands Run
 
@@ -64,4 +70,26 @@ npm.cmd run test:unit
 npm.cmd run build
 npm.cmd run test:unit
 npm.cmd run build
+Start-Process -FilePath npm.cmd -ArgumentList @('run','dev','--','--host','127.0.0.1','--port','5173')
+Invoke-WebRequest http://127.0.0.1:5173/
+Invoke-WebRequest http://127.0.0.1:5173/features
+Invoke-WebRequest http://127.0.0.1:5173/templates
+Invoke-WebRequest http://127.0.0.1:5173/pricing
+Invoke-WebRequest http://127.0.0.1:5173/login
+Invoke-WebRequest http://127.0.0.1:5173/onboarding
+Invoke-WebRequest http://127.0.0.1:5173/store/demo-fashion
+Invoke-WebRequest http://127.0.0.1:5173/store/demo-fashion/products?saved=true
+Invoke-WebRequest http://127.0.0.1:5173/store/demo-fashion/products/1001
+Invoke-WebRequest http://127.0.0.1:5173/store/demo-fashion/cart
+Invoke-WebRequest http://127.0.0.1:5173/store/demo-fashion/checkout
+Invoke-WebRequest http://127.0.0.1:5173/store/demo-fashion/support?mode=refund
+Invoke-WebRequest http://127.0.0.1:5173/admin/dashboard
+Invoke-WebRequest http://127.0.0.1:5173/products?search=bag
+Invoke-WebRequest http://127.0.0.1:5173/refund-request?orderNumber=local-demo&email=test@example.com
+Invoke-WebRequest http://127.0.0.1:5173/not-real-page
+npm.cmd install
+.\mvnw.cmd test
+docker compose config --quiet
+npm.cmd run build
+npm.cmd run test:unit
 ```
