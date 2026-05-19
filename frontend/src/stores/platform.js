@@ -199,6 +199,10 @@ function normalizeProducts(products) {
       lowStockThreshold: Number(product.lowStockThreshold) || 5,
       imageUrl: product.imageUrl || '/demo-images/products/boutique-shirt.jpg',
       imageGallery: product.imageGallery || [product.imageUrl || '/demo-images/products/boutique-shirt.jpg'],
+      sizes: Array.isArray(product.sizes) ? product.sizes.filter(Boolean) : [],
+      colors: Array.isArray(product.colors) ? product.colors.filter(Boolean) : [],
+      material: product.material || '',
+      careInstructions: product.careInstructions || '',
       badges: product.badges || (discountPercent ? ['Sale'] : ['New']),
       status: product.status || 'ACTIVE',
       description: product.description || 'A merchant-created product ready for the storefront.'

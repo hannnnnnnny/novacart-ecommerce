@@ -9,6 +9,7 @@
     <footer class="generated-store-footer">
       <strong>{{ store.name }}</strong>
       <span>{{ store.description }}</span>
+      <RouterLink :to="`/store/${store.slug}/support`">Support and refunds</RouterLink>
       <RouterLink :to="`/admin/dashboard`">Merchant admin</RouterLink>
     </footer>
   </div>

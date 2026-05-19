@@ -23,11 +23,16 @@ export const useStorefrontCartStore = defineStore('storefrontCart', {
         localStorage.removeItem(STORAGE_KEY)
       }
     },
-    addItem(storeSlug, product, quantity = 1) {
+    addItem(storeSlug, product, quantity = 1, options = {}) {
       if (!storeSlug || !product || product.stockQuantity < 1) return
       if (!this.carts[storeSlug]) this.carts[storeSlug] = []
       const requestedQuantity = Math.max(1, Math.floor(Number(quantity) || 1))
-      const existing = this.carts[storeSlug].find((item) => item.productId === product.id)
+      const selectedOptions = {
+        size: options.size || '',
+        color: options.color || ''
+      }
+      const itemId = cartItemId(product.id, selectedOptions)
+      const existing = this.carts[storeSlug].find((item) => (item.itemId || cartItemId(item.productId, item.options || {})) === itemId)
       if (existing) {
         existing.quantity = Math.min(existing.quantity + requestedQuantity, product.stockQuantity)
         existing.stockQuantity = product.stockQuantity
@@ -35,6 +40,7 @@ export const useStorefrontCartStore = defineStore('storefrontCart', {
         const compareAtPrice = Number(product.compareAtPrice) || null
         const price = Number(product.effectivePrice ?? product.price) || 0
         this.carts[storeSlug].push({
+          itemId,
           productId: product.id,
           name: product.name,
           price,
@@ -43,25 +49,26 @@ export const useStorefrontCartStore = defineStore('storefrontCart', {
           discountPercent: product.discountPercent || 0,
           imageUrl: product.imageUrl,
           stockQuantity: product.stockQuantity,
+          options: selectedOptions,
           quantity: Math.min(requestedQuantity, product.stockQuantity)
         })
       }
       this.persist()
     },
-    updateQuantity(storeSlug, productId, quantity) {
+    updateQuantity(storeSlug, itemId, quantity) {
       const cart = this.carts[storeSlug] || []
-      const item = cart.find((entry) => entry.productId === productId)
+      const item = cart.find((entry) => matchesCartItem(entry, itemId))
       if (!item) return
       const nextQuantity = Math.floor(Number(quantity) || 0)
       if (nextQuantity < 1) {
-        this.removeItem(storeSlug, productId)
+        this.removeItem(storeSlug, itemId)
         return
       }
       item.quantity = Math.min(nextQuantity, item.stockQuantity)
       this.persist()
     },
-    removeItem(storeSlug, productId) {
-      this.carts[storeSlug] = (this.carts[storeSlug] || []).filter((item) => item.productId !== productId)
+    removeItem(storeSlug, itemId) {
+      this.carts[storeSlug] = (this.carts[storeSlug] || []).filter((item) => !matchesCartItem(item, itemId))
       this.persist()
     },
     clearStoreCart(storeSlug) {
@@ -73,3 +80,11 @@ export const useStorefrontCartStore = defineStore('storefrontCart', {
     }
   }
 })
+
+function cartItemId(productId, options = {}) {
+  return [productId, options.size || '', options.color || ''].join('::')
+}
+
+function matchesCartItem(item, itemId) {
+  return item.itemId === itemId || String(item.productId) === String(itemId)
+}

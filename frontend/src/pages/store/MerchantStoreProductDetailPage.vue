@@ -19,14 +19,45 @@
           <span v-if="product.compareAtPrice">{{ formatCurrency(product.compareAtPrice) }}</span>
         </div>
         <p class="muted">{{ product.stockQuantity }} available from {{ store.name }}. Demo-safe checkout, no real payment captured.</p>
+        <fieldset v-if="product.colors?.length" class="merchant-option-group">
+          <legend>Color</legend>
+          <div class="option-button-row">
+            <button
+              v-for="color in product.colors"
+              :key="color"
+              type="button"
+              :class="{ active: selectedColor === color }"
+              @click="selectedColor = color"
+            >
+              {{ color }}
+            </button>
+          </div>
+        </fieldset>
+        <fieldset v-if="product.sizes?.length" class="merchant-option-group">
+          <legend>Size</legend>
+          <div class="option-button-row">
+            <button
+              v-for="size in product.sizes"
+              :key="size"
+              type="button"
+              :class="{ active: selectedSize === size }"
+              @click="selectedSize = size"
+            >
+              {{ size }}
+            </button>
+          </div>
+        </fieldset>
+        <p v-if="selectionError || selectionHint" class="field-error">{{ selectionError || selectionHint }}</p>
         <label>Quantity<QuantityStepper v-model="quantity" :max="Math.max(product.stockQuantity, 1)" /></label>
         <div class="card-actions">
-          <button class="primary-button" type="button" :disabled="product.stockQuantity < 1" @click="addToCart">Add to cart</button>
-          <button class="secondary-button" type="button" :disabled="product.stockQuantity < 1" @click="buyNow">Buy now</button>
+          <button class="primary-button" type="button" :disabled="!canAddToCart" @click="addToCart">Add to cart</button>
+          <button class="secondary-button" type="button" :disabled="!canAddToCart" @click="buyNow">Buy now</button>
         </div>
         <div class="merchant-detail-notes">
           <span>{{ store.shippingMessage }}</span>
           <span>30-day refund request window</span>
+          <span v-if="product.material">Material: {{ product.material }}</span>
+          <span v-if="product.careInstructions">Care: {{ product.careInstructions }}</span>
         </div>
       </div>
     </div>
@@ -65,14 +96,43 @@ const route = useRoute()
 const router = useRouter()
 const cartStore = useStorefrontCartStore()
 const quantity = ref(1)
+const selectedSize = ref('')
+const selectedColor = ref('')
+const selectionError = ref('')
 const toastMessage = ref('')
 let toastTimer
 const product = computed(() => props.store.products.find((entry) => String(entry.id) === String(route.params.productId)))
 const relatedProducts = computed(() => props.store.products.filter((entry) => entry.id !== product.value?.id).slice(0, 3))
+const requiresSize = computed(() => (product.value?.sizes?.length || 0) > 1)
+const requiresColor = computed(() => (product.value?.colors?.length || 0) > 1)
+const canAddToCart = computed(() => {
+  if (!product.value || product.value.stockQuantity < 1) return false
+  if (requiresSize.value && !selectedSize.value) return false
+  if (requiresColor.value && !selectedColor.value) return false
+  return true
+})
+const selectionHint = computed(() => {
+  if (!product.value || product.value.stockQuantity < 1) return ''
+  if (requiresSize.value && !selectedSize.value) return 'Choose a size to continue.'
+  if (requiresColor.value && !selectedColor.value) return 'Choose a color to continue.'
+  return ''
+})
 
 function addToCart() {
   if (!product.value) return
-  cartStore.addItem(props.store.slug, product.value, quantity.value)
+  selectionError.value = ''
+  if (requiresSize.value && !selectedSize.value) {
+    selectionError.value = 'Choose a size before adding this product.'
+    return
+  }
+  if (requiresColor.value && !selectedColor.value) {
+    selectionError.value = 'Choose a color before adding this product.'
+    return
+  }
+  cartStore.addItem(props.store.slug, product.value, quantity.value, {
+    size: selectedSize.value || product.value.sizes?.[0] || '',
+    color: selectedColor.value || product.value.colors?.[0] || ''
+  })
   toastMessage.value = `${product.value.name} added to cart.`
   window.clearTimeout(toastTimer)
   toastTimer = window.setTimeout(() => {
@@ -81,7 +141,14 @@ function addToCart() {
 }
 
 function addRelated(relatedProduct) {
-  cartStore.addItem(props.store.slug, relatedProduct, 1)
+  if ((relatedProduct.sizes?.length || 0) > 1 || (relatedProduct.colors?.length || 0) > 1) {
+    router.push(`/store/${props.store.slug}/products/${relatedProduct.id}`)
+    return
+  }
+  cartStore.addItem(props.store.slug, relatedProduct, 1, {
+    size: relatedProduct.sizes?.[0] || '',
+    color: relatedProduct.colors?.[0] || ''
+  })
   toastMessage.value = `${relatedProduct.name} added to cart.`
 }
 

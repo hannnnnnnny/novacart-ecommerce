@@ -11,6 +11,7 @@
     </nav>
     <div class="generated-store-actions">
       <RouterLink :to="`/store/${store.slug}/products`">Shop</RouterLink>
+      <RouterLink :to="`/store/${store.slug}/support`">Support</RouterLink>
       <RouterLink class="cart-link generated-cart-link" :to="`/store/${store.slug}/cart`">
         <ShoppingBag aria-hidden="true" />
         <span>Cart</span>

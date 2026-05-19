@@ -12,7 +12,7 @@ NovaCart is no longer positioned as one fashion store. It is a website builder a
 - Merchant access: `/login`, `/signup`, `/onboarding`
 - Merchant workspace: `/admin/dashboard`, `/admin/store-setup`, `/admin/products`, `/admin/orders`, `/admin/customers`, `/admin/inventory`, `/admin/promotions`, `/admin/analytics`, `/admin/templates`, `/admin/theme-editor`, `/admin/support`, `/admin/refunds`, `/admin/settings`
 - Generated storefronts: `/store/demo-fashion`, `/store/demo-sports`, `/store/demo-home`, `/store/demo-boutique`
-- Store-specific shopping paths: `/store/:storeSlug/products`, `/store/:storeSlug/products/:productId`, `/store/:storeSlug/cart`, `/store/:storeSlug/checkout`, `/store/:storeSlug/order-success`
+- Store-specific shopping paths: `/store/:storeSlug/products`, `/store/:storeSlug/products/:productId`, `/store/:storeSlug/cart`, `/store/:storeSlug/checkout`, `/store/:storeSlug/order-success`, `/store/:storeSlug/support`
 
 ## Visual Preview
 
@@ -80,7 +80,7 @@ The project demonstrates real ecommerce architecture: a Spring Boot REST API, My
 ## Generated Customer Storefronts
 
 - Storefronts live under `/store/:storeSlug`, which keeps the platform homepage separate from merchant stores.
-- Each storefront displays the merchant logo/name, selected template style, announcement bar, hero section, category navigation, featured products, product grid, cart, checkout, and order success.
+- Each storefront displays the merchant logo/name, selected template style, announcement bar, hero section, category navigation, featured products, product grid, variant-aware product detail pages, cart, checkout, order success, and support/refund request flow.
 - Demo stores are included for fashion, sports, home goods, and a minimal boutique so visitors can see multiple merchant storefronts.
 - Generated storefront imagery uses original local demo JPEG assets under `frontend/public/demo-images` for realistic ecommerce photography-style previews.
 - Generated storefront checkout is demo-safe and local for mock stores. The existing backend checkout remains available for backend-powered commerce flows.
