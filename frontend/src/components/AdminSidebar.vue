@@ -4,7 +4,7 @@
       <span class="brand-mark" aria-hidden="true">N</span>
       <span>
         <strong>NovaCart</strong>
-        <small>Merchant Admin</small>
+        <small>Merchant Console</small>
       </span>
     </RouterLink>
 
